@@ -1,0 +1,31 @@
+.overviewEvent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--border);
+  img {
+    width: 62px;
+    height: 62px;
+    border-radius: var(--radius-2);
+  }
+  h4 {
+    font-size: var(--text-sm);
+    margin: var(--space-2) 0;
+  }
+  div {
+    flex: 1;
+  }
+  .subtle {
+    font-size: var(--text-xs);
+  }
+}
+.overviewCheck {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--text-sm);
+}
+
+.tripoverviewDetail1 {
+  margin-top: var(--space-6);
+}

@@ -1,0 +1,312 @@
+@use '@/styles/mixins' as *;
+
+.scheduleLayout {
+  display: grid;
+  grid-template-columns: 174px minmax(0, 1fr);
+  gap: var(--space-7);
+  &Today {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dayList {
+  @include panel;
+  padding: var(--space-5) var(--space-3);
+  height: fit-content;
+  .eyebrow {
+    padding: 0 var(--space-3);
+    font-size: var(--text-xs);
+    margin: 0 0 var(--space-4);
+    display: block;
+  }
+  button {
+    margin-bottom: var(--space-2);
+    padding: var(--space-3) var(--space-3);
+    strong {
+      font-size: var(--text-sm);
+      font-weight: 550;
+      display: block;
+      text-align: left;
+    }
+    small {
+      display: block;
+      font-size: var(--text-xs);
+      color: var(--muted);
+      margin-top: var(--space-1);
+    }
+    .dayEventCount {
+      font-size: var(--text-xs);
+      opacity: 0.6;
+    }
+  }
+}
+
+.daysNote {
+  @include flex(var(--space-2));
+  margin: var(--space-5) var(--space-3) var(--space-1);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--muted);
+  svg {
+    color: #b59f76;
+  }
+}
+
+.scheduleMain {
+  min-width: 0;
+  .sectionHeading {
+    min-height: 58px;
+    margin-bottom: var(--space-5);
+  }
+  .eyebrow {
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-2);
+    display: block;
+  }
+  h2 {
+    font-size: var(--text-lg);
+  }
+  .scheduleHeadingDate {
+    font-size: var(--text-sm);
+    font-weight: 400;
+    color: var(--muted);
+    margin-left: var(--space-3);
+  }
+}
+
+.eventList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eventCard {
+  @include panel;
+  @include flex(var(--space-4));
+  padding: var(--space-5);
+  position: relative;
+  min-height: 125px;
+}
+
+.eventTime {
+  width: 56px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  position: relative;
+  strong {
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  span {
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+}
+
+.eventDetailsButton {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: left;
+  flex: 1;
+  min-width: 0;
+  img {
+    width: 78px;
+    height: 84px;
+    border-radius: var(--radius-2);
+    flex-shrink: 0;
+  }
+  h3 {
+    font-size: var(--text-base);
+    margin: var(--space-2) 0 var(--space-2);
+    line-height: 1.5;
+  }
+  p {
+    @include flex(var(--space-1));
+    font-size: var(--text-xs);
+    color: var(--muted);
+    margin: 0;
+  }
+  span {
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+  }
+}
+
+.eventActions {
+  @include flex(var(--space-2));
+  margin-left: auto;
+  :is(button, a) {
+    width: 44px;
+    color: var(--muted);
+  }
+}
+
+.scheduleEnd {
+  @include flex(var(--space-3));
+  justify-content: center;
+  font-size: var(--text-xs);
+  color: #a3aa9d;
+  padding: var(--space-2) var(--space-8);
+  span {
+    height: 1px;
+    background: var(--border);
+    flex: 1;
+  }
+}
+
+.scheduleTip {
+  @include flex(var(--space-2));
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--muted);
+  padding: var(--space-5) var(--space-6);
+  background: #f0f2eb;
+  border-radius: var(--radius-2);
+  margin-top: var(--space-4);
+  svg {
+    color: #a29273;
+  }
+}
+
+@include below(1100px) {
+  .scheduleLayout {
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+  .eventCard {
+    padding: var(--space-4);
+    gap: var(--space-3);
+  }
+  .eventDetailsButton {
+    gap: var(--space-3);
+    img {
+      width: 58px;
+      height: 70px;
+    }
+  }
+  .eventActions {
+    flex-direction: column;
+  }
+  .scheduleHeadingDate {
+    display: block;
+    margin: var(--space-2) 0 0 !important;
+  }
+  .scheduleLayoutToday {
+    grid-template-columns: 1fr;
+  }
+}
+
+@include below(650px) {
+  .scheduleLayout {
+    grid-template-columns: 1fr;
+  }
+  .dayList {
+    display: flex;
+    overflow-x: auto;
+    padding: var(--space-2);
+    gap: var(--space-2);
+    .eyebrow,
+    .daysNote {
+      display: none;
+    }
+    button {
+      min-width: 110px;
+      margin: 0;
+    }
+    .dayEventCount {
+      display: none;
+    }
+  }
+  .scheduleMain .sectionHeading {
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+  .eventCard {
+    padding: var(--space-4) var(--space-3);
+    gap: var(--space-3);
+  }
+  .eventTime {
+    width: 42px;
+  }
+  .eventDetailsButton {
+    gap: var(--space-3);
+    img {
+      width: 48px;
+      height: 62px;
+    }
+    h3 {
+      font-size: var(--text-sm);
+    }
+    span {
+      display: none;
+    }
+    p {
+      font-size: var(--text-xs);
+    }
+  }
+  .eventActions {
+    gap: 0;
+    :is(button, a) {
+      width: 44px;
+      min-height: 44px;
+    }
+  }
+}
+
+@include below(650px) {
+  .scheduleMain .sectionHeading {
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    :is(button, a) {
+      width: 100%;
+    }
+  }
+  .eventCard {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    align-items: start;
+    padding: var(--space-4);
+  }
+  .eventTime {
+    width: auto;
+  }
+  .eventDetailsButton {
+    align-items: flex-start;
+    h3 {
+      font-size: var(--text-base);
+      margin-top: 0;
+    }
+    p {
+      align-items: flex-start;
+      overflow-wrap: anywhere;
+    }
+  }
+  .eventActions {
+    grid-column: 2;
+    flex-direction: row;
+    gap: var(--space-2);
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+  .scheduleTip {
+    align-items: flex-start;
+    font-size: var(--text-sm);
+  }
+}
+
+@include below(600px) {
+  .eventDetailsButton p svg {
+    margin-top: var(--space-0-5);
+  }
+}

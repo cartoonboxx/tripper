@@ -1,73 +1,127 @@
-# /
+# Tripper
 
-This template should help get you started developing with Vue 3 in Vite.
+Планировщик путешествий по предоставленным макетам. Vue 3, TypeScript, Vue Router, Pinia и SCSS.
 
-## Recommended IDE Setup
-
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Type Support for `.vue` Imports in TS
-
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+## Запуск
 
 ```sh
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+Сборка: `npm run build`. Просмотр сборки: `npm run preview`.
+
+## Архитектура
+
+- `src/pages/<Name>/<Name>Component.vue` — страницы, все имена заканчиваются на `Component`.
+- `src/components/ui` — UI-кит. Публичные компоненты: `Button`, `Input`, `Select`, `Tab`, `Badge`, `Card`, `Checkbox`, `Switch`, `Avatar`, `Modal`, `Drawer`, `EmptyState`.
+- `src/components/ui/<Name>/<Name>Base.vue` и `Base.module.scss` — разметка, поведение, размеры, скругления и доступность.
+- `src/components/ui/<Name>/<Name>Style.vue` и `Style.module.scss` — обёртка над Base, визуальные варианты, цвета и состояния. Из `ui/index.ts` экспортируется короткое имя без суффикса.
+- `*.types.ts` — типы и интерфейсы. В страницах и UI-компонентах нет объявлений интерфейсов и псевдонимов типов.
+- `src/data/*.data.ts` — исходные данные и навигация.
+- Все Vue-компоненты используют Options API: `<script lang="ts">`, `defineComponent`, `data`, `computed`, `methods`, `watch` и lifecycle hooks. `setup` не используется.
+- Страница и её локальный SCSS находятся в одной папке; общие формы и карточки остаются в `components/trip`.
+- Иконки импортируются напрямую из `@phosphor-icons/vue`; компонента-обёртки Icon нет. Динамические иконки используют `<component :is="...">`.
+- `src/styles/_tokens.scss` — root-переменные палитры, размеров, шкалы шрифтов `--text-*`, радиусов `--radius-0`…`--radius-6` и отступов `--space-*`.
+- На мобильных экранах до 900 px боковое меню заменяется нижними вкладками: Главная, Поездки, Места, Чек-листы, Ещё. Последняя вкладка открывает расходы, архив и настройки. Учитывается safe area; нижняя панель не перекрывает контент и уведомления.
+- Размер основного текста и полей — 16 px, вспомогательного текста — 12–14 px. Заголовки масштабируются через `clamp`; мобильные кнопки имеют высоту минимум 44 px.
+- `src/styles/_mixins.scss` — SCSS-миксины.
+- `src/components/trip` — общие карточки, формы, приглашения и оболочка поездки.
+- `src/stores/travel.ts` — состояние Pinia, сохранение в localStorage, роли и уведомления.
+- `src/composables/format.ts` — общие функции форматирования дат и сумм.
+- `src/mixins/tripContext.ts` — общий контекст поездки на Options API.
+- `src/utils/overlay.ts` — управление фокусом и клавиатурой для модальных окон через обычный контроллер.
+- Компонентные стили — CSS Modules на SCSS: `import style from './Component.module.scss'`, в шаблоне `:class="style.className"`. CamelCase-ключи из локального и общего модуля объединяются через `mergeStyles`.
+- Aria-атрибуты в проекте не используются. Для подписей используются нативные label, текст и title; для выбора и переключателей — нативные input. AppLink использует custom-slot Vue Router и не добавляет автоматические атрибуты навигации.
+- Соглашения для дальнейшей разработки записаны в `AGENTS.md`.
+
+```vue
+<script lang="ts">
+import { defineComponent } from 'vue'
+import { Button, Tab } from '@/components/ui'
+import { PhPlus } from '@phosphor-icons/vue'
+import style from './Example.module.scss'
+
+export default defineComponent({
+  components: { Button, Tab, PhPlus },
+  data() {
+    return { style, active: true }
+  },
+})
+</script>
+
+<template>
+  <div :class="style.actions">
+    <Button>
+      <PhPlus :size="20" />
+      Создать поездку
+    </Button>
+    <Tab
+      variant="line"
+      :active="active"
+      @click="active = !active">
+      План
+    </Tab>
+  </div>
+</template>
+```
+
+Варианты `Button`: `primary`, `secondary`, `ghost`, `danger`; размеры `sm`, `md`, `lg`.
+Варианты `Tab`: `pill`, `line`, `vertical`.
+Варианты `Badge`: `green`, `neutral`, `orange`.
+
+Живая витрина всех компонентов: `/ui-kit` (пункт «UI-kit» в меню). На ней представлены все 12 компонентов, их варианты, состояния disabled/error/readonly, контролируемые значения, обычное и широкое модальное окно, Drawer, токены, иконки, TripCard и общие формы TripForm/EventForm/InviteForm.
+
+## Страницы и маршруты
+
+| Маршрут                               | Страница                                       |
+| ------------------------------------- | ---------------------------------------------- |
+| `/` и `/trips`                        | Главная и список поездок с поиском и фильтрами |
+| `/trips/new`                          | Создание поездки                               |
+| `/trips/:tripId/edit`                 | Редактирование поездки                         |
+| `/trips/:tripId/overview`             | Обзор и подготовка                             |
+| `/trips/:tripId/today`                | События на текущую локальную дату              |
+| `/trips/:tripId/plan`                 | Расписание по дням                             |
+| `/trips/:tripId/events/new`           | Создание события                               |
+| `/trips/:tripId/events/:eventId`      | Подробности события                            |
+| `/trips/:tripId/events/:eventId/edit` | Редактирование события                         |
+| `/trips/:tripId/places`               | Места и идеи поездки                           |
+| `/trips/:tripId/checklists`           | Личные чек-листы поездки                       |
+| `/trips/:tripId/expenses`             | Расходы и диаграмма                            |
+| `/trips/:tripId/participants`         | Участники, ссылка и QR-код                     |
+| `/trips/:tripId/information`          | Информация, заметки и архивирование            |
+| `/places`, `/checklists`, `/expenses` | Общие разделы                                  |
+| `/archive`                            | Архив и восстановление поездок                 |
+| `/settings`                           | Профиль и настройки                            |
+| `/login`, `/register`                 | Демонстрационные формы авторизации             |
+| `/join/:tripId`                       | Локальное приглашение с режимом просмотра      |
+| `/ui-kit`                             | Витрина UI-кита                                |
+| Любой неизвестный адрес               | Страница 404                                   |
+
+Создание поездок, загрузка собственной обложки (JPG/PNG/WebP до 1 МБ), редактирование, события, места, расходы, заметки, чек-листы и настройки работают локально. Есть валидация дат и времени, пустые состояния, состояние отсутствующей поездки, предупреждение об отсутствии сети и ошибке сохранения. Организатор редактирует общую программу, участник просматривает её; личные чек-листы доступны для редактирования.
+
+Макеты реализованы с боковым меню 240 px, максимальной шириной контента 1360 px, карточками с радиусом 12 px и адаптацией к мобильным экранам. Модальные окна и боковые панели удерживают фокус, закрываются по Escape и возвращают фокус к вызвавшему элементу. Фотографии и шрифт Inter включены в проект, внешние запросы для их отображения не нужны. Лицензия шрифта: `src/assets/fonts/OFL.txt`. Фотографии: Unsplash.
+
+## Границы локальной версии
+
+Сервер и API в проекте отсутствуют. Авторизация демонстрационная: пароль не сохраняется и не проверяется. Приглашения открывают данные текущего браузера; совместная работа с других устройств, настоящая авторизация, серверная проверка прав и синхронизация требуют backend. Права на клиенте отражают поведение интерфейса и не заменяют серверную авторизацию.
+
+Данные сохраняются на этом устройстве в localStorage с префиксом `tripper:` (данные старой версии `tripplan:` подхватываются автоматически). Очистка данных сайта сбрасывает их к демопримеру. Индикатор офлайна сообщает об отсутствии сети; кэширование приложения для первого открытия без сети не реализовано.
+
+## Проверки
 
 ```sh
 npm run build
-```
-
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
-
-### Run End-to-End Tests with [Playwright](https://playwright.dev)
-
-```sh
-# Install browsers for the first run
-npx playwright install
-
-# When testing on CI, must build the project first
-npm run build
-
-# Runs the end-to-end tests
-npm run test:e2e
-# Runs the tests only on Chromium
-npm run test:e2e -- --project=chromium
-# Runs the tests of a specific file
-npm run test:e2e -- tests/example.spec.ts
-# Runs the tests in debug mode
-npm run test:e2e -- --debug
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
 npm run lint
+npm run test:unit -- --run
+npx playwright install chromium webkit
+npx playwright test --project=chromium --project=webkit
 ```
+
+Unit-тесты проверяют контракты Base/Style, события моделей, сохранение данных, права и календарные границы. Браузерные тесты проверяют маршруты, создание поездок, CRUD событий, чек-листы, роль участника, QR-код и мобильную вёрстку. Проверяемые CSS-размеры: Samsung S24 360×780, iPhone 16 Pro Max 440×956, iPhone SE 375×667 и компактный SE 320×568.
+
+Для размещения сборки сервер должен возвращать `index.html` для маршрутов приложения (history fallback).
+
+## Форматирование
+
+В `.prettierrc.json` включены `bracketSameLine: true`, `htmlWhitespaceSensitivity: "ignore"` и `singleAttributePerLine: true`. Открывающие и закрывающие угловые скобки не висят на отдельной строке. Запуск: `npm run format`; проверка: `npx prettier --check src`.

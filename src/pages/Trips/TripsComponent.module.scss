@@ -1,0 +1,217 @@
+@use '@/styles/mixins' as *;
+
+.titleCount {
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+  justify-content: center;
+  margin-left: var(--space-3);
+  width: 26px;
+  height: 26px;
+  font-size: var(--text-sm);
+  background: #e9ede5;
+  color: var(--primary);
+  border-radius: var(--radius-2);
+  letter-spacing: 0;
+}
+.inspirationBanner {
+  margin-top: var(--space-8);
+  border: 1px solid #e5e8dd;
+  border-radius: var(--radius-3);
+  background: linear-gradient(105deg, #eef2e9, #f4f5ed);
+  padding: var(--space-7) var(--space-8);
+  @include flex(var(--space-6));
+  position: relative;
+  overflow: hidden;
+
+  .inspirationArt {
+    width: 60px;
+    height: 60px;
+    display: grid;
+    place-items: center;
+    color: var(--primary);
+    background: #e0e8d8;
+    border-radius: var(--radius-round);
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-size: var(--text-base);
+    margin: 0 0 var(--space-1);
+  }
+
+  p {
+    font-size: var(--text-xs);
+    color: #858d7c;
+    margin: 0;
+  }
+
+  :is(button, a) {
+    margin-left: auto;
+    z-index: 1;
+    font-size: var(--text-xs);
+  }
+
+  .bannerLine {
+    position: absolute;
+    width: 190px;
+    height: 190px;
+    right: var(--space-24);
+    top: calc(var(--space-20) * -1);
+    border: 1px solid #dbe3d3;
+    border-radius: var(--radius-round);
+    transform: rotate(-30deg);
+    opacity: 0.6;
+
+    &:after {
+      content: '';
+      position: absolute;
+      inset: var(--space-5);
+      border: 1px solid #dbe3d3;
+      border-radius: var(--radius-round);
+    }
+  }
+}
+
+.dashboardLower {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-10);
+}
+
+.dashboardPanel {
+  padding: var(--space-6);
+}
+
+.miniEvent {
+  @include flex(var(--space-4));
+  border-top: 1px solid var(--border);
+  padding: var(--space-4) 0 0;
+  margin-top: var(--space-4);
+
+  .miniDate {
+    width: 46px;
+    border-radius: var(--radius-2);
+    background: var(--background);
+    text-align: center;
+    padding: var(--space-2) 0;
+    color: var(--primary);
+
+    strong {
+      display: block;
+      font-size: var(--text-lg);
+    }
+
+    span {
+      font-size: var(--text-xs);
+    }
+  }
+
+  strong {
+    font-size: var(--text-sm);
+  }
+
+  p {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    margin: var(--space-1) 0 0;
+  }
+
+  .miniEventArrow {
+    margin-left: auto;
+    color: var(--muted);
+  }
+}
+
+.preparationRow {
+  @include flex(var(--space-3));
+  padding-top: var(--space-5);
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--border);
+
+  strong {
+    font-size: var(--text-sm);
+  }
+
+  p {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    margin: var(--space-1) 0 0;
+  }
+
+  .prepPercent {
+    margin-left: auto;
+    font-size: var(--text-sm);
+    color: var(--primary);
+  }
+}
+
+.progressTrack {
+  height: 5px;
+  border-radius: var(--radius-2);
+  background: #edf0e8;
+  overflow: hidden;
+  margin-top: var(--space-3);
+
+  span {
+    height: 100%;
+    background: var(--primary);
+    display: block;
+    border-radius: inherit;
+  }
+}
+
+.pageBottomNote {
+  text-align: center;
+  color: #a1a69b;
+  font-size: var(--text-xs);
+  margin-top: var(--space-8);
+  @include flex(var(--space-2));
+  justify-content: center;
+}
+
+@include below(1050px) {
+  .dashboardLower {
+    grid-template-columns: 1fr;
+  }
+
+  .inspirationBanner {
+    padding: var(--space-6);
+    gap: var(--space-4);
+  }
+}
+
+@include below(600px) {
+  .inspirationBanner {
+    align-items: flex-start;
+    flex-direction: column;
+
+    :is(button, a) {
+      margin-left: 0;
+    }
+  }
+
+  .dashboardLower {
+    margin-top: var(--space-6);
+  }
+}
+
+@include below(600px) {
+  .pageBottomNote {
+    align-items: flex-start;
+    font-size: var(--text-xs);
+    line-height: 1.7;
+  }
+}
+
+@include below(1050px) {
+  .inspirationBanner .inspirationArt {
+    display: none;
+  }
+}
+@include below(360px) {
+  .dashboardPanel {
+    padding: var(--space-4);
+  }
+}

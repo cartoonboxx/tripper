@@ -1,0 +1,95 @@
+.uiOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  color: inherit;
+  overflow: hidden;
+  &::backdrop {
+    background: transparent;
+  }
+}
+.uiDialog {
+  width: 100%;
+  max-width: 480px;
+  max-height: calc(100dvh - var(--space-12));
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-4);
+  padding: var(--space-7);
+  transform: translate3d(0, var(--sheet-offset, 0px), 0);
+  overflow: hidden;
+  transition: transform var(--motion-modal-enter) var(--ease-sheet);
+  &.isDragging {
+    transition: none;
+  }
+}
+.uiDialogWide {
+  max-width: 640px;
+}
+.uiDialogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  margin-bottom: var(--space-6);
+  h2 {
+    margin: 0;
+  }
+}
+.uiDialogBody {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.uiSheetHandle {
+  display: none;
+}
+@media (max-width: 600px) {
+  .uiOverlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .uiDialog {
+    max-width: 100%;
+    max-height: calc(100dvh - var(--safe-top) - var(--space-6));
+    border-radius: var(--radius-6) var(--radius-6) 0 0;
+    padding: 0 var(--space-5) calc(var(--space-6) + var(--safe-bottom));
+  }
+  .uiSheetHandle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    height: var(--space-8);
+    margin: 0 calc(-1 * var(--space-5));
+    touch-action: none;
+    cursor: grab;
+    span {
+      width: var(--space-9);
+      height: var(--space-1);
+      border-radius: var(--radius-pill);
+      background: var(--border);
+    }
+  }
+  .uiDialogHeader {
+    margin-bottom: var(--space-5);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .uiDialog {
+    transition-duration: 1ms;
+  }
+}

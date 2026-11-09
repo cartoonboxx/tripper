@@ -1,0 +1,11 @@
+.uiBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-1);
+  font-size: var(--text-xs);
+  font-weight: 550;
+  line-height: 1.2;
+  white-space: nowrap;
+}

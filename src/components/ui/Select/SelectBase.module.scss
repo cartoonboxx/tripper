@@ -1,0 +1,16 @@
+@use '@/styles/mixins' as *;
+.uiField {
+  @include field-layout;
+  select {
+    width: 100%;
+    min-height: 44px;
+    padding: var(--space-3);
+    border-width: 1px;
+    border-style: solid;
+    border-radius: var(--radius-2);
+    font: inherit;
+    font-size: var(--text-base);
+    min-width: 0;
+    max-width: 100%;
+  }
+}

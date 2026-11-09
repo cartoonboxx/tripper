@@ -1,0 +1,187 @@
+@use '@/styles/mixins' as *;
+
+.tripBackRow {
+  @include flex;
+  justify-content: space-between;
+  margin: calc(var(--space-2) * -1) 0 var(--space-5);
+  font-size: var(--text-xs);
+}
+
+.readonly {
+  @include flex(var(--space-2));
+  color: var(--muted);
+}
+
+.tripHero {
+  height: 210px;
+  border-radius: var(--radius-3);
+  background-size: cover;
+  background-position: center 48%;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-8);
+  color: white;
+
+  &:before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, #172b25a6, #172b2522), linear-gradient(0deg, #172b2555, transparent);
+  }
+}
+
+.tripHeroContent {
+  position: relative;
+
+  h1 {
+    font-size: var(--text-3xl);
+    margin: var(--space-2) 0 var(--space-4);
+    color: white;
+    letter-spacing: -1px;
+  }
+}
+
+.heroEyebrow {
+  font-size: var(--text-xs);
+  letter-spacing: 1.6px;
+  color: #ffffffd1;
+
+  span {
+    margin: 0 var(--space-2);
+  }
+}
+
+.heroMeta {
+  @include flex(var(--space-6));
+  font-size: var(--text-xs);
+
+  span {
+    @include flex(var(--space-2));
+  }
+}
+
+.tripHero > span {
+  position: absolute;
+  right: var(--space-6);
+  top: var(--space-5);
+  background: #ffffffed;
+  color: var(--primary);
+}
+
+.heroMembers {
+  position: absolute;
+  right: var(--space-6);
+  bottom: var(--space-7);
+  display: flex;
+
+  span {
+    border: 2px solid white;
+    margin-left: calc(var(--space-1) * -1);
+  }
+}
+
+.tripTabs {
+  @include flex(var(--space-3));
+  border-bottom: 1px solid var(--border);
+  margin: var(--space-3) 0 var(--space-7);
+  overflow-x: auto;
+
+  a {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    padding: var(--space-5) var(--space-4);
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+
+    &.isActive {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 600;
+    }
+  }
+}
+
+.tripContent {
+  min-height: 260px;
+}
+
+@include below(1200px) {
+  .tripTabs {
+    gap: 0;
+
+    a {
+      padding: var(--space-4) var(--space-3);
+    }
+  }
+}
+
+@include below(1050px) {
+  .heroMembers {
+    display: none;
+  }
+}
+
+@include below(600px) {
+  .tripHero {
+    height: 200px;
+    padding: var(--space-6);
+  }
+
+  .tripHeroContent h1 {
+    font-size: var(--text-3xl);
+  }
+
+  .heroMeta {
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .tripBackRow > :is(button, a) {
+    display: none;
+  }
+
+  .tripBackRow > a:last-child {
+    font-size: var(--text-xs);
+  }
+}
+
+@include below(600px) {
+  .tripHero {
+    height: auto;
+    min-height: 240px;
+    padding: var(--space-18) var(--space-5) var(--space-6);
+  }
+
+  .tripHeroContent h1 {
+    font-size: var(--text-3xl);
+    overflow-wrap: anywhere;
+  }
+
+  .tripBackRow {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .tripBackRow > a:last-child {
+    font-size: var(--text-sm);
+  }
+
+  .tripTabs a {
+    min-height: 48px;
+    font-size: var(--text-sm);
+    padding: var(--space-4);
+  }
+}
+
+@include below(360px) {
+  .tripHero {
+    padding-inline: var(--space-4);
+  }
+
+  .heroMeta {
+    font-size: var(--text-xs);
+  }
+}

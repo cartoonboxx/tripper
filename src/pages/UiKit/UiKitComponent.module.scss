@@ -1,0 +1,191 @@
+@use '@/styles/mixins' as *;
+.kitPage {
+  min-width: 0;
+}
+.kitHeader {
+  margin-bottom: var(--space-6);
+}
+.catalogNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-8);
+  a {
+    font-size: var(--text-sm);
+    padding: var(--space-2) var(--space-3);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-2);
+    color: var(--primary);
+    min-height: 40px;
+    @media (hover: hover) and (pointer: fine) {
+      &:hover {
+        background: var(--primary-soft);
+      }
+    }
+  }
+}
+.kitSection {
+  @include panel;
+  padding: var(--space-7);
+  margin-bottom: var(--space-6);
+  scroll-margin-top: var(--space-6);
+  h2 {
+    margin-bottom: var(--space-4);
+  }
+  h3 {
+    margin: var(--space-6) 0 var(--space-3);
+  }
+}
+.kitRow {
+  @include flex(var(--space-3));
+  flex-wrap: wrap;
+  margin: var(--space-5) 0;
+}
+.demoGrid,
+.foundationGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+.foundationGrid {
+  margin: var(--space-6) 0;
+}
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.colorCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  strong {
+    font-size: var(--text-sm);
+  }
+  code,
+  small {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    overflow-wrap: anywhere;
+  }
+}
+.colorSwatch {
+  height: 64px;
+  border-radius: var(--radius-2);
+  border: 1px solid var(--border);
+  margin-bottom: var(--space-2);
+}
+.spaceSamples {
+  display: grid;
+  gap: var(--space-2);
+  > div {
+    @include flex(var(--space-3));
+    min-height: 20px;
+  }
+  span {
+    height: 12px;
+    background: var(--primary);
+    border-radius: var(--radius-1);
+    display: block;
+  }
+  code {
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+}
+.radiusSamples {
+  @include flex(var(--space-3));
+  flex-wrap: wrap;
+  margin: var(--space-5) 0;
+  > div {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    background: var(--primary-soft);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+  }
+}
+.iconSamples {
+  @include flex(var(--space-5));
+  flex-wrap: wrap;
+  color: var(--primary);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+.modelValue {
+  font-size: var(--text-sm);
+  color: var(--muted);
+  margin: var(--space-4) 0 0;
+}
+.verticalTabs {
+  max-width: 320px;
+  display: grid;
+  gap: var(--space-2);
+  small {
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+}
+.demoCard {
+  padding: var(--space-6);
+  p {
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+}
+.switchGrid {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 420px;
+}
+.switchDemo {
+  @include flex;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  span {
+    font-size: var(--text-sm);
+  }
+}
+.compositionPreview {
+  max-width: 360px;
+  margin: var(--space-6) 0;
+}
+.drawerHeading {
+  margin-top: var(--space-6);
+}
+@include below(1100px) {
+  .colorGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@include below(600px) {
+  .kitSection {
+    padding: var(--space-5);
+  }
+  .demoGrid,
+  .foundationGrid {
+    grid-template-columns: 1fr;
+  }
+  .colorGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .kitRow {
+    align-items: stretch;
+    :is(button, a):not(:has(svg:only-child)) {
+      max-width: 100%;
+      white-space: normal;
+    }
+  }
+}
+@include below(360px) {
+  .kitSection {
+    padding: var(--space-4);
+  }
+  .catalogNav {
+    gap: var(--space-1);
+  }
+}

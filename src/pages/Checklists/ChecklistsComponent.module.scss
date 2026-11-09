@@ -1,0 +1,115 @@
+@use '@/styles/mixins' as *;
+.checklistLayout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: var(--space-7);
+}
+.checklistSidebar {
+  padding-top: var(--space-1);
+  button {
+    margin-bottom: var(--space-2);
+    font-size: var(--text-sm);
+    small {
+      font-size: var(--text-xs);
+      opacity: 0.7;
+    }
+  }
+  > :is(button, a) {
+    margin-top: var(--space-4);
+    font-size: var(--text-xs);
+  }
+  p {
+    @include flex(var(--space-2));
+    padding: var(--space-6) var(--space-3);
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+}
+.checklistPanel {
+  max-width: 750px;
+}
+.checklistProgress {
+  height: 6px;
+  background: #edf0e8;
+  border-radius: var(--radius-3);
+  overflow: hidden;
+  margin: var(--space-2) 0 var(--space-5);
+  span {
+    display: block;
+    height: 100%;
+    background: var(--primary);
+    border-radius: inherit;
+    transition: width 0.25s;
+  }
+}
+.checklistItem {
+  @include flex(var(--space-1));
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+  label:has(> input[type='checkbox']) {
+    flex: 1;
+    font-size: var(--text-sm);
+  }
+  :is(button, a) {
+    width: 44px;
+    min-height: 44px;
+    color: var(--muted);
+  }
+  label:has(> input[type='checkbox']):has(input:checked) span {
+    text-decoration: line-through;
+  }
+}
+.addItemForm {
+  @include flex(var(--space-2));
+  margin-top: var(--space-5);
+  div:has(> label) {
+    flex: 1;
+    font-size: var(--text-sm);
+  }
+}
+.checklistBottom {
+  @include flex(var(--space-2));
+  font-size: var(--text-xs);
+  color: var(--muted);
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+  strong {
+    margin-left: auto;
+    color: var(--primary);
+    font-size: var(--text-sm);
+  }
+}
+@include below(1000px) {
+  .checklistLayout {
+    grid-template-columns: 170px minmax(0, 1fr);
+    gap: var(--space-5);
+  }
+}
+@include below(650px) {
+  .checklistLayout {
+    grid-template-columns: 1fr;
+  }
+  .checklistSidebar {
+    display: flex;
+    overflow: auto;
+    gap: var(--space-2);
+    button {
+      width: auto;
+      flex-shrink: 0;
+      gap: var(--space-4);
+      margin: 0;
+    }
+    :is(button, a),
+    p {
+      display: none;
+    }
+  }
+  .checklistBottom {
+    line-height: 1.7;
+  }
+}
+
+.checklistsDetail1 {
+  padding: var(--space-5) 0;
+}

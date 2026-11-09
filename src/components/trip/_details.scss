@@ -1,0 +1,17 @@
+@use '@/styles/mixins' as *;
+
+.detailCover {
+  width: 100%;
+  height: 210px;
+  border-radius: var(--radius-2);
+  margin-bottom: var(--space-5);
+}
+
+.detailMeta {
+  margin: var(--space-6) 0;
+  p {
+    @include flex(var(--space-3));
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
+}

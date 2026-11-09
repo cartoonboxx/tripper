@@ -1,0 +1,14 @@
+.uiAvatar {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.uiAvatarSm {
+  width: 28px;
+  height: 28px;
+  font-size: var(--text-xs);
+}
+.uiAvatarLg {
+  width: 76px;
+  height: 76px;
+  font-size: var(--text-2xl);
+}

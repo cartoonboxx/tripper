@@ -1,0 +1,36 @@
+.joinPage {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+}
+.joinCard {
+  max-width: 520px;
+  width: 100%;
+  > img {
+    height: 220px;
+    width: 100%;
+  }
+  > div {
+    padding: var(--space-8);
+  }
+  .eyebrow {
+    font-size: var(--text-xs);
+  }
+  h1 {
+    margin: var(--space-3) 0;
+  }
+  p:not(.subtle) {
+    font-size: var(--text-sm);
+    line-height: 1.9;
+    color: var(--muted);
+    margin: var(--space-5) 0 var(--space-6);
+  }
+  :is(button, a) {
+    width: 100%;
+  }
+  .textLink {
+    justify-content: center;
+    margin-top: var(--space-5);
+  }
+}

@@ -1,0 +1,6 @@
+.uiCheckbox input {
+  accent-color: var(--primary);
+}
+.uiCheckbox:has(input:checked) {
+  color: var(--muted);
+}

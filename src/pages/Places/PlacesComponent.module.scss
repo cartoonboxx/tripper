@@ -1,0 +1,76 @@
+.placeImage {
+  position: relative;
+  height: 195px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  overflow: hidden;
+  img {
+    height: 100%;
+    width: 100%;
+  }
+  .bookmarkMark {
+    position: absolute;
+    right: var(--space-3);
+    top: var(--space-3);
+    display: grid;
+    place-items: center;
+    background: white;
+    width: 29px;
+    height: 32px;
+    border-radius: var(--radius-2);
+    color: var(--primary);
+  }
+  span {
+    position: absolute;
+    left: var(--space-3);
+    bottom: var(--space-3);
+    background: white;
+  }
+}
+.placeCardBody {
+  padding: var(--space-5);
+}
+.placeTitle {
+  font: inherit;
+  font-size: var(--text-base);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  border: 0;
+  background: none;
+  padding: 0;
+  line-height: 1.5;
+}
+.placeCardBody > p {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  margin: var(--space-2) 0 var(--space-4);
+}
+.placeAddress {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  display: flex;
+  gap: var(--space-1);
+  align-items: center;
+}
+.placeCardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--primary);
+  min-height: 40px;
+  :is(button, a) {
+    min-height: 44px;
+    width: 44px;
+  }
+}
+.tabSmallCount {
+  font-size: var(--text-xs);
+  opacity: 0.6;
+}
