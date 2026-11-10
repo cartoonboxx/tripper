@@ -1,6 +1,4 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
-import sharedStyle from '@/styles/shared.module.scss'
 import style from './InputBase.module.scss'
 import { defineComponent, type StyleValue } from 'vue'
 import { createId } from '@/utils/createId'
@@ -18,7 +16,8 @@ export default defineComponent({
       return Boolean(this.label?.trim())
     },
     controlId(): string | undefined {
-      return this.$attrs.id ? String(this.$attrs.id) : this.hasLabel ? this.id : undefined
+      if (this.$attrs.id) return String(this.$attrs.id)
+      return this.hasLabel ? this.id : undefined
     },
     controlAttrs() {
       return Object.fromEntries(
@@ -28,13 +27,52 @@ export default defineComponent({
   },
   emits: ['update:modelValue'],
   data() {
-    return { style: mergeStyles(sharedStyle, style), id: createId() }
+    return { style, id: createId(), resizeObserver: null as ResizeObserver | null }
+  },
+  mounted() {
+    this.resizeTextarea()
+    if (typeof ResizeObserver !== 'undefined') {
+      let width = 0
+      this.resizeObserver = new ResizeObserver(([entry]) => {
+        if (entry && entry.contentRect.width !== width) {
+          width = entry.contentRect.width
+          this.resizeTextarea()
+        }
+      })
+      this.resizeObserver.observe(this.$el)
+    }
+  },
+  updated() {
+    this.resizeTextarea()
+  },
+  beforeUnmount() {
+    this.resizeObserver?.disconnect()
+  },
+  methods: {
+    resizeTextarea() {
+      const field = this.$refs.control
+      if (!(field instanceof HTMLTextAreaElement) || !field.clientWidth) return
+      field.style.height = '0px'
+      const minimum = parseFloat(getComputedStyle(field).lineHeight) * this.rows
+      field.style.height = `${Math.max(field.scrollHeight, minimum)}px`
+    },
+    onInput(event: Event) {
+      const field = event.target as HTMLInputElement | HTMLTextAreaElement
+      this.resizeTextarea()
+      this.$emit('update:modelValue', field.value)
+    },
   },
 })
 </script>
 <template>
   <div
-    :class="[style.uiField, appearance.uiField, $attrs.class]"
+    :class="[
+      style.uiField,
+      size === 'sm' && style.uiFieldSm,
+      size === 'lg' && style.uiFieldLg,
+      appearance.uiField,
+      $attrs.class,
+    ]"
     :style="rootStyle">
     <label
       v-if="hasLabel"
@@ -45,23 +83,27 @@ export default defineComponent({
     <div
       :class="[
         style.uiInputWrap,
+        type === 'textarea' && style.multiline,
         appearance.uiInputWrap,
         error && appearance.invalid,
         disabled && appearance.disabled,
       ]">
       <slot name="prefix" />
-      <input
+      <component
+        :is="type === 'textarea' ? 'textarea' : 'input'"
+        ref="control"
         v-bind="controlAttrs"
         :id="controlId"
         :value="modelValue"
-        :type="type || 'text'"
+        :type="type === 'textarea' ? undefined : type"
+        :rows="type === 'textarea' ? rows : undefined"
         :placeholder="placeholder"
         :required="required"
         :disabled="disabled"
         :min="min"
         :max="max"
         :autocomplete="autocomplete"
-        @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)" />
+        @input="onInput" />
       <slot name="suffix" />
     </div>
     <small

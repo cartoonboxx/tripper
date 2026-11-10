@@ -3,15 +3,16 @@
     scale var(--motion-press-out) var(--ease-soft),
     opacity var(--motion-press-out) var(--ease-soft);
   transform-origin: center;
+
   &.isPressed {
     scale: 0.975;
     opacity: 0.78;
     transition-duration: var(--motion-press-in);
   }
-}
-@media (prefers-reduced-motion: reduce) {
-  .pressTarget {
+
+  @media (prefers-reduced-motion: reduce) {
     transition-duration: 1ms;
+
     &.isPressed {
       scale: 1;
     }

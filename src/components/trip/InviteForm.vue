@@ -1,6 +1,5 @@
 <script lang="ts">
 import style from './InviteForm.module.scss'
-import { mergeStyles } from '@/utils/mergeStyles'
 import sharedStyle from '@/styles/shared.module.scss'
 import { defineComponent } from 'vue'
 import { PhCopy, PhLink, PhLockKey, PhQrCode } from '@phosphor-icons/vue'
@@ -17,7 +16,8 @@ export default defineComponent({
   emits: ['close'],
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      sharedStyle,
+      style,
       mode: 'link',
       qr: '',
       error: '',
@@ -73,8 +73,8 @@ export default defineComponent({
     :open="open"
     title="Путешествовать лучше вместе"
     @close="$emit('close')">
-    <p :class="[style.subtle]">Пригласите близких посмотреть маршрут и планы поездки.</p>
-    <div :class="[style.inviteTabs]">
+    <p :class="sharedStyle.subtle">Пригласите близких посмотреть маршрут и планы поездки.</p>
+    <div :class="style.inviteTabs">
       <Tab
         variant="line"
         :active="mode === 'link'"
@@ -92,17 +92,15 @@ export default defineComponent({
     </div>
     <div
       v-if="mode === 'link'"
-      :class="[style.formStack]">
+      :class="sharedStyle.formStack">
       <Input
         :model-value="link"
         label="Ссылка-приглашение"
-        readonly
-        title="Ссылка-приглашение">
+        readonly>
         <template #suffix>
           <Button
             variant="ghost"
             icon-only
-            title="Скопировать ссылку"
             @click="copy">
             <PhCopy :size="16" />
           </Button>
@@ -117,17 +115,17 @@ export default defineComponent({
     </div>
     <div
       v-else
-      :class="[style.qrPreview]">
+      :class="style.qrPreview">
       <img
         v-if="qr"
         :src="qr"
         alt="QR-код приглашения в поездку"
         width="240"
         height="240" />
-      <p :class="[style.subtle]">Отсканируйте, чтобы открыть приглашение</p>
+      <p :class="sharedStyle.subtle">Отсканируйте, чтобы открыть приглашение</p>
     </div>
-    <div :class="[style.inviteAccess]">
-      <span :class="[style.softIcon]">
+    <div :class="style.inviteAccess">
+      <span :class="[style.softIcon, sharedStyle.softIcon]">
         <PhLockKey :size="18" />
       </span>
       <div>
@@ -135,13 +133,13 @@ export default defineComponent({
         <p>Участники видят план, места и информацию. Изменять общий план может организатор.</p>
       </div>
     </div>
-    <p :class="[style.formHelp]">
+    <p :class="sharedStyle.formHelp">
       Локальное приглашение: данные доступны в этом браузере. Для совместного доступа с других
       устройств потребуется сервер.
     </p>
     <p
       v-if="error"
-      :class="[style.errorText]">
+      :class="sharedStyle.errorText">
       {{ error }}
     </p>
   </Modal>

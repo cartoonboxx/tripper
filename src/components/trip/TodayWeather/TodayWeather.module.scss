@@ -1,0 +1,58 @@
+@use '@/styles/mixins' as *;
+
+.weather {
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+
+  .heading {
+    @include flex(var(--space-3));
+    justify-content: space-between;
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
+
+    h2 {
+      margin: 0 0 var(--space-1);
+    }
+
+    p {
+      @include flex(var(--space-1));
+      color: var(--muted);
+      font-size: var(--text-xs);
+    }
+  }
+
+  .forecast {
+    @include flex(var(--space-4));
+    flex-wrap: wrap;
+
+    > svg {
+      color: var(--primary);
+    }
+
+    > strong {
+      font-size: var(--text-3xl);
+    }
+
+    span {
+      color: var(--muted);
+      font-size: var(--text-sm);
+    }
+  }
+
+  .message {
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+
+  .source {
+    display: inline-block;
+    margin-top: var(--space-3);
+    color: var(--muted);
+    font-size: var(--text-xs);
+    text-decoration: underline;
+  }
+
+  @include below(600px) {
+    padding: var(--space-5);
+  }
+}

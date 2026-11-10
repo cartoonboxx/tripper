@@ -16,19 +16,19 @@
   transition:
     background 0.18s,
     box-shadow 0.18s;
+
   &:disabled {
     opacity: 0.45;
     cursor: not-allowed;
   }
+
   &Icon {
     width: 44px;
     padding: 0;
     flex-shrink: 0;
   }
-}
 
-@media (max-width: 600px) {
-  .uiButton {
+  @media (max-width: 600px) {
     min-height: 44px;
   }
 }

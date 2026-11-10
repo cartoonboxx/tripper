@@ -1,18 +1,14 @@
 <script lang="ts">
-import sharedStyle from '@/styles/shared.module.scss'
-import { defineComponent } from 'vue'
+import { defineComponent, markRaw } from 'vue'
 import { PhArrowLeft, PhCompass } from '@phosphor-icons/vue'
 import { EmptyState, Button } from '@/components/ui'
-import { markRawValue } from '@/utils/markRawValue'
 
 export default defineComponent({
   name: 'NotFoundComponent',
   components: { PhArrowLeft, EmptyState, Button },
   data() {
     return {
-      style: sharedStyle,
-      PhArrowLeft: markRawValue(PhArrowLeft),
-      PhCompass: markRawValue(PhCompass),
+      PhCompass: markRaw(PhCompass),
     }
   },
 })

@@ -1,24 +1,51 @@
 @use '@/styles/mixins' as *;
+
 .uiField {
+  --field-height: var(--space-12);
+  --field-padding: var(--space-4);
+  --field-font-size: var(--text-base);
   @include field-layout;
+
+  &Sm {
+    --field-height: var(--space-10);
+    --field-padding: var(--space-3);
+    --field-font-size: var(--text-sm);
+
+    @include below(600px) {
+      --field-height: var(--space-11);
+      --field-font-size: var(--text-base);
+    }
+  }
+
+  &Lg {
+    --field-height: var(--space-14);
+    --field-padding: var(--space-5);
+  }
+
+  &Error {
+    font-size: var(--text-sm);
+  }
 }
+
 .uiInputWrap {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0 var(--space-3);
+  padding: 0 var(--field-padding);
   border-width: 1px;
   border-style: solid;
-  border-radius: var(--radius-2);
-  min-height: 44px;
-  input {
+  border-radius: var(--radius-6);
+  min-height: var(--field-height);
+  input,
+  textarea {
     width: 100%;
     min-width: 0;
-    padding: var(--space-3) 0;
+    height: calc(var(--field-height) - var(--space-0-5));
+    padding: 0;
     border: 0;
     outline: none;
     font: inherit;
-    font-size: var(--text-base);
+    font-size: var(--field-font-size);
     line-height: 1.5;
     background: transparent;
     color: inherit;
@@ -28,7 +55,16 @@
       box-shadow: none;
     }
   }
-}
-.uiFieldError {
-  font-size: var(--text-sm);
+
+  &.multiline {
+    align-items: flex-start;
+    padding: var(--space-3) var(--field-padding);
+
+    textarea {
+      height: auto;
+      min-height: var(--field-height);
+      resize: none;
+      overflow-y: hidden;
+    }
+  }
 }

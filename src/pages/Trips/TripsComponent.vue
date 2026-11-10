@@ -1,8 +1,8 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
+import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import sharedStyle from '@/styles/shared.module.scss'
 import style from './TripsComponent.module.scss'
-import { defineComponent } from 'vue'
+import { defineComponent, markRaw } from 'vue'
 import {
   PhArrowRight,
   PhArrowUpRight,
@@ -18,11 +18,11 @@ import { Button, Input, Tab, EmptyState, Card } from '@/components/ui'
 import TripCard from '@/components/trip/TripCard.vue'
 import TripForm from '@/components/trip/TripForm.vue'
 import { useTravelStore } from '@/stores/travel'
-import { markRawValue } from '@/utils/markRawValue'
 
 export default defineComponent({
   name: 'TripsComponent',
   components: {
+    SectionHeader,
     PhArrowRight,
     PhArrowUpRight,
     PhCalendarDots,
@@ -42,19 +42,12 @@ export default defineComponent({
   },
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      sharedStyle,
+      style,
       search: '',
       filter: 'all',
       creating: false,
-      PhArrowRight: markRawValue(PhArrowRight),
-      PhArrowUpRight: markRawValue(PhArrowUpRight),
-      PhCalendarDots: markRawValue(PhCalendarDots),
-      PhListChecks: markRawValue(PhListChecks),
-      PhLockKey: markRawValue(PhLockKey),
-      PhMagnifyingGlass: markRawValue(PhMagnifyingGlass),
-      PhMapTrifold: markRawValue(PhMapTrifold),
-      PhPlus: markRawValue(PhPlus),
-      PhSuitcaseRolling: markRawValue(PhSuitcaseRolling),
+      PhSuitcaseRolling: markRaw(PhSuitcaseRolling),
     }
   },
   computed: {
@@ -67,17 +60,20 @@ export default defineComponent({
     isHome() {
       return this.route.name === 'home'
     },
+    activeTrips() {
+      return this.store.trips.filter((trip) => !trip.archived)
+    },
     filtered() {
-      return this.store.trips.filter(
-        (t) =>
-          !t.archived &&
-          (this.filter === 'all' || t.status === this.filter) &&
-          t.name.toLowerCase().includes(this.search.toLowerCase()),
+      const search = this.search.toLowerCase()
+      return this.activeTrips.filter(
+        (trip) =>
+          (this.filter === 'all' || trip.status === this.filter) &&
+          trip.name.toLowerCase().includes(search),
       )
     },
     nextTrip() {
-      return this.store.trips
-        .filter((t) => !t.archived && t.status !== 'completed')
+      return this.activeTrips
+        .filter((trip) => trip.status !== 'completed')
         .sort((a, b) => a.start.localeCompare(b.start))[0]
     },
     checklist() {
@@ -94,26 +90,19 @@ export default defineComponent({
 </script>
 <template>
   <div>
-    <header :class="[style.pageHeading]">
-      <div>
-        <span :class="[style.eyebrow]">СОБИРАЙТЕ МОМЕНТЫ, А НЕ ВКЛАДКИ</span>
-        <h1>
-          Мои поездки
-          <span :class="[style.titleCount]">
-            {{ store.trips.filter((t) => !t.archived).length }}
-          </span>
-        </h1>
-        <p>Все ваши путешествия и планы — в одном месте.</p>
-      </div>
-      <Button @click="creating = true">
-        <PhPlus :size="16" />
-        Создать поездку
-      </Button>
-    </header>
-    <div :class="[style.toolbar]">
-      <div
-        title="Фильтр поездок"
-        :class="[style.filterTabs]">
+    <SectionHeader
+      header="Мои поездки"
+      level="h1"
+      paragraph="Все ваши путешествия и планы — в одном месте.">
+      <template #actions>
+        <Button @click="creating = true">
+          <PhPlus :size="16" />
+          Создать поездку
+        </Button>
+      </template>
+    </SectionHeader>
+    <div :class="sharedStyle.toolbar">
+      <div :class="sharedStyle.filterTabs">
         <Tab
           :active="filter === 'all'"
           @click="filter = 'all'">
@@ -137,9 +126,9 @@ export default defineComponent({
       </div>
       <Input
         v-model="search"
-        placeholder="Найти поездку…"
-        title="Поиск поездок"
-        :class="[style.searchField]">
+        placeholder="Поиск поездки"
+        :class="sharedStyle.searchField"
+        size="sm">
         <template #prefix>
           <PhMagnifyingGlass :size="16" />
         </template>
@@ -147,7 +136,7 @@ export default defineComponent({
     </div>
     <div
       v-if="filtered.length"
-      :class="[style.tripGrid]">
+      :class="sharedStyle.tripGrid">
       <TripCard
         v-for="trip in filtered"
         :key="trip.id"
@@ -169,15 +158,15 @@ export default defineComponent({
         Создать поездку
       </Button>
     </EmptyState>
-    <section :class="[style.inspirationBanner]">
-      <div :class="[style.inspirationArt]">
+    <section :class="style.inspirationBanner">
+      <div :class="style.inspirationArt">
         <PhMapTrifold :size="30" />
       </div>
       <div>
         <h3>Куда отправимся в следующий раз?</h3>
         <p>Большое путешествие начинается с маленького плана.</p>
       </div>
-      <span :class="[style.bannerLine]" />
+      <span :class="style.bannerLine" />
       <Button
         variant="secondary"
         @click="creating = true">
@@ -187,20 +176,23 @@ export default defineComponent({
     </section>
     <div
       v-if="isHome"
-      :class="[style.dashboardLower]">
-      <Card :class="[style.dashboardPanel]">
-        <div :class="[style.sectionHeading]">
-          <h3>Ближайшее путешествие</h3>
-          <PhCalendarDots
-            :size="17"
-            :class="[style.subtle]" />
-        </div>
+      :class="style.dashboardLower">
+      <Card :class="style.dashboardPanel">
+        <SectionHeader
+          header="Ближайшее путешествие"
+          level="h3">
+          <template #actions>
+            <PhCalendarDots
+              :size="17"
+              :class="sharedStyle.subtle" />
+          </template>
+        </SectionHeader>
         <template v-if="nextTrip">
-          <p :class="[style.subtle]">Самое время добавить последние штрихи к плану.</p>
+          <p :class="sharedStyle.subtle">Самое время добавить последние штрихи к плану.</p>
           <AppLink
-            :to="`/trips/${nextTrip.id}/plan`"
-            :class="[style.miniEvent]">
-            <div :class="[style.miniDate]">
+            :to="`/trips/${nextTrip.id}/today`"
+            :class="style.miniEvent">
+            <div :class="style.miniDate">
               <strong>{{ new Date(nextTrip.start).getDate() }}</strong>
               <span>
                 {{
@@ -216,39 +208,42 @@ export default defineComponent({
             </div>
             <PhArrowRight
               :size="18"
-              :class="[style.miniEventArrow]" />
+              :class="style.miniEventArrow" />
           </AppLink>
         </template>
         <p
           v-else
-          :class="[style.subtle]">
+          :class="sharedStyle.subtle">
           Новые маршруты ещё впереди.
         </p>
       </Card>
-      <Card :class="[style.dashboardPanel]">
-        <div :class="[style.sectionHeading]">
-          <h3>Всё готово к поездке?</h3>
-          <PhListChecks
-            :size="17"
-            :class="[style.subtle]" />
-        </div>
-        <p :class="[style.subtle]">Ничего не забыть и отправиться налегке.</p>
+      <Card :class="style.dashboardPanel">
+        <SectionHeader
+          header="Всё готово к поездке?"
+          level="h3">
+          <template #actions>
+            <PhListChecks
+              :size="17"
+              :class="sharedStyle.subtle" />
+          </template>
+        </SectionHeader>
+        <p :class="sharedStyle.subtle">Ничего не забыть и отправиться налегке.</p>
         <AppLink
           :to="nextTrip ? `/trips/${nextTrip.id}/checklists` : '/checklists'"
-          :class="[style.preparationRow]">
-          <span :class="[style.softIcon]">
+          :class="style.preparationRow">
+          <span :class="sharedStyle.softIcon">
             <PhSuitcaseRolling :size="20" />
           </span>
           <div>
             <strong>{{ checklist?.title || 'Личный чек-лист' }}</strong>
             <p>{{ checked }} из {{ checklist?.items.length || 0 }} пунктов выполнено</p>
           </div>
-          <span :class="[style.prepPercent]">{{ percentage }}%</span>
+          <span :class="style.prepPercent">{{ percentage }}%</span>
         </AppLink>
-        <div :class="[style.progressTrack]"><span :style="{ width: percentage + '%' }" /></div>
+        <div :class="style.progressTrack"><span :style="{ width: percentage + '%' }" /></div>
       </Card>
     </div>
-    <div :class="[style.pageBottomNote]">
+    <div :class="style.pageBottomNote">
       <PhLockKey :size="16" />
       Ваши планы доступны только вам и участникам поездки
     </div>

@@ -56,3 +56,9 @@ export const iconSamples = [
   PhMagnifyingGlass,
   PhPlus,
 ]
+
+export const fieldSizes = [
+  { value: 'sm', label: 'S' },
+  { value: 'md', label: 'M' },
+  { value: 'lg', label: 'L' },
+] as const

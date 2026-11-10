@@ -9,6 +9,7 @@
 
 .detailMeta {
   margin: var(--space-6) 0;
+
   p {
     @include flex(var(--space-3));
     font-size: var(--text-sm);

@@ -1,5 +1,5 @@
 <script lang="ts">
-import sharedStyle from '@/styles/shared.module.scss'
+import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import { defineComponent } from 'vue'
 import TripForm from '@/components/trip/TripForm.vue'
 import { EmptyState, Button } from '@/components/ui'
@@ -7,15 +7,15 @@ import tripContext from '@/mixins/tripContext'
 
 export default defineComponent({
   name: 'TripEditComponent',
-  components: { TripForm, EmptyState, Button },
+  components: { SectionHeader, TripForm, EmptyState, Button },
   mixins: [tripContext],
   data() {
-    return { style: sharedStyle, open: true }
+    return { open: true }
   },
   methods: {
     close() {
       this.open = false
-      this.router.push(`/trips/${this.trip?.id}/information`)
+      this.router.push(`/trips/${this.trip?.id}/plan`)
     },
   },
 })
@@ -29,13 +29,14 @@ export default defineComponent({
       <Button to="/trips">К поездкам</Button>
     </EmptyState>
     <template v-else>
-      <div :class="[style.pageHeading]">
-        <div>
-          <h1>Редактирование поездки</h1>
-          <p>{{ trip.name }}</p>
-        </div>
-        <Button @click="open = true">Открыть форму</Button>
-      </div>
+      <SectionHeader
+        header="Редактирование поездки"
+        level="h1"
+        :paragraph="trip.name">
+        <template #actions>
+          <Button @click="open = true">Открыть форму</Button>
+        </template>
+      </SectionHeader>
       <TripForm
         :open="open"
         :trip="trip"

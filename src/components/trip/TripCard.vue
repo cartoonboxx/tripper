@@ -1,5 +1,4 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
 import sharedStyle from '@/styles/shared.module.scss'
 import style from './TripCard.module.scss'
 import { defineComponent } from 'vue'
@@ -32,7 +31,8 @@ export default defineComponent({
   props: componentProps,
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      sharedStyle,
+      style,
       menuOpen: false,
       PhArrowRight: markRawValue(PhArrowRight),
       PhArrowUpRight: markRawValue(PhArrowUpRight),
@@ -42,6 +42,9 @@ export default defineComponent({
     }
   },
   computed: {
+    members() {
+      return this.store.members(this.trip.id)
+    },
     store(): ReturnType<typeof useTravelStore> {
       return useTravelStore()
     },
@@ -52,10 +55,10 @@ export default defineComponent({
 <template>
   <Card
     interactive
-    :class="[style.tripCard]">
+    :class="style.tripCard">
     <AppLink
-      :to="`/trips/${trip.id}/overview`"
-      :class="[style.tripCardImage]">
+      :to="`/trips/${trip.id}/plan`"
+      :class="style.tripCardImage">
       <img
         :src="trip.image"
         :alt="trip.name" />
@@ -68,31 +71,30 @@ export default defineComponent({
               : 'Предстоящая'
         }}
       </Badge>
-      <span :class="[style.tripCardImageArrow]">
+      <span :class="style.tripCardImageArrow">
         <PhArrowUpRight :size="19" />
       </span>
     </AppLink>
-    <div :class="[style.tripCardBody]">
-      <div :class="[style.tripCardTitle]">
+    <div :class="style.tripCardBody">
+      <div :class="style.tripCardTitle">
         <div>
-          <span :class="[style.eyebrow]">{{ trip.country }}</span>
-          <AppLink :to="`/trips/${trip.id}/overview`">
+          <span :class="[sharedStyle.eyebrow, style.eyebrow]">{{ trip.country }}</span>
+          <AppLink :to="`/trips/${trip.id}/plan`">
             <h3>{{ trip.name }}</h3>
           </AppLink>
         </div>
         <div
           v-if="store.editable(trip.id)"
-          :class="[style.cardMenu]">
+          :class="style.cardMenu">
           <Button
             variant="ghost"
             icon-only
-            :title="`Действия: ${trip.name}`"
             @click="menuOpen = !menuOpen">
             <PhDotsThree :size="19" />
           </Button>
           <div
             v-if="menuOpen"
-            :class="[style.dropdownMenu]">
+            :class="style.dropdownMenu">
             <AppLink :to="`/trips/${trip.id}/edit`">Редактировать</AppLink>
             <button
               @click="
@@ -107,30 +109,31 @@ export default defineComponent({
           </div>
         </div>
       </div>
-      <p :class="[style.tripCardDates]">
+      <p :class="style.tripCardDates">
         <PhCalendarDots :size="16" />
         {{ dateRange(trip.start, trip.end) }}
       </p>
-      <div :class="[style.tripCardBottom]">
-        <div :class="[style.avatarStack]">
-          <Avatar
-            v-for="member in store.members(trip.id).slice(0, 3)"
-            :key="member.id"
-            :name="member.name"
-            :color="member.color"
-            size="sm" />
-          <span
-            v-if="!store.members(trip.id).length"
-            :class="[style.soloTraveler]">
-            <PhUser :size="16" />
-          </span>
-          <span :class="[style.memberLabel]">
-            {{ store.members(trip.id).length || 1 }} участника
-          </span>
+      <div :class="style.tripCardBottom">
+        <div :class="style.tripMembers">
+          <div :class="style.avatarStack">
+            <Avatar
+              v-for="member in members.slice(0, 3)"
+              :key="member.id"
+              :name="member.name"
+              :color="member.color"
+              :class="style.memberAvatar"
+              size="sm" />
+            <span
+              v-if="!members.length"
+              :class="style.soloTraveler">
+              <PhUser :size="16" />
+            </span>
+          </div>
+          <span :class="style.memberLabel">{{ members.length || 1 }} участника</span>
         </div>
         <AppLink
           :to="`/trips/${trip.id}/plan`"
-          :class="[style.cardOpenLink]">
+          :class="style.cardOpenLink">
           Открыть
           <PhArrowRight :size="16" />
         </AppLink>

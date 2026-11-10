@@ -1,5 +1,4 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
 import sharedStyle from '@/styles/shared.module.scss'
 import style from './AuthComponent.module.scss'
 import { defineComponent } from 'vue'
@@ -14,7 +13,6 @@ import {
 import { Input, Button, Checkbox } from '@/components/ui'
 import { useTravelStore } from '@/stores/travel'
 import florence from '@/assets/images/florence.jpg'
-import { markRawValue } from '@/utils/markRawValue'
 
 export default defineComponent({
   name: 'AuthComponent',
@@ -31,19 +29,14 @@ export default defineComponent({
   },
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      sharedStyle,
+      style,
       name: '',
       email: '',
       password: '',
       accepted: false,
       error: '',
-      PhArrowRight: markRawValue(PhArrowRight),
-      PhArrowUpRight: markRawValue(PhArrowUpRight),
-      PhCompass: markRawValue(PhCompass),
-      PhInfo: markRawValue(PhInfo),
-      PhMapPin: markRawValue(PhMapPin),
-      PhMountains: markRawValue(PhMountains),
-      florence: markRawValue(florence),
+      florence,
     }
   },
   computed: {
@@ -76,19 +69,19 @@ export default defineComponent({
 })
 </script>
 <template>
-  <div :class="[style.authPage]">
-    <section :class="[style.authFormSide]">
+  <div :class="style.authPage">
+    <section :class="style.authFormSide">
       <AppLink
         to="/"
-        :class="[style.authBrand]">
+        :class="style.authBrand">
         <PhMountains :size="30" />
         Tripper
         <span>.</span>
       </AppLink>
-      <div :class="[style.authForm]">
-        <span :class="[style.eyebrow]">ПУТЕШЕСТВИЯ НАЧИНАЮТСЯ ЗДЕСЬ</span>
+      <div :class="style.authForm">
+        <span :class="[sharedStyle.eyebrow, style.eyebrow]">ПУТЕШЕСТВИЯ НАЧИНАЮТСЯ ЗДЕСЬ</span>
         <h1>{{ register ? 'Ваши планы. Ваши открытия.' : 'Рады видеть вас снова' }}</h1>
-        <p :class="[style.authIntro]">
+        <p :class="style.authIntro">
           {{
             register
               ? 'Соберите все идеи в одном месте — и отправляйтесь навстречу новому.'
@@ -97,7 +90,7 @@ export default defineComponent({
         </p>
         <form
           @submit.prevent="submit"
-          :class="[style.formStack]">
+          :class="sharedStyle.formStack">
           <Input
             v-if="register"
             v-model="name"
@@ -126,7 +119,7 @@ export default defineComponent({
             label="Согласен с хранением данных в этом браузере" />
           <p
             v-if="error"
-            :class="[style.errorText]">
+            :class="sharedStyle.errorText">
             {{ error }}
           </p>
           <Button
@@ -136,13 +129,13 @@ export default defineComponent({
             <PhArrowRight :size="17" />
           </Button>
         </form>
-        <p :class="[style.authSwitch]">
+        <p :class="style.authSwitch">
           {{ register ? 'Уже с нами?' : 'Ещё нет аккаунта?' }}
           <AppLink :to="register ? '/login' : '/register'">
             {{ register ? 'Войти' : 'Зарегистрироваться' }}
           </AppLink>
         </p>
-        <div :class="[style.authDemo]">
+        <div :class="style.authDemo">
           <PhInfo :size="16" />
           <span>
             Демонстрационный вход: данные остаются на этом устройстве, пароль не сохраняется и не
@@ -151,7 +144,7 @@ export default defineComponent({
         </div>
         <AppLink
           to="/"
-          :class="[style.authGuest]">
+          :class="style.authGuest">
           Посмотреть без входа
           <PhArrowUpRight :size="16" />
         </AppLink>
@@ -160,12 +153,12 @@ export default defineComponent({
     </section>
     <section
       :style="{ backgroundImage: `url(${florence})` }"
-      :class="[style.authVisual]">
-      <div :class="[style.authVisualTop]">
+      :class="style.authVisual">
+      <div :class="style.authVisualTop">
         <PhCompass :size="24" />
         <span>ДЛЯ ТЕХ, КТО ЛЮБИТ ОТКРЫВАТЬ</span>
       </div>
-      <div :class="[style.authQuote]">
+      <div :class="style.authQuote">
         <span>43°46′ с. ш. 11°15′ в. д.</span>
         <h2>
           Большие впечатления.

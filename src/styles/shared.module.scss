@@ -1,61 +1,12 @@
 @use './mixins' as *;
 @use '@/components/trip/details';
 
-.pageHeading {
-  @include flex(var(--space-6));
-  justify-content: space-between;
-  margin-bottom: var(--space-8);
-
-  h1 {
-    overflow-wrap: anywhere;
-    margin: 0 0 var(--space-2);
-  }
-
-  p {
-    font-size: var(--text-sm);
-    color: var(--muted);
-    margin: 0;
-  }
-
-  .eyebrow {
-    display: block;
-    margin-bottom: var(--space-2);
-  }
-
-  :is(button, a) {
-    font-size: var(--text-sm);
-  }
-}
-
 .eyebrow {
   font-size: var(--text-xs);
   letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--muted);
   font-weight: 550;
-}
-
-.headingActions {
-  @include flex(var(--space-3));
-}
-
-.sectionHeading {
-  @include flex(var(--space-4));
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: var(--space-5);
-
-  h2,
-  h3 {
-    margin: 0;
-  }
-
-  p {
-    margin: var(--space-1) 0 0;
-    color: var(--muted);
-    font-size: var(--text-sm);
-  }
 }
 
 .subtle {
@@ -86,16 +37,39 @@
   justify-content: space-between;
   margin-bottom: var(--space-6);
   flex-wrap: wrap;
+
+  @include below(600px) {
+    align-items: stretch;
+    gap: var(--space-4);
+  }
 }
 
 .filterTabs {
   @include flex(var(--space-2));
-  flex-wrap: wrap;
+  overflow: auto;
 
   button {
     font-size: var(--text-xs);
     min-height: 36px;
     padding: var(--space-2) var(--space-4);
+
+    @include below(600px) {
+      padding: var(--space-2) var(--space-3);
+      min-height: 44px;
+      font-size: var(--text-sm);
+    }
+
+    @include below(360px) {
+      padding-inline: var(--space-3);
+    }
+  }
+
+  @include below(600px) {
+    gap: var(--space-1);
+  }
+
+  @include below(360px) {
+    gap: var(--space-2);
   }
 }
 
@@ -105,6 +79,14 @@
   div:has(> input) {
     min-height: 38px;
     font-size: var(--text-xs);
+
+    @include below(600px) {
+      min-height: 44px;
+    }
+  }
+
+  @include below(600px) {
+    width: 100%;
   }
 }
 
@@ -112,6 +94,18 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-6);
+
+  @include below(1200px) {
+    gap: var(--space-4);
+  }
+
+  @include below(1050px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @include below(600px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .backLink {
@@ -122,12 +116,24 @@
 .panel {
   @include panel;
   padding: var(--space-6);
+
+  @include below(600px) {
+    padding: var(--space-5);
+  }
+
+  @include below(360px) {
+    padding: var(--space-4);
+  }
 }
 
 .twoColumn {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
   gap: var(--space-6);
+
+  @include below(1050px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .statsGrid {
@@ -135,6 +141,11 @@
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-5);
   margin-bottom: var(--space-6);
+
+  @include below(600px) {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
 }
 
 .statCard {
@@ -159,6 +170,10 @@
     font-size: var(--text-xs);
     color: var(--muted);
   }
+
+  @include below(600px) {
+    padding: var(--space-4);
+  }
 }
 
 .formStack {
@@ -171,6 +186,10 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);
+
+  @include below(600px) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .formActions {
@@ -179,6 +198,18 @@
   margin-top: var(--space-2);
   padding-top: var(--space-5);
   border-top: 1px solid var(--border);
+
+  @include below(600px) {
+    flex-wrap: wrap;
+    gap: var(--space-3);
+
+    > :is(button, a) {
+      flex: 1;
+      min-width: 0;
+      padding-inline: var(--space-3);
+      white-space: normal;
+    }
+  }
 }
 
 .fieldLabel {
@@ -253,6 +284,10 @@
   font-size: var(--text-sm);
   box-shadow: var(--shadow);
   max-width: calc(100% - var(--space-8));
+
+  @include below(900px) {
+    bottom: calc(var(--mobile-nav-height) + var(--safe-bottom) + var(--space-4));
+  }
 }
 
 .toastEnterActive,
@@ -288,73 +323,9 @@
   color: var(--muted);
 }
 
-@include below(1200px) {
-  .tripGrid {
-    gap: var(--space-4);
-  }
-}
-
-@include below(1050px) {
-  .tripGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .twoColumn {
-    grid-template-columns: 1fr;
-  }
-}
-
-@include below(600px) {
-  h1 {
+h1 {
+  @include below(600px) {
     font-size: var(--text-2xl);
-  }
-
-  .pageHeading {
-    align-items: flex-start;
-    gap: var(--space-4);
-    flex-direction: column;
-  }
-
-  .headingActions {
-    width: 100%;
-  }
-
-  .tripGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .toolbar {
-    align-items: stretch;
-    gap: var(--space-4);
-  }
-
-  .searchField {
-    width: 100%;
-  }
-
-  .filterTabs {
-    gap: var(--space-1);
-
-    button {
-      padding: var(--space-2) var(--space-3);
-    }
-  }
-
-  .statsGrid {
-    grid-template-columns: 1fr;
-    gap: var(--space-3);
-  }
-
-  .statCard {
-    padding: var(--space-4);
-  }
-
-  .formRow {
-    grid-template-columns: 1fr;
-  }
-
-  .panel {
-    padding: var(--space-5);
   }
 }
 
@@ -365,56 +336,5 @@
     scroll-behavior: auto !important;
     transition: none !important;
     animation: none !important;
-  }
-}
-
-@include below(900px) {
-  .appToast {
-    bottom: calc(var(--mobile-nav-height) + var(--safe-bottom) + var(--space-4));
-  }
-}
-
-@include below(600px) {
-  .pageHeading {
-    margin-bottom: var(--space-6);
-  }
-
-  .pageHeading > :is(button, a),
-  .headingActions > :is(button, a) {
-    width: 100%;
-  }
-
-  .formActions {
-    flex-wrap: wrap;
-    gap: var(--space-3);
-    > :is(button, a) {
-      flex: 1;
-      min-width: 0;
-      padding-inline: var(--space-3);
-      white-space: normal;
-    }
-  }
-
-  .searchField div:has(> input) {
-    min-height: 44px;
-  }
-
-  .filterTabs button {
-    min-height: 44px;
-    font-size: var(--text-sm);
-  }
-}
-
-@include below(360px) {
-  .panel {
-    padding: var(--space-4);
-  }
-
-  .filterTabs {
-    gap: var(--space-2);
-  }
-
-  .filterTabs button {
-    padding-inline: var(--space-3);
   }
 }

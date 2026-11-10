@@ -1,6 +1,4 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
-import sharedStyle from '@/styles/shared.module.scss'
 import style from './CheckboxBase.module.scss'
 import { defineComponent } from 'vue'
 import { componentProps } from './Checkbox.props'
@@ -10,7 +8,7 @@ export default defineComponent({
   props: componentProps,
   emits: ['update:modelValue'],
   data() {
-    return { style: mergeStyles(sharedStyle, style) }
+    return { style }
   },
 })
 </script>

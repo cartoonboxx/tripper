@@ -2,31 +2,37 @@
   display: flex;
   border-bottom: 1px solid var(--border);
   margin-bottom: var(--space-6);
+
   button {
     flex: 1;
   }
 }
+
 .qrPreview {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
 }
+
 .inviteAccess {
   display: flex;
   gap: var(--space-3);
   padding: var(--space-5) 0;
   margin-top: var(--space-5);
   border-top: 1px solid var(--border);
+
   strong {
     font-size: var(--text-sm);
   }
+
   p {
     font-size: var(--text-xs);
     color: var(--muted);
     margin: var(--space-2) 0 0;
     line-height: 1.7;
   }
+
   .softIcon {
     width: 36px;
     height: 36px;

@@ -1,7 +1,5 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
 import ModalBase from './ModalBase.vue'
-import sharedStyle from '@/styles/shared.module.scss'
 import style from './ModalStyle.module.scss'
 import { defineComponent } from 'vue'
 import { componentProps } from './Modal.props'
@@ -12,7 +10,7 @@ export default defineComponent({
   props: componentProps,
   emits: ['close'],
   data() {
-    return { style: mergeStyles(sharedStyle, style) }
+    return { style }
   },
 })
 </script>
@@ -21,12 +19,6 @@ export default defineComponent({
     @close="$emit('close')"
     v-bind="$props"
     :appearance="style">
-    <template
-      v-for="(_, name) in $slots"
-      #[name]="scope">
-      <slot
-        :name="name"
-        v-bind="scope || {}" />
-    </template>
+    <slot />
   </ModalBase>
 </template>

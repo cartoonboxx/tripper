@@ -1,18 +1,18 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
+import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import sharedStyle from '@/styles/shared.module.scss'
 import style from './ParticipantsComponent.module.scss'
-import { defineComponent } from 'vue'
+import { defineComponent, markRaw } from 'vue'
 import { PhInfo, PhPlus, PhTrash, PhUsers } from '@phosphor-icons/vue'
 import { Button, Avatar, Badge, Card, EmptyState, Modal } from '@/components/ui'
 import InviteForm from '@/components/trip/InviteForm.vue'
 import type { Participant } from '@/types/trip.types'
 import tripContext from '@/mixins/tripContext'
-import { markRawValue } from '@/utils/markRawValue'
 
 export default defineComponent({
   name: 'ParticipantsComponent',
   components: {
+    SectionHeader,
     PhInfo,
     PhPlus,
     PhTrash,
@@ -27,14 +27,17 @@ export default defineComponent({
   mixins: [tripContext],
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      sharedStyle,
+      style,
       inviting: false,
       removing: undefined as Participant | undefined,
-      PhInfo: markRawValue(PhInfo),
-      PhPlus: markRawValue(PhPlus),
-      PhTrash: markRawValue(PhTrash),
-      PhUsers: markRawValue(PhUsers),
+      PhUsers: markRaw(PhUsers),
     }
+  },
+  computed: {
+    members() {
+      return this.store.members(this.tripId)
+    },
   },
   methods: {
     remove() {
@@ -48,37 +51,34 @@ export default defineComponent({
 </script>
 <template>
   <div>
-    <header :class="[style.sectionHeading]">
-      <div>
-        <span :class="[style.eyebrow]">ОБЩИЕ ПЛАНЫ, ОБЩИЕ ВПЕЧАТЛЕНИЯ</span>
-        <h2>
-          Ваша компания
-          <span :class="[style.subtle]">{{ store.members(tripId).length }}</span>
-        </h2>
-        <p>Хорошо, когда все знают, что впереди.</p>
-      </div>
-      <Button
-        v-if="canEdit"
-        size="sm"
-        @click="inviting = true">
-        <PhPlus :size="16" />
-        Пригласить участников
-      </Button>
-    </header>
-    <Card :class="[style.membersCard]">
-      <div :class="[style.memberTableHead]">
+    <SectionHeader
+      :header="`Ваша компания ${members.length}`"
+      level="h2"
+      paragraph="Хорошо, когда все знают, что впереди.">
+      <template #actions>
+        <Button
+          v-if="canEdit"
+          size="sm"
+          @click="inviting = true">
+          <PhPlus :size="16" />
+          Пригласить участников
+        </Button>
+      </template>
+    </SectionHeader>
+    <Card :class="style.membersCard">
+      <div :class="style.memberTableHead">
         <span>Участник</span>
         <span>Доступ</span>
         <span />
       </div>
       <div
-        v-for="member in store.members(tripId)"
+        v-for="member in members"
         :key="member.id"
-        :class="[style.memberRow]">
+        :class="style.memberRow">
         <Avatar
           :name="member.name"
           :color="member.color" />
-        <div :class="[style.memberName]">
+        <div :class="style.memberName">
           <strong>
             {{ member.name }}
             <small v-if="member.email === store.profile.email">(вы)</small>
@@ -92,21 +92,20 @@ export default defineComponent({
           v-if="canEdit && member.role !== 'organizer'"
           variant="ghost"
           icon-only
-          :title="`Удалить участника ${member.name}`"
           @click="removing = member">
           <PhTrash :size="16" />
         </Button>
         <span
           v-else
-          :class="[style.memberRowSpacer]" />
+          :class="style.memberRowSpacer" />
       </div>
       <EmptyState
-        v-if="!store.members(tripId).length"
+        v-if="!members.length"
         title="Пока только вы"
         description="Пригласите тех, с кем хочется разделить путешествие."
         :icon="PhUsers" />
     </Card>
-    <div :class="[style.accessNote]">
+    <div :class="style.accessNote">
       <PhInfo :size="18" />
       <div>
         <strong>Как устроен доступ</strong>
@@ -124,8 +123,10 @@ export default defineComponent({
       :open="!!removing"
       title="Удалить участника?"
       @close="removing = undefined">
-      <p :class="[style.subtle]">{{ removing?.name }} будет удалён из списка участников поездки.</p>
-      <div :class="[style.formActions]">
+      <p :class="sharedStyle.subtle">
+        {{ removing?.name }} будет удалён из списка участников поездки.
+      </p>
+      <div :class="sharedStyle.formActions">
         <Button
           variant="secondary"
           @click="removing = undefined">

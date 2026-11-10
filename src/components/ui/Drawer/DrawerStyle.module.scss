@@ -1,3 +1,33 @@
+@use '../Modal/ModalStyle.module';
+
 .uiDrawer {
   box-shadow: -12px 0 60px #0001;
+}
+
+.overlayEnterActive,
+.overlayLeaveActive {
+  > dialog {
+    transition: transform var(--motion-modal-enter) var(--ease-sheet);
+
+    @media (prefers-reduced-motion: reduce) {
+      transition-duration: 1ms;
+    }
+  }
+}
+
+.overlayLeaveActive {
+  > dialog {
+    transition-duration: var(--motion-modal-leave);
+
+    @media (prefers-reduced-motion: reduce) {
+      transition-duration: 1ms;
+    }
+  }
+}
+
+.overlayEnterFrom,
+.overlayLeaveTo {
+  > dialog {
+    transform: translateX(100%);
+  }
 }

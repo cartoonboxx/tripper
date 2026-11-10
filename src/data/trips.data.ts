@@ -1,4 +1,12 @@
-import type { Trip, PlanEvent, Place, Checklist, Participant, Expense } from '@/types/trip.types'
+import type {
+  Trip,
+  PlanEvent,
+  Place,
+  TripPlace,
+  Checklist,
+  Participant,
+  Expense,
+} from '@/types/trip.types'
 import florence from '@/assets/images/florence.jpg'
 import altai from '@/assets/images/altai.jpg'
 import petersburg from '@/assets/images/petersburg.jpg'
@@ -100,34 +108,33 @@ export const initialEvents: PlanEvent[] = [
 export const initialPlaces: Place[] = [
   {
     id: 'p1',
-    tripId: 'florence',
     name: 'Сады Боболи',
     category: 'Парк',
     address: 'Piazza de’ Pitti, 1',
     image: garden,
-    planned: false,
     description: 'Зелёные аллеи, скульптуры и прекрасный вид на Флоренцию.',
   },
   {
     id: 'p2',
-    tripId: 'florence',
     name: 'Площадь Микеланджело',
     category: 'Смотровая площадка',
     address: 'Piazzale Michelangelo',
     image: florence,
-    planned: false,
     description: 'Лучшее место, чтобы проводить закат над городом.',
   },
   {
     id: 'p3',
-    tripId: 'florence',
     name: 'Рынок Сан-Лоренцо',
     category: 'Рынок',
     address: 'Piazza del Mercato Centrale',
     image: food,
-    planned: true,
     description: 'Свежие продукты и маленькие гастрономические открытия.',
   },
+]
+export const initialTripPlaces: TripPlace[] = [
+  { tripId: 'florence', placeId: 'p1' },
+  { tripId: 'florence', placeId: 'p2' },
+  { tripId: 'florence', placeId: 'p3' },
 ]
 export const initialChecklists: Checklist[] = [
   {

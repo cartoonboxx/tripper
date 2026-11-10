@@ -37,9 +37,7 @@ export default defineComponent({
     places() {
       return [
         { label: 'Без привязки к месту', value: '' },
-        ...this.store.places
-          .filter((p) => p.tripId === this.tripId)
-          .map((p) => ({ label: p.name, value: p.name })),
+        ...this.store.placesForTrip(this.tripId).map((p) => ({ label: p.name, value: p.name })),
       ]
     },
   },
@@ -54,13 +52,10 @@ export default defineComponent({
         this.error = 'Выберите дату в пределах поездки.'
         return
       }
-      const place = this.store.places.find(
-        (p) => p.name === this.form.place && p.tripId === this.tripId,
-      )
-      if (place) {
-        this.form.image = place.image
-        place.planned = true
-      }
+      const place = this.store
+        .placesForTrip(this.tripId)
+        .find((place) => place.name === this.form.place)
+      if (place) this.form.image = place.image
       if (this.event) {
         const current = this.store.events.find((event) => event.id === this.event?.id)
         if (current) Object.assign(current, this.form)
@@ -102,7 +97,7 @@ export default defineComponent({
     @close="$emit('close')">
     <form
       @submit.prevent="save"
-      :class="[style.formStack]">
+      :class="style.formStack">
       <Input
         v-model="form.title"
         label="Название"
@@ -115,7 +110,7 @@ export default defineComponent({
         :min="trip?.start"
         :max="trip?.end"
         required />
-      <div :class="[style.formRow]">
+      <div :class="style.formRow">
         <Input
           v-model="form.start"
           label="Начало"
@@ -131,25 +126,17 @@ export default defineComponent({
         v-model="form.place"
         label="Сохранённое место"
         :options="places" />
-      <div>
-        <label
-          for="event-description"
-          :class="[style.fieldLabel]">
-          Описание
-          <span :class="[style.subtle]">(необязательно)</span>
-        </label>
-        <textarea
-          id="event-description"
-          v-model="form.description"
-          placeholder="Билеты, заметки, важные детали…"
-          :class="[style.textarea]" />
-      </div>
+      <Input
+        v-model="form.description"
+        type="textarea"
+        label="Описание"
+        placeholder="Билеты, заметки, важные детали…" />
       <p
         v-if="error"
-        :class="[style.errorText]">
+        :class="style.errorText">
         {{ error }}
       </p>
-      <div :class="[style.formActions]">
+      <div :class="style.formActions">
         <Button
           variant="secondary"
           @click="$emit('close')">

@@ -42,7 +42,7 @@ export default defineComponent({
     :leave-to-class="style.toastLeaveTo">
     <div
       v-if="store.toast"
-      :class="[style.appToast]">
+      :class="style.appToast">
       <PhCheckCircle :size="18" />
       {{ store.toast }}
     </div>

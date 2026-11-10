@@ -53,12 +53,16 @@ export default defineConfig({
     },
     {
       name: 'firefox',
+      // Native touch gesture tests use Chromium's input protocol.
+      testIgnore: '**/*-touch.spec.ts',
       use: {
         ...devices['Desktop Firefox'],
       },
     },
     {
       name: 'webkit',
+      // Native touch gesture tests use Chromium's input protocol.
+      testIgnore: '**/*-touch.spec.ts',
       use: {
         ...devices['Desktop Safari'],
       },

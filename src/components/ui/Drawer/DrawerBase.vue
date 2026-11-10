@@ -1,6 +1,4 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
-import sharedStyle from '@/styles/shared.module.scss'
 import style from './DrawerBase.module.scss'
 import modalStyle from '../Modal/ModalBase.module.scss'
 import { defineComponent, markRaw } from 'vue'
@@ -17,7 +15,8 @@ export default defineComponent({
   emits: ['close'],
   data() {
     return {
-      style: mergeStyles(sharedStyle, modalStyle, style),
+      modalStyle,
+      style,
       overlay: null as OverlayController | null,
     }
   },
@@ -57,28 +56,16 @@ export default defineComponent({
       <div
         v-if="open"
         @mousedown.self="$emit('close')"
-        :class="[
-          style.uiOverlay,
-          appearance.uiOverlay,
-          style.uiDrawerOverlay,
-          appearance.uiDrawerOverlay,
-        ]">
+        :class="[appearance.uiOverlay, style.uiDrawerOverlay, appearance.uiDrawerOverlay]">
         <dialog
           open
           ref="panel"
-          :class="[
-            style.uiDialog,
-            appearance.uiDialog,
-            style.uiDrawer,
-            appearance.uiDrawer,
-            { [style.uiDialogWide || '']: false },
-          ]">
-          <header :class="[style.uiDialogHeader, appearance.uiDialogHeader]">
+          :class="[appearance.uiDialog, style.uiDrawer, appearance.uiDrawer]">
+          <header :class="[modalStyle.uiDialogHeader, appearance.uiDialogHeader]">
             <h2>{{ title }}</h2>
             <Button
               variant="ghost"
               icon-only
-              title="Закрыть"
               @click="$emit('close')">
               <PhX />
             </Button>

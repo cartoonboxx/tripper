@@ -1,16 +1,53 @@
 @use '@/styles/mixins' as *;
+
 .uiField {
+  --field-height: var(--space-12);
+  --field-padding: var(--space-4);
+  --field-font-size: var(--text-base);
   @include field-layout;
+
+  &Sm {
+    --field-height: var(--space-10);
+    --field-padding: var(--space-3);
+    --field-font-size: var(--text-sm);
+
+    @include below(600px) {
+      --field-height: var(--space-11);
+      --field-font-size: var(--text-base);
+    }
+  }
+
+  &Lg {
+    --field-height: var(--space-14);
+    --field-padding: var(--space-5);
+  }
+
   select {
+    display: block;
     width: 100%;
-    min-height: 44px;
-    padding: var(--space-3);
+    height: var(--field-height);
+    padding: 0 var(--field-padding);
+    padding-inline-end: calc(var(--field-padding) + var(--space-4) + var(--space-2));
+    appearance: none;
     border-width: 1px;
     border-style: solid;
-    border-radius: var(--radius-2);
+    border-radius: var(--radius-4);
     font: inherit;
-    font-size: var(--text-base);
+    font-size: var(--field-font-size);
+    line-height: 1.5;
     min-width: 0;
     max-width: 100%;
+  }
+}
+
+.selectControl {
+  position: relative;
+
+  .caret {
+    position: absolute;
+    inset-inline-end: var(--field-padding);
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
   }
 }

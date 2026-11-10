@@ -1,32 +1,31 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
-import sharedStyle from '@/styles/shared.module.scss'
-import style from './PlacesComponent.module.scss'
-import { defineComponent } from 'vue'
+import { defineComponent, markRaw } from 'vue'
 import {
   PhBookmarkSimple,
-  PhCheck,
   PhMagnifyingGlass,
   PhMapPin,
   PhPencilSimple,
   PhPlus,
 } from '@phosphor-icons/vue'
-import { Button, Tab, Card, Badge, Modal, Input, Select, EmptyState, Drawer } from '@/components/ui'
+import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
+import { Button, Card, Badge, Modal, Input, Select, EmptyState, Drawer } from '@/components/ui'
 import { covers } from '@/data/trips.data'
 import type { Place } from '@/types/trip.types'
 import tripContext from '@/mixins/tripContext'
-import { markRawValue } from '@/utils/markRawValue'
+import sharedStyle from '@/styles/shared.module.scss'
+import style from './PlacesComponent.module.scss'
+import { placeCategories } from './PlacesComponent.data'
 
 export default defineComponent({
   name: 'PlacesComponent',
   components: {
+    SectionHeader,
     PhBookmarkSimple,
     PhMagnifyingGlass,
     PhMapPin,
     PhPencilSimple,
     PhPlus,
     Button,
-    Tab,
     Card,
     Badge,
     Modal,
@@ -38,10 +37,16 @@ export default defineComponent({
   mixins: [tripContext],
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
-      filter: 'all',
+      style,
+      sharedStyle,
+      covers,
+      placeCategories,
+      PhBookmarkSimple: markRaw(PhBookmarkSimple),
       search: '',
+      librarySearch: '',
+      selectedTrip: '',
       creating: false,
+      choosing: false,
       detail: undefined as Place | undefined,
       editing: undefined as Place | undefined,
       deleting: undefined as Place | undefined,
@@ -50,69 +55,101 @@ export default defineComponent({
         category: 'Достопримечательность',
         address: '',
         description: '',
-        tripId: '',
         image: covers[0] || '',
       },
-      PhBookmarkSimple: markRawValue(PhBookmarkSimple),
-      PhCheck: markRawValue(PhCheck),
-      PhMagnifyingGlass: markRawValue(PhMagnifyingGlass),
-      PhMapPin: markRawValue(PhMapPin),
-      PhPencilSimple: markRawValue(PhPencilSimple),
-      PhPlus: markRawValue(PhPlus),
-      covers: markRawValue(covers),
     }
   },
   computed: {
+    canManagePlaces() {
+      return !this.tripId || this.canEdit
+    },
+    tripPlaces() {
+      return this.tripId ? this.store.placesForTrip(this.tripId) : this.store.places
+    },
     places() {
+      const search = this.search.toLowerCase()
+      return this.tripPlaces.filter((place) => place.name.toLowerCase().includes(search))
+    },
+    availablePlaces() {
+      const assigned = new Set(this.tripPlaces.map((place) => place.id))
+      const search = this.librarySearch.toLowerCase()
       return this.store.places.filter(
-        (p) =>
-          (!this.tripId || p.tripId === this.tripId) &&
-          (this.filter === 'all' || (this.filter === 'planned' ? p.planned : !p.planned)) &&
-          p.name.toLowerCase().includes(this.search.toLowerCase()),
+        (place) => !assigned.has(place.id) && place.name.toLowerCase().includes(search),
       )
     },
-    editableTrips() {
-      return this.store.trips
-        .filter((t) => t.role === 'organizer' && !t.archived)
-        .map((t) => ({ label: t.name, value: t.id }))
+    attachedTrips() {
+      return this.detail ? this.store.tripsForPlace(this.detail.id) : []
+    },
+    tripOptions() {
+      const attached = new Set(this.attachedTrips.map((trip) => trip.id))
+      const trips = this.store.trips.filter(
+        (trip) => trip.role === 'organizer' && !trip.archived && !attached.has(trip.id),
+      )
+      return [
+        { label: 'Выберите поездку', value: '' },
+        ...trips.map((trip) => ({ label: trip.name, value: trip.id })),
+      ]
     },
   },
   methods: {
+    startAdd() {
+      if (!this.canManagePlaces) return
+      if (this.tripId) {
+        this.librarySearch = ''
+        this.choosing = true
+      } else this.open()
+    },
     open(place?: Place) {
+      if (!this.canManagePlaces) return
       this.editing = place
-      Object.assign(
-        this.form,
-        {
-          name: '',
-          category: 'Достопримечательность',
-          address: '',
-          description: '',
-          tripId: this.tripId || this.editableTrips[0]?.value || '',
-          image: this.covers[0],
-        },
-        place || {},
-      )
-      this.creating = true
+      this.form = {
+        name: place?.name || '',
+        category: place?.category || 'Достопримечательность',
+        address: place?.address || '',
+        description: place?.description || '',
+        image: place?.image || this.covers[0] || '',
+      }
+      this.choosing = false
       this.detail = undefined
+      this.creating = true
     },
     save() {
-      if (!this.store.editable(this.form.tripId)) return
-      if (this.editing) Object.assign(this.editing, this.form)
-      else this.store.places.push({ ...this.form, id: crypto.randomUUID(), planned: false })
+      if (!this.canManagePlaces || !this.form.name.trim()) return
+      const fields = { ...this.form, name: this.form.name.trim() }
+      if (this.editing) Object.assign(this.editing, fields)
+      else {
+        const place = { ...fields, id: crypto.randomUUID() }
+        this.store.places.push(place)
+        if (this.tripId) this.store.addPlaceToTrip(place.id, this.tripId)
+      }
       this.creating = false
       this.store.notify('Место сохранено')
     },
-    togglePlanned() {
-      const place = this.detail
-      if (!place || !this.store.editable(place.tripId)) return
-      place.planned = !place.planned
-      this.store.notify(
-        place.planned ? 'Место отмечено как запланированное' : 'Место возвращено в идеи',
-      )
+    showDetail(place: Place) {
+      this.detail = place
+      this.selectedTrip = ''
+    },
+    addExisting(place: Place) {
+      if (this.store.addPlaceToTrip(place.id, this.tripId)) {
+        this.choosing = false
+        this.store.notify('Место добавлено в поездку')
+      }
+    },
+    assignToTrip() {
+      if (!this.detail) return
+      if (this.store.addPlaceToTrip(this.detail.id, this.selectedTrip)) {
+        this.selectedTrip = ''
+        this.store.notify('Место добавлено в поездку')
+      }
+    },
+    detachFromTrip(tripId: string) {
+      if (!this.detail || !this.store.editable(tripId)) return
+      this.store.removePlaceFromTrip(this.detail.id, tripId)
+      this.store.notify('Место убрано из поездки и осталось в сохранённых')
     },
     remove() {
-      if (!this.deleting || !this.store.editable(this.deleting.tripId)) return
-      this.store.places = this.store.places.filter((p) => p.id !== this.deleting?.id)
+      if (!this.deleting || !this.canManagePlaces) return
+      this.store.removePlace(this.deleting.id)
       this.deleting = undefined
       this.detail = undefined
       this.store.notify('Место удалено')
@@ -122,90 +159,62 @@ export default defineComponent({
 </script>
 <template>
   <div>
-    <header :class="tripId ? [style.sectionHeading] : style.pageHeading">
-      <div>
-        <span :class="[style.eyebrow]">МАЛЕНЬКИЕ ТОЧКИ БОЛЬШОГО МАРШРУТА</span>
-        <component :is="tripId ? 'h2' : 'h1'">
-          {{ tripId ? 'Места, которые стоит увидеть' : 'Сохранённые места' }}
-        </component>
-        <p v-if="!tripId">Сохраняйте находки, чтобы однажды оказаться там.</p>
-      </div>
-      <Button
-        v-if="tripId ? canEdit : editableTrips.length"
-        :size="tripId ? 'sm' : 'md'"
-        @click="open()">
-        <PhPlus :size="16" />
-        Добавить место
-      </Button>
-    </header>
-    <div :class="[style.toolbar]">
-      <div :class="[style.filterTabs]">
-        <Tab
-          :active="filter === 'all'"
-          @click="filter = 'all'">
-          Все места
-        </Tab>
-        <Tab
-          :active="filter === 'ideas'"
-          @click="filter = 'ideas'">
-          Идеи
-          <span :class="[style.tabSmallCount]">
-            {{ store.places.filter((p) => (!tripId || p.tripId === tripId) && !p.planned).length }}
-          </span>
-        </Tab>
-        <Tab
-          :active="filter === 'planned'"
-          @click="filter = 'planned'">
-          В плане
-        </Tab>
-      </div>
-      <Input
-        v-model="search"
-        placeholder="Найти место…"
-        title="Поиск мест"
-        :class="[style.searchField]">
-        <template #prefix>
-          <PhMagnifyingGlass :size="16" />
-        </template>
-      </Input>
-    </div>
+    <SectionHeader
+      :header="tripId ? 'Места, которые стоит увидеть' : 'Сохранённые места'"
+      :level="tripId ? 'h2' : 'h1'"
+      :paragraph="
+        tripId
+          ? 'Добавляйте места из сохранённых или создавайте новые.'
+          : 'Сохраняйте находки и добавляйте их в любые поездки.'
+      ">
+      <template #actions>
+        <Button
+          v-if="canManagePlaces"
+          :size="tripId ? 'sm' : 'md'"
+          @click="startAdd">
+          <PhPlus :size="16" />
+          Добавить место
+        </Button>
+      </template>
+    </SectionHeader>
+    <Input
+      v-model="search"
+      placeholder="Найти место…"
+      :class="style.searchField">
+      <template #prefix><PhMagnifyingGlass :size="16" /></template>
+    </Input>
     <div
       v-if="places.length"
-      :class="[style.tripGrid, style.placesGrid]">
+      :class="sharedStyle.tripGrid">
       <Card
         v-for="place in places"
         :key="place.id"
-        interactive
-        :class="[style.placeCard]">
+        interactive>
         <button
-          @click="detail = place"
-          :class="[style.placeImage]">
+          @click="showDetail(place)"
+          :class="style.placeImage">
           <img
             :src="place.image"
             :alt="place.name" />
-          <span :class="[style.bookmarkMark]">
-            <PhBookmarkSimple :size="17" />
-          </span>
-          <Badge v-if="place.planned">В плане</Badge>
+          <span :class="style.bookmarkMark"><PhBookmarkSimple :size="17" /></span>
         </button>
-        <div :class="[style.placeCardBody]">
+        <div :class="style.placeCardBody">
           <button
-            @click="detail = place"
-            :class="[style.placeTitle]">
+            @click="showDetail(place)"
+            :class="style.placeTitle">
             {{ place.name }}
           </button>
           <p>{{ place.category }}</p>
-          <div :class="[style.placeAddress]">
+          <div :class="style.placeAddress">
             <PhMapPin :size="16" />
             {{ place.address || 'Адрес не указан' }}
           </div>
-          <div :class="[style.placeCardFooter]">
-            <span>{{ store.trips.find((t) => t.id === place.tripId)?.name }}</span>
+          <div :class="style.placeCardFooter">
+            <span>В поездках: {{ store.tripsForPlace(place.id).length }}</span>
             <Button
-              v-if="store.editable(place.tripId)"
+              v-if="canManagePlaces"
               variant="ghost"
               icon-only
-              :title="`Редактировать ${place.name}`"
               @click="open(place)">
               <PhPencilSimple :size="16" />
             </Button>
@@ -216,70 +225,74 @@ export default defineComponent({
     <EmptyState
       v-else
       :icon="PhBookmarkSimple"
-      title="Сохраним что-нибудь интересное?"
+      :title="search ? 'Места не найдены' : 'Сохраним что-нибудь интересное?'"
       description="Любимые кафе, необычные музеи и красивые виды — всё будет здесь.">
       <Button
-        v-if="editableTrips.length"
-        @click="open()">
+        v-if="canManagePlaces"
+        @click="startAdd">
         Добавить место
       </Button>
     </EmptyState>
+    <Modal
+      :open="choosing"
+      title="Добавить место в поездку"
+      @close="choosing = false">
+      <div :class="sharedStyle.formStack">
+        <Input
+          v-model="librarySearch"
+          label="Поиск сохранённых мест"
+          placeholder="Название места" />
+        <div :class="style.savedPlaces">
+          <Button
+            v-for="place in availablePlaces"
+            :key="place.id"
+            variant="secondary"
+            @click="addExisting(place)">
+            <PhPlus :size="16" />
+            {{ place.name }}
+          </Button>
+          <p
+            v-if="!availablePlaces.length"
+            :class="sharedStyle.subtle">
+            Подходящих сохранённых мест пока нет.
+          </p>
+        </div>
+        <Button @click="open()">Создать новое место</Button>
+      </div>
+    </Modal>
     <Modal
       :open="creating"
       :title="editing ? 'Редактировать место' : 'Новое место'"
       @close="creating = false">
       <form
         @submit.prevent="save"
-        :class="[style.formStack]">
+        :class="sharedStyle.formStack">
         <Input
           v-model="form.name"
           label="Название"
           placeholder="Например, сады Боболи"
           required />
         <Select
-          v-if="!tripId"
-          v-model="form.tripId"
-          label="Поездка"
-          :options="editableTrips"
-          required />
-        <Select
           v-model="form.category"
           label="Категория"
-          :options="
-            [
-              'Достопримечательность',
-              'Парк',
-              'Музей',
-              'Кафе',
-              'Ресторан',
-              'Рынок',
-              'Смотровая площадка',
-            ].map((value) => ({ label: value, value }))
-          " />
+          :options="placeCategories" />
         <Input
           v-model="form.address"
           label="Адрес"
           placeholder="Улица, дом или ориентир" />
+        <Input
+          v-model="form.description"
+          type="textarea"
+          label="Заметки"
+          placeholder="Что стоит знать об этом месте?" />
         <div>
-          <label
-            for="place-description"
-            :class="[style.fieldLabel]">
-            Заметки
-          </label>
-          <textarea
-            id="place-description"
-            v-model="form.description"
-            :class="[style.textarea]" />
-        </div>
-        <div>
-          <span :class="[style.fieldLabel]">Фото</span>
-          <div :class="[style.coverOptions]">
+          <span :class="sharedStyle.fieldLabel">Фото</span>
+          <div :class="sharedStyle.coverOptions">
             <button
-              v-for="(cover, i) in covers"
+              v-for="cover in covers"
               :key="cover"
               type="button"
-              :class="{ [style.selected || '']: form.image === cover }"
-              :title="`Фото ${i + 1}`"
+              :class="{ [sharedStyle.selected || '']: form.image === cover }"
               @click="form.image = cover">
               <img
                 :src="cover"
@@ -287,17 +300,16 @@ export default defineComponent({
             </button>
           </div>
         </div>
-        <div :class="[style.formActions]">
+        <p :class="sharedStyle.formHelp">
+          Место хранится в сохранённых и может использоваться в нескольких поездках.
+        </p>
+        <div :class="sharedStyle.formActions">
           <Button
             variant="secondary"
             @click="creating = false">
             Отмена
           </Button>
-          <Button
-            type="submit"
-            :disabled="!form.tripId">
-            Сохранить место
-          </Button>
+          <Button type="submit">Сохранить место</Button>
         </div>
       </form>
     </Modal>
@@ -305,49 +317,80 @@ export default defineComponent({
       :open="!!detail"
       :title="detail?.name || 'Место'"
       @close="detail = undefined">
-      <template v-if="detail">
+      <div
+        v-if="detail"
+        :class="style.placeDetails">
         <img
           :src="detail.image"
           :alt="detail.name"
-          :class="[style.detailCover]" />
+          :class="sharedStyle.detailCover" />
         <Badge>{{ detail.category }}</Badge>
-        <div :class="[style.detailMeta]">
-          <p>
-            <PhMapPin :size="17" />
-            {{ detail.address || 'Адрес не указан' }}
-          </p>
+        <p :class="style.placeAddress">
+          <PhMapPin :size="17" />
+          {{ detail.address || 'Адрес не указан' }}
+        </p>
+        <p :class="style.description">
+          {{ detail.description || 'Добавьте заметку об этом месте.' }}
+        </p>
+        <h3>В поездках</h3>
+        <div
+          v-for="trip in attachedTrips"
+          :key="trip.id"
+          :class="style.assignedTrip">
+          <AppLink :to="`/trips/${trip.id}/places`">{{ trip.name }}</AppLink>
+          <Button
+            v-if="store.editable(trip.id) && canManagePlaces"
+            variant="ghost"
+            size="sm"
+            @click="detachFromTrip(trip.id)">
+            Убрать из поездки
+          </Button>
         </div>
-        <p :class="[style.subtle]">{{ detail.description || 'Добавьте заметку об этом месте.' }}</p>
-        <template v-if="store.editable(detail.tripId)">
+        <p
+          v-if="!attachedTrips.length"
+          :class="sharedStyle.subtle">
+          Место пока не добавлено в поездки.
+        </p>
+        <form
+          v-if="canManagePlaces && tripOptions.length > 1"
+          @submit.prevent="assignToTrip"
+          :class="sharedStyle.formStack">
+          <Select
+            v-model="selectedTrip"
+            label="Добавить в поездку"
+            :options="tripOptions"
+            required />
+          <Button
+            type="submit"
+            variant="secondary"
+            :disabled="!selectedTrip">
+            Добавить в поездку
+          </Button>
+        </form>
+        <div
+          v-if="canManagePlaces"
+          :class="sharedStyle.formActions">
           <Button
             variant="secondary"
-            @click="togglePlanned">
-            <component
-              :is="detail.planned ? PhCheck : PhPlus"
-              :size="16" />
-            {{ detail.planned ? 'В плане — вернуть в идеи' : 'Отметить как запланированное' }}
+            @click="open(detail)">
+            Редактировать
           </Button>
-          <div :class="[style.formActions]">
-            <Button
-              variant="secondary"
-              @click="open(detail)">
-              Редактировать
-            </Button>
-            <Button
-              variant="danger"
-              @click="deleting = detail">
-              Удалить
-            </Button>
-          </div>
-        </template>
-      </template>
+          <Button
+            variant="danger"
+            @click="deleting = detail">
+            Удалить место
+          </Button>
+        </div>
+      </div>
     </Drawer>
     <Modal
       :open="!!deleting"
       title="Удалить место?"
       @close="deleting = undefined">
-      <p :class="[style.subtle]">«{{ deleting?.name }}» исчезнет из сохранённых мест.</p>
-      <div :class="[style.formActions]">
+      <p :class="sharedStyle.subtle">
+        «{{ deleting?.name }}» будет удалено из сохранённых и из всех поездок, куда оно добавлено.
+      </p>
+      <div :class="sharedStyle.formActions">
         <Button
           variant="secondary"
           @click="deleting = undefined">

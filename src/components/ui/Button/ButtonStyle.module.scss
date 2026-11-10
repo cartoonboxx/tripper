@@ -1,41 +1,51 @@
-.uiButtonPrimary {
-  background: var(--primary);
-  color: white;
-  @media (hover: hover) and (pointer: fine) {
-    &:hover:not(:disabled) {
-      background: var(--primary-hover);
-      box-shadow: 0 3px 8px #376b591a;
+.uiButton {
+  &Primary {
+    background: var(--primary);
+    color: white;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover:not(:disabled) {
+        background: var(--primary-hover);
+        box-shadow: 0 3px 8px #376b591a;
+      }
     }
   }
-}
-.uiButtonSecondary {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text);
-  @media (hover: hover) and (pointer: fine) {
-    &:hover:not(:disabled) {
-      background: var(--background);
+
+  &Secondary {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover:not(:disabled) {
+        background: var(--background);
+      }
     }
   }
-}
-.uiButtonGhost {
-  background: transparent;
-  color: var(--primary);
-  @media (hover: hover) and (pointer: fine) {
-    &:hover:not(:disabled) {
-      background: var(--primary-soft);
+
+  &Ghost {
+    background: transparent;
+    color: var(--primary);
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover:not(:disabled) {
+        background: var(--primary-soft);
+      }
     }
   }
-}
-.uiButtonDanger {
-  background: var(--danger-soft);
-  color: var(--danger);
-}
-.uiButtonSm {
-  min-height: 40px;
-  padding: 0 var(--space-3);
-  font-size: var(--text-sm);
-}
-.uiButtonLg {
-  min-height: 48px;
+
+  &Danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+  }
+
+  &Sm {
+    min-height: 40px;
+    padding: 0 var(--space-3);
+    font-size: var(--text-sm);
+  }
+
+  &Lg {
+    min-height: 48px;
+  }
 }

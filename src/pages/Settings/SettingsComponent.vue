@@ -1,25 +1,33 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
+import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import sharedStyle from '@/styles/shared.module.scss'
 import style from './SettingsComponent.module.scss'
 import { defineComponent } from 'vue'
 import { PhCheck, PhLockKey, PhSignOut, PhUser } from '@phosphor-icons/vue'
 import { useTravelStore } from '@/stores/travel'
 import { Card, Input, Button, Avatar, Switch, Modal } from '@/components/ui'
-import { markRawValue } from '@/utils/markRawValue'
 
 export default defineComponent({
   name: 'SettingsComponent',
-  components: { PhCheck, PhLockKey, PhSignOut, PhUser, Card, Input, Button, Avatar, Switch, Modal },
+  components: {
+    SectionHeader,
+    PhCheck,
+    PhLockKey,
+    PhSignOut,
+    PhUser,
+    Card,
+    Input,
+    Button,
+    Avatar,
+    Switch,
+    Modal,
+  },
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      sharedStyle,
+      style,
       form: { ...useTravelStore().profile },
       logout: false,
-      PhCheck: markRawValue(PhCheck),
-      PhLockKey: markRawValue(PhLockKey),
-      PhSignOut: markRawValue(PhSignOut),
-      PhUser: markRawValue(PhUser),
     }
   },
   computed: {
@@ -31,6 +39,10 @@ export default defineComponent({
     },
   },
   methods: {
+    signOut() {
+      this.store.session = false
+      this.router.push('/login')
+    },
     save() {
       Object.assign(this.store.profile, { ...this.form, name: this.form.name.trim() })
       for (const member of this.store.participants) {
@@ -45,20 +57,17 @@ export default defineComponent({
 })
 </script>
 <template>
-  <div :class="[style.settingsPage]">
-    <header :class="[style.pageHeading]">
-      <div>
-        <span :class="[style.eyebrow]">ВАШЕ ЛИЧНОЕ ПРОСТРАНСТВО</span>
-        <h1>Настройки</h1>
-        <p>Немного о вас и о том, как вам удобнее планировать.</p>
-      </div>
-    </header>
-    <Card :class="[style.settingsCard]">
-      <div :class="[style.settingsSectionTitle]">
+  <div :class="style.settingsPage">
+    <SectionHeader
+      header="Настройки"
+      level="h1"
+      paragraph="Немного о вас и о том, как вам удобнее планировать." />
+    <Card :class="style.settingsCard">
+      <div :class="style.settingsSectionTitle">
         <PhUser :size="19" />
         <h3>Личный профиль</h3>
       </div>
-      <div :class="[style.settingsAvatar]">
+      <div :class="style.settingsAvatar">
         <Avatar
           :name="form.name"
           size="lg"
@@ -70,8 +79,8 @@ export default defineComponent({
       </div>
       <form
         @submit.prevent="save"
-        :class="[style.formStack]">
-        <div :class="[style.formRow]">
+        :class="sharedStyle.formStack">
+        <div :class="sharedStyle.formRow">
           <Input
             v-model="form.name"
             label="Ваше имя"
@@ -84,7 +93,7 @@ export default defineComponent({
             required
             autocomplete="email" />
         </div>
-        <div :class="[style.settingsPreference]">
+        <div :class="style.settingsPreference">
           <div>
             <strong>Уведомления в приложении</strong>
             <p>Напоминания о планах и новых возможностях.</p>
@@ -93,7 +102,7 @@ export default defineComponent({
             v-model="form.notifications"
             label="Уведомления в приложении" />
         </div>
-        <div :class="[style.formActions]">
+        <div :class="sharedStyle.formActions">
           <Button type="submit">
             <PhCheck :size="16" />
             Сохранить изменения
@@ -101,16 +110,16 @@ export default defineComponent({
         </div>
       </form>
     </Card>
-    <Card :class="[style.settingsCard]">
-      <div :class="[style.settingsSectionTitle]">
+    <Card :class="style.settingsCard">
+      <div :class="style.settingsSectionTitle">
         <PhLockKey :size="19" />
         <h3>Управление аккаунтом</h3>
       </div>
-      <p :class="[style.subtle]">
+      <p :class="sharedStyle.subtle">
         Это локальная версия Tripper. Планы сохраняются в вашем браузере. Авторизация и
         синхронизация между устройствами требуют подключения сервера.
       </p>
-      <div :class="[style.settingsAccountRow]">
+      <div :class="style.settingsAccountRow">
         <div>
           <strong>Завершить сеанс</strong>
           <p>Ваши поездки останутся на этом устройстве.</p>
@@ -127,22 +136,14 @@ export default defineComponent({
       :open="logout"
       title="Выйти из аккаунта?"
       @close="logout = false">
-      <p :class="[style.subtle]">Вы сможете вернуться к своим планам на этом устройстве.</p>
-      <div :class="[style.formActions]">
+      <p :class="sharedStyle.subtle">Вы сможете вернуться к своим планам на этом устройстве.</p>
+      <div :class="sharedStyle.formActions">
         <Button
           variant="secondary"
           @click="logout = false">
           Остаться
         </Button>
-        <Button
-          @click="
-            () => {
-              store.session = false
-              router.push('/login')
-            }
-          ">
-          Выйти
-        </Button>
+        <Button @click="signOut">Выйти</Button>
       </div>
     </Modal>
   </div>

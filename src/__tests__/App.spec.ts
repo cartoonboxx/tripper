@@ -13,10 +13,33 @@ beforeEach(() => {
 })
 
 describe('UI kit contracts', () => {
+  it('uses the same Input contract for a native multiline field', async () => {
+    const wrapper = mount(Input, {
+      props: {
+        type: 'textarea',
+        label: 'Заметки',
+        modelValue: 'Первая строка',
+        rows: 6,
+        size: 'lg',
+      },
+      attrs: { required: true, maxlength: 200 },
+    })
+    const field = wrapper.get('textarea')
+    expect(wrapper.find('input').exists()).toBe(false)
+    expect(field.attributes()).toMatchObject({ rows: '6', required: '', maxlength: '200' })
+    expect(field.attributes('type')).toBeUndefined()
+    expect(wrapper.get('label').attributes('for')).toBe(field.attributes('id'))
+    await field.setValue('Первая строка\nВторая строка')
+    expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['Первая строка\nВторая строка'])
+    await wrapper.setProps({ disabled: true })
+    expect(field.attributes('disabled')).toBeDefined()
+    wrapper.unmount()
+  })
+
   it('passes native input attributes and model updates through Style to Base', async () => {
     const wrapper = mount(Input, {
       props: { label: 'Пароль', modelValue: '' },
-      attrs: { minlength: 8, autocomplete: 'new-password', title: 'Пароль' },
+      attrs: { minlength: 8, autocomplete: 'new-password' },
     })
     expect(wrapper.get('input').attributes('minlength')).toBe('8')
     await wrapper.get('input').setValue('new-password')
@@ -36,6 +59,36 @@ describe('UI kit contracts', () => {
       expect(plain.find('label').exists()).toBe(false)
       expect(plain.get('input, select').attributes('id')).toBeUndefined()
     }
+  })
+  it('keeps field layout attrs on the root and control attrs on native fields', async () => {
+    for (const component of [Input, Select]) {
+      const wrapper = mount(component, {
+        props: { label: 'Направление', options: [{ value: 'it', label: 'Италия' }] },
+        attrs: { id: 'field', class: 'custom-field', style: { width: '240px' }, required: true },
+      })
+      expect(wrapper.classes()).toContain('custom-field')
+      expect(wrapper.attributes('style')).toContain('width: 240px')
+      expect(wrapper.attributes('id')).toBeUndefined()
+      expect(wrapper.get('input, select').attributes()).toMatchObject({ id: 'field', required: '' })
+      await wrapper.get('input, select').setValue('it')
+      expect(wrapper.emitted('update:modelValue')?.[0]).toEqual(['it'])
+    }
+  })
+  it('preserves named input slots and optional checkbox content', () => {
+    const input = mount(Input, {
+      slots: { prefix: '<span>До</span>', suffix: '<span>После</span>' },
+    })
+    const control = input.get('input').element
+    expect(control.previousElementSibling?.textContent).toBe('До')
+    expect(control.nextElementSibling?.textContent).toBe('После')
+    expect(mount(Checkbox, { props: { label: 'Подпись' } }).text()).toBe('Подпись')
+    expect(mount(Checkbox, { slots: { default: 'Свой текст' } }).text()).toBe('Свой текст')
+    expect(mount(Checkbox).find('span').exists()).toBe(false)
+    expect(
+      mount(Button, { slots: { default: 'Продолжить' } })
+        .get('button')
+        .attributes('type'),
+    ).toBe('button')
   })
   it('forwards checkbox model changes and respects disabled buttons', async () => {
     const checkbox = mount(Checkbox, { props: { label: 'Паспорт', modelValue: false } })

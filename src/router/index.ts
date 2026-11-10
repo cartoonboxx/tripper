@@ -56,13 +56,8 @@ const router = createRouter({
           component: TripLayout,
           meta: { section: 'Поездки' },
           children: [
-            { path: '', redirect: (to) => `/trips/${to.params.tripId}/overview` },
-            {
-              path: 'overview',
-              name: 'trip-overview',
-              component: () => import('@/pages/TripOverview/TripOverviewComponent.vue'),
-              meta: { title: 'Обзор поездки' },
-            },
+            { path: '', redirect: (to) => `/trips/${to.params.tripId}/plan` },
+            { path: 'overview', redirect: (to) => `/trips/${to.params.tripId}/plan` },
             {
               path: 'today',
               name: 'trip-today',
@@ -99,12 +94,7 @@ const router = createRouter({
               component: () => import('@/pages/Participants/ParticipantsComponent.vue'),
               meta: { title: 'Участники' },
             },
-            {
-              path: 'information',
-              name: 'trip-information',
-              component: () => import('@/pages/TripInformation/TripInformationComponent.vue'),
-              meta: { title: 'Информация' },
-            },
+            { path: 'information', redirect: (to) => `/trips/${to.params.tripId}/plan` },
             {
               path: 'events/new',
               name: 'event-create',

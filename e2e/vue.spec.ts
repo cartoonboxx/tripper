@@ -32,12 +32,13 @@ test('all main routes render without runtime errors', async ({ page }) => {
     await expect(page.locator('body')).not.toContainText('You did it!')
     expect(
       await page.evaluate(() =>
-        [...document.querySelectorAll('*')].some((el) =>
+        [...document.body.querySelectorAll('*')].some((el) =>
           [...el.attributes].some(
             (attr) =>
               attr.name.startsWith('aria-') ||
               attr.name.startsWith('data-') ||
-              attr.name === 'tabindex',
+              attr.name === 'tabindex' ||
+              attr.name === 'title',
           ),
         ),
       ),
@@ -68,12 +69,20 @@ test('add, edit and delete an event', async ({ page }) => {
   await dialog.getByRole('button', { name: 'Добавить событие', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Прогулка по набережной' })).toBeVisible()
   await page
-    .getByRole('button', { name: 'Редактировать Прогулка по набережной', exact: true })
+    .getByRole('article')
+    .filter({ has: page.getByRole('heading', { name: 'Прогулка по набережной', exact: true }) })
+    .getByRole('button')
+    .nth(1)
     .click()
   dialog = page.getByRole('dialog')
   await dialog.getByLabel('Название', { exact: false }).fill('Вечер у реки')
   await dialog.getByRole('button', { name: 'Сохранить', exact: true }).click()
-  await page.getByRole('button', { name: 'Удалить Вечер у реки', exact: true }).click()
+  await page
+    .getByRole('article')
+    .filter({ has: page.getByRole('heading', { name: 'Вечер у реки', exact: true }) })
+    .getByRole('button')
+    .nth(2)
+    .click()
   await page.getByRole('dialog').getByRole('button', { name: 'Удалить', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Вечер у реки' })).toHaveCount(0)
 })
@@ -119,9 +128,10 @@ for (const device of [
       '/trips/florence/checklists',
       '/trips/florence/expenses',
       '/trips/florence/participants',
-      '/trips/florence/information',
+      '/trips/florence/today',
       '/settings',
       '/login',
+      '/register',
     ]) {
       await page.goto(route)
       await expect(page.locator('h1,h2,h3').first()).toBeVisible()
@@ -147,7 +157,9 @@ for (const device of [
     expect((dialogBounds?.x || 0) + (dialogBounds?.width || 0)).toBeLessThanOrEqual(device.width)
     await page.keyboard.press('Escape')
     await expect(dialog).toHaveCount(0)
-    const navigation = page.getByRole('navigation', { name: 'Мобильная навигация' })
+    const navigation = page
+      .getByRole('navigation')
+      .filter({ has: page.getByRole('button', { name: 'Ещё', exact: true }) })
     await expect(navigation).toBeVisible()
     const bounds = await navigation.boundingBox()
     expect(bounds?.y).toBeGreaterThan(0)
@@ -159,7 +171,8 @@ for (const device of [
     )
     await navigation.getByRole('button', { name: 'Ещё' }).click()
     await page
-      .getByRole('navigation', { name: 'Дополнительные разделы' })
+      .getByRole('dialog')
+      .getByRole('navigation')
       .getByRole('link', { name: 'Архив', exact: true })
       .click()
     await expect(page.getByRole('heading', { name: 'Архив путешествий' })).toBeVisible()
@@ -171,11 +184,13 @@ test('returning from Today selects a valid trip day', async ({ page }) => {
   await page.clock.setFixedTime(new Date('2027-01-01T12:00:00'))
   await page.goto('/trips/florence/plan')
   await page
-    .getByRole('navigation', { name: 'Разделы поездки' })
+    .getByRole('navigation')
+    .filter({ has: page.getByRole('link', { name: 'Сегодня', exact: true }) })
     .getByRole('link', { name: 'Сегодня', exact: true })
     .click()
   await page
-    .getByRole('navigation', { name: 'Разделы поездки' })
+    .getByRole('navigation')
+    .filter({ has: page.getByRole('link', { name: 'Сегодня', exact: true }) })
     .getByRole('link', { name: 'План поездки', exact: true })
     .click()
   await expect(page.getByRole('heading', { name: /День 2/ })).toBeVisible()
@@ -226,12 +241,13 @@ test('UI-kit shows every control and its interactive states without aria attribu
   await expect(page.getByRole('dialog')).toHaveCount(0)
   expect(
     await page.evaluate(() =>
-      [...document.querySelectorAll('*')].flatMap((el) =>
+      [...document.body.querySelectorAll('*')].flatMap((el) =>
         [...el.attributes].filter(
           (attr) =>
             attr.name.startsWith('aria-') ||
             attr.name.startsWith('data-') ||
-            attr.name === 'tabindex',
+            attr.name === 'tabindex' ||
+            attr.name === 'title',
         ),
       ),
     ),
@@ -244,7 +260,15 @@ test('mobile input focus, soft presses and sheet gestures', async ({ page }) => 
   const input = page.getByLabel('Название поездки', { exact: true })
   await input.focus()
   await expect(input).toHaveCSS('outline-style', 'none')
-  await expect(input.locator('..')).toHaveCSS('border-top-color', 'rgb(55, 107, 89)')
+  const focusColor = await input.evaluate((element) => {
+    const probe = document.createElement('span')
+    probe.style.color = 'var(--focus)'
+    element.parentElement!.append(probe)
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    return color
+  })
+  await expect(input.locator('..')).toHaveCSS('border-top-color', focusColor)
   const opener = page.getByRole('button', { name: 'Открыть Modal', exact: true })
   await opener.dispatchEvent('pointerdown', { pointerType: 'touch', clientX: 20, clientY: 20 })
   await expect(opener).toHaveCSS('scale', '0.975')
@@ -275,4 +299,91 @@ test('mobile input focus, soft presses and sheet gestures', async ({ page }) => 
   await expect(dialog).toHaveCount(0)
   await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
   await expect(opener).toBeFocused()
+})
+
+test('Input and Select sizes align and preserve editing on desktop and mobile', async ({
+  page,
+}) => {
+  await page.goto('/ui-kit')
+  const viewports = [
+    {
+      width: 1280,
+      sizes: [
+        ['S', 40, '14px'],
+        ['M', 48, '16px'],
+        ['L', 56, '16px'],
+      ],
+    },
+    {
+      width: 375,
+      sizes: [
+        ['S', 44, '16px'],
+        ['M', 48, '16px'],
+        ['L', 56, '16px'],
+      ],
+    },
+  ] as const
+  for (const { width, sizes } of viewports) {
+    await page.setViewportSize({ width, height: 900 })
+    for (const [size, height, fontSize] of sizes) {
+      const input = page.getByLabel(`Input ${size}`, { exact: true })
+      const select = page.getByRole('combobox', { name: `Select ${size}`, exact: true })
+      await expect(input.locator('..')).toHaveCSS('height', `${height}px`)
+      await expect(select).toHaveCSS('height', `${height}px`)
+      await expect(input).toHaveCSS('font-size', fontSize)
+      await expect(select).toHaveCSS('font-size', fontSize)
+      expect(await input.getAttribute('size')).toBeNull()
+      expect(await select.getAttribute('size')).toBeNull()
+      await input.fill(`Текст ${size}`)
+      await expect(page.getByLabel('Название поездки', { exact: true })).toHaveValue(
+        `Текст ${size}`,
+      )
+      await select.selectOption('portugal')
+      await expect(page.getByLabel('Направление', { exact: true })).toHaveValue('portugal')
+      await select.selectOption('italy')
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+  }
+})
+
+test('auth images stay within the viewport while long forms remain scrollable', async ({
+  page,
+}) => {
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 1366, height: 768 },
+    { width: 1024, height: 600 },
+    { width: 800, height: 600 },
+  ]) {
+    await page.setViewportSize(viewport)
+    for (const route of [
+      { path: '/login', button: 'Войти' },
+      { path: '/register', button: 'Создать аккаунт' },
+    ]) {
+      await page.goto(route.path)
+      await page.evaluate(() => document.fonts.ready)
+      const visual = page.locator('section').filter({
+        has: page.getByRole('heading', { name: /Большие впечатления/ }),
+      })
+      const bounds = await visual.boundingBox()
+      expect(bounds).not.toBeNull()
+      expect(bounds!.y).toBeGreaterThanOrEqual(0)
+      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(viewport.height)
+      expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(
+        viewport.height,
+      )
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        viewport.width,
+      )
+      const email = page.getByLabel(/^Электронная почта/)
+      await email.fill('traveler@example.com')
+      await expect(email).toHaveValue('traveler@example.com')
+      const submit = page.getByRole('button', { name: route.button, exact: true })
+      await submit.scrollIntoViewIfNeeded()
+      await expect(submit).toBeInViewport()
+      await page.locator('footer').scrollIntoViewIfNeeded()
+      await expect(page.locator('footer')).toBeInViewport()
+      expect(await visual.boundingBox()).toEqual(bounds)
+    }
+  }
 })

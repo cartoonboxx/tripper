@@ -1,5 +1,4 @@
 @use './tokens';
-
 @use './mixins' as *;
 
 @font-face {
@@ -8,9 +7,6 @@
   font-weight: 400;
   font-display: swap;
   src: url('../assets/fonts/Inter-Regular.ttf') format('truetype');
-}
-
-@font-face {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 501 900;
@@ -31,6 +27,8 @@ svg {
 
 * {
   box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
 body {

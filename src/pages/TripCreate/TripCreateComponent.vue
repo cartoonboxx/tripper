@@ -1,38 +1,35 @@
 <script lang="ts">
-import sharedStyle from '@/styles/shared.module.scss'
+import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import { defineComponent } from 'vue'
 import TripForm from '@/components/trip/TripForm.vue'
 import { Button } from '@/components/ui'
 
 export default defineComponent({
   name: 'TripCreateComponent',
-  components: { TripForm, Button },
+  components: { SectionHeader, TripForm, Button },
   data() {
-    return { style: sharedStyle, open: true }
+    return { open: true }
   },
-  computed: {
-    router() {
-      return this.$router
+  methods: {
+    close() {
+      this.open = false
+      this.$router.push('/trips')
     },
   },
 })
 </script>
 <template>
   <div>
-    <div :class="[style.pageHeading]">
-      <div>
-        <h1>Создать поездку</h1>
-        <p>Новый маршрут, новые впечатления.</p>
-      </div>
-      <Button @click="open = true">Открыть форму</Button>
-    </div>
+    <SectionHeader
+      header="Создать поездку"
+      level="h1"
+      paragraph="Новый маршрут, новые впечатления.">
+      <template #actions>
+        <Button @click="open = true">Открыть форму</Button>
+      </template>
+    </SectionHeader>
     <TripForm
       :open="open"
-      @close="
-        () => {
-          open = false
-          router.push('/trips')
-        }
-      " />
+      @close="close" />
   </div>
 </template>

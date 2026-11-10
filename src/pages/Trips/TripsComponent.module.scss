@@ -1,19 +1,5 @@
 @use '@/styles/mixins' as *;
 
-.titleCount {
-  display: inline-flex;
-  vertical-align: middle;
-  align-items: center;
-  justify-content: center;
-  margin-left: var(--space-3);
-  width: 26px;
-  height: 26px;
-  font-size: var(--text-sm);
-  background: #e9ede5;
-  color: var(--primary);
-  border-radius: var(--radius-2);
-  letter-spacing: 0;
-}
 .inspirationBanner {
   margin-top: var(--space-8);
   border: 1px solid #e5e8dd;
@@ -33,6 +19,10 @@
     background: #e0e8d8;
     border-radius: var(--radius-round);
     flex-shrink: 0;
+
+    @include below(1050px) {
+      display: none;
+    }
   }
 
   h3 {
@@ -50,6 +40,10 @@
     margin-left: auto;
     z-index: 1;
     font-size: var(--text-xs);
+
+    @include below(600px) {
+      margin-left: 0;
+    }
   }
 
   .bannerLine {
@@ -71,6 +65,16 @@
       border-radius: var(--radius-round);
     }
   }
+
+  @include below(1050px) {
+    padding: var(--space-6);
+    gap: var(--space-4);
+  }
+
+  @include below(600px) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
 
 .dashboardLower {
@@ -78,10 +82,22 @@
   grid-template-columns: 1.35fr 1fr;
   gap: var(--space-6);
   margin-top: var(--space-10);
+
+  @include below(1050px) {
+    grid-template-columns: 1fr;
+  }
+
+  @include below(600px) {
+    margin-top: var(--space-6);
+  }
 }
 
 .dashboardPanel {
   padding: var(--space-6);
+
+  @include below(360px) {
+    padding: var(--space-4);
+  }
 }
 
 .miniEvent {
@@ -169,49 +185,10 @@
   margin-top: var(--space-8);
   @include flex(var(--space-2));
   justify-content: center;
-}
 
-@include below(1050px) {
-  .dashboardLower {
-    grid-template-columns: 1fr;
-  }
-
-  .inspirationBanner {
-    padding: var(--space-6);
-    gap: var(--space-4);
-  }
-}
-
-@include below(600px) {
-  .inspirationBanner {
-    align-items: flex-start;
-    flex-direction: column;
-
-    :is(button, a) {
-      margin-left: 0;
-    }
-  }
-
-  .dashboardLower {
-    margin-top: var(--space-6);
-  }
-}
-
-@include below(600px) {
-  .pageBottomNote {
+  @include below(600px) {
     align-items: flex-start;
     font-size: var(--text-xs);
     line-height: 1.7;
-  }
-}
-
-@include below(1050px) {
-  .inspirationBanner .inspirationArt {
-    display: none;
-  }
-}
-@include below(360px) {
-  .dashboardPanel {
-    padding: var(--space-4);
   }
 }

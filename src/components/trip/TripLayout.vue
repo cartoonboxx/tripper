@@ -1,5 +1,4 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
 import sharedStyle from '@/styles/shared.module.scss'
 import style from './TripLayout.module.scss'
 import { defineComponent } from 'vue'
@@ -33,7 +32,8 @@ export default defineComponent({
   mixins: [tripContext],
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      sharedStyle,
+      style,
       PhArrowLeft: markRawValue(PhArrowLeft),
       PhCalendarDots: markRawValue(PhCalendarDots),
       PhCompass: markRawValue(PhCompass),
@@ -49,17 +49,17 @@ export default defineComponent({
 <template>
   <div
     v-if="trip"
-    :class="[style.tripLayout]">
-    <div :class="[style.tripBackRow]">
+    :class="style.tripLayout">
+    <div :class="style.tripBackRow">
       <AppLink
         to="/trips"
-        :class="[style.backLink]">
+        :class="sharedStyle.backLink">
         <PhArrowLeft :size="16" />
         Все поездки
       </AppLink>
       <span
         v-if="!canEdit"
-        :class="[style.readonly]">
+        :class="style.readonly">
         <PhLockKey :size="16" />
         Только просмотр
       </span>
@@ -76,15 +76,15 @@ export default defineComponent({
     </div>
     <section
       :style="{ backgroundImage: `url(${trip.image})` }"
-      :class="[style.tripHero]">
-      <div :class="[style.tripHeroContent]">
-        <span :class="[style.heroEyebrow]">
+      :class="style.tripHero">
+      <div :class="style.tripHeroContent">
+        <span :class="style.heroEyebrow">
           {{ trip.country }}
           <span>•</span>
           ВАШЕ ПУТЕШЕСТВИЕ
         </span>
         <h1>{{ trip.name }}</h1>
-        <div :class="[style.heroMeta]">
+        <div :class="style.heroMeta">
           <span>
             <PhCalendarDots :size="16" />
             {{ dateRange(trip.start, trip.end) }}
@@ -98,7 +98,7 @@ export default defineComponent({
       <Badge :variant="trip.status === 'completed' ? 'neutral' : 'green'">
         {{ trip.status === 'completed' ? 'Завершена' : 'Предстоящая поездка' }}
       </Badge>
-      <div :class="[style.heroMembers]">
+      <div :class="style.heroMembers">
         <Avatar
           v-for="member in store.members(trip.id)"
           :key="member.id"
@@ -107,9 +107,7 @@ export default defineComponent({
           size="sm" />
       </div>
     </section>
-    <nav
-      title="Разделы поездки"
-      :class="[style.tripTabs]">
+    <nav :class="style.tripTabs">
       <AppLink
         v-for="tab in tripNavigation"
         :key="tab.path"
@@ -118,7 +116,7 @@ export default defineComponent({
         {{ tab.label }}
       </AppLink>
     </nav>
-    <div :class="[style.tripContent]"><RouterView :key="trip.id" /></div>
+    <div :class="style.tripContent"><RouterView :key="trip.id" /></div>
   </div>
   <EmptyState
     v-else

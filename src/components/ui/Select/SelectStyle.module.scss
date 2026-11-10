@@ -1,18 +1,23 @@
-.uiField select {
-  background: var(--surface);
-  color: var(--text);
-  border-color: var(--border);
-  transition:
-    border-color 160ms var(--ease-soft),
-    box-shadow 160ms var(--ease-soft);
-  &:focus-visible {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: var(--field-focus-shadow);
-  }
-  &:disabled {
-    background: var(--background);
+.uiField {
+  .caret {
     color: var(--muted);
-    cursor: not-allowed;
+  }
+
+  select {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+    transition: 0.16s;
+
+    &:focus-visible {
+      outline: none;
+      border-color: var(--focus);
+    }
+
+    &:disabled {
+      background: var(--background);
+      color: var(--muted);
+      cursor: not-allowed;
+    }
   }
 }

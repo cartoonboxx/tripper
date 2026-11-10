@@ -1,18 +1,18 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
+import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import sharedStyle from '@/styles/shared.module.scss'
 import style from './EventComponent.module.scss'
-import { defineComponent } from 'vue'
+import { defineComponent, markRaw } from 'vue'
 import { PhArrowLeft, PhCalendarDots, PhMapPin, PhPencilSimple } from '@phosphor-icons/vue'
 import { shortDate } from '@/composables/format'
 import { Button, Badge, EmptyState } from '@/components/ui'
 import EventForm from '@/components/trip/EventForm.vue'
 import tripContext from '@/mixins/tripContext'
-import { markRawValue } from '@/utils/markRawValue'
 
 export default defineComponent({
   name: 'EventComponent',
   components: {
+    SectionHeader,
     PhArrowLeft,
     PhCalendarDots,
     PhMapPin,
@@ -25,12 +25,10 @@ export default defineComponent({
   mixins: [tripContext],
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      sharedStyle,
+      style,
       editing: this.$route.name === 'event-edit' || this.$route.name === 'event-create',
-      PhArrowLeft: markRawValue(PhArrowLeft),
-      PhCalendarDots: markRawValue(PhCalendarDots),
-      PhMapPin: markRawValue(PhMapPin),
-      PhPencilSimple: markRawValue(PhPencilSimple),
+      PhCalendarDots: markRaw(PhCalendarDots),
     }
   },
   computed: {
@@ -57,29 +55,30 @@ export default defineComponent({
     <template v-if="event">
       <AppLink
         :to="`/trips/${tripId}/plan`"
-        :class="[style.eventDetail1, style.backLink]">
+        :class="[style.eventDetail1, sharedStyle.backLink]">
         <PhArrowLeft :size="16" />
         К плану поездки
       </AppLink>
-      <div :class="[style.panel, style.eventPage]">
+      <div :class="[sharedStyle.panel, style.eventPage]">
         <img
           :src="event.image"
           :alt="event.title"
-          :class="[style.detailCover]" />
-        <div :class="[style.sectionHeading]">
-          <div>
-            <Badge>{{ event.category }}</Badge>
-            <h2 :class="[style.eventDetail2]">{{ event.title }}</h2>
-          </div>
-          <Button
-            v-if="canEdit"
-            variant="secondary"
-            @click="editing = true">
-            <PhPencilSimple :size="16" />
-            Редактировать
-          </Button>
-        </div>
-        <div :class="[style.detailMeta]">
+          :class="[sharedStyle.detailCover, style.detailCover]" />
+        <Badge>{{ event.category }}</Badge>
+        <SectionHeader
+          :header="event.title"
+          level="h2">
+          <template #actions>
+            <Button
+              v-if="canEdit"
+              variant="secondary"
+              @click="editing = true">
+              <PhPencilSimple :size="16" />
+              Редактировать
+            </Button>
+          </template>
+        </SectionHeader>
+        <div :class="sharedStyle.detailMeta">
           <p>
             <PhCalendarDots :size="17" />
             {{ shortDate(event.day) }} · {{ event.start }} —
@@ -91,7 +90,7 @@ export default defineComponent({
           </p>
         </div>
         <h3>Описание</h3>
-        <p :class="[style.subtle]">{{ event.description || 'Заметок пока нет.' }}</p>
+        <p :class="sharedStyle.subtle">{{ event.description || 'Заметок пока нет.' }}</p>
       </div>
     </template>
     <EmptyState

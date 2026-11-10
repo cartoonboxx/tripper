@@ -4,6 +4,7 @@
   flex-direction: column;
   text-align: center;
   padding: var(--space-16) var(--space-6);
+
   .uiEmptyIcon {
     display: grid;
     place-items: center;
@@ -12,9 +13,11 @@
     border-radius: var(--radius-round);
     margin-bottom: var(--space-5);
   }
+
   h3 {
     margin: 0 0 var(--space-2);
   }
+
   p {
     max-width: 380px;
     margin: 0 0 var(--space-6);

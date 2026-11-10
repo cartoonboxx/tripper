@@ -1,10 +1,14 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
 import TabBase from './TabBase.vue'
-import sharedStyle from '@/styles/shared.module.scss'
 import style from './TabStyle.module.scss'
 import { defineComponent } from 'vue'
 import { componentProps } from './Tab.props'
+
+const variants = {
+  pill: style.uiTabPill,
+  line: style.uiTabLine,
+  vertical: style.uiTabVertical,
+}
 
 export default defineComponent({
   name: 'Tab',
@@ -12,16 +16,11 @@ export default defineComponent({
   props: componentProps,
   computed: {
     appearanceClasses() {
-      const variants = {
-        pill: style.uiTabPill,
-        line: style.uiTabLine,
-        vertical: style.uiTabVertical,
-      }
-      return [variants[this.variant || 'pill'], this.active && style.isActive]
+      return [variants[this.variant], this.active && style.isActive]
     },
   },
   data() {
-    return { style: mergeStyles(sharedStyle, style) }
+    return { style }
   },
 })
 </script>
@@ -30,12 +29,6 @@ export default defineComponent({
     v-bind="$props"
     :appearance="style"
     :class="appearanceClasses">
-    <template
-      v-for="(_, name) in $slots"
-      #[name]="scope">
-      <slot
-        :name="name"
-        v-bind="scope || {}" />
-    </template>
+    <slot />
   </TabBase>
 </template>

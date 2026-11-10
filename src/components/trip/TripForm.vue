@@ -1,6 +1,5 @@
 <script lang="ts">
 import style from './TripForm.module.scss'
-import { mergeStyles } from '@/utils/mergeStyles'
 import sharedStyle from '@/styles/shared.module.scss'
 import { defineComponent } from 'vue'
 import { PhCheck, PhImage, PhPlus } from '@phosphor-icons/vue'
@@ -17,7 +16,8 @@ export default defineComponent({
   emits: ['close'],
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      sharedStyle,
+      style,
       error: '',
       form: {
         name: '',
@@ -26,6 +26,7 @@ export default defineComponent({
         end: '',
         image: covers[0] || '',
         status: 'upcoming',
+        notes: '',
       },
       PhCheck: markRawValue(PhCheck),
       PhImage: markRawValue(PhImage),
@@ -95,7 +96,6 @@ export default defineComponent({
           name: this.form.name.trim(),
           status: 'upcoming',
           archived: false,
-          notes: '',
           role: 'organizer',
         })
         this.store.participants.push({
@@ -108,7 +108,7 @@ export default defineComponent({
         })
         this.store.notify('Поездка создана')
         this.$emit('close')
-        this.router.push(`/trips/${id}/overview`)
+        this.router.push(`/trips/${id}/plan`)
       }
     },
   },
@@ -125,6 +125,7 @@ export default defineComponent({
               end: '',
               image: this.covers[0],
               status: 'upcoming',
+              notes: '',
             },
             this.trip || {},
           )
@@ -143,7 +144,7 @@ export default defineComponent({
     @close="$emit('close')">
     <form
       @submit.prevent="save"
-      :class="[style.formStack]">
+      :class="sharedStyle.formStack">
       <Input
         v-model="form.name"
         label="Название поездки"
@@ -153,7 +154,7 @@ export default defineComponent({
         v-model="form.country"
         label="Страна или регион"
         placeholder="Куда отправляемся?" />
-      <div :class="[style.formRow]">
+      <div :class="sharedStyle.formRow">
         <Input
           v-model="form.start"
           label="Начало поездки"
@@ -175,20 +176,23 @@ export default defineComponent({
           { label: 'Активная', value: 'active' },
           { label: 'Завершённая', value: 'completed' },
         ]" />
+      <Input
+        v-model="form.notes"
+        type="textarea"
+        label="Заметки о поездке" />
       <div>
-        <span :class="[style.fieldLabel]">Обложка</span>
+        <span :class="sharedStyle.fieldLabel">Обложка</span>
         <img
           v-if="form.image.startsWith('data:')"
           :src="form.image"
           alt="Выбранная обложка"
-          :class="[style.coverPreview]" />
-        <div :class="[style.coverOptions]">
+          :class="[style.coverPreview, sharedStyle.coverPreview]" />
+        <div :class="sharedStyle.coverOptions">
           <button
-            v-for="(cover, i) in covers"
+            v-for="cover in covers"
             :key="cover"
             type="button"
-            :class="{ [style.selected || '']: form.image === cover }"
-            :title="`Выбрать обложку ${i + 1}`"
+            :class="{ [sharedStyle.selected || '']: form.image === cover }"
             @click="form.image = cover">
             <img
               :src="cover"
@@ -196,7 +200,7 @@ export default defineComponent({
           </button>
         </div>
       </div>
-      <div :class="[style.coverUpload]">
+      <div :class="style.coverUpload">
         <input
           ref="fileInput"
           type="file"
@@ -210,14 +214,14 @@ export default defineComponent({
           <PhImage :size="16" />
           Выбрать изображение
         </Button>
-        <span :class="[style.formHelp]">JPG, PNG, WebP · до 1 МБ</span>
+        <span :class="sharedStyle.formHelp">JPG, PNG, WebP · до 1 МБ</span>
       </div>
       <p
         v-if="error"
-        :class="[style.errorText]">
+        :class="sharedStyle.errorText">
         {{ error }}
       </p>
-      <div :class="[style.formActions]">
+      <div :class="sharedStyle.formActions">
         <Button
           variant="secondary"
           @click="$emit('close')">

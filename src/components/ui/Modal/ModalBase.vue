@@ -1,8 +1,6 @@
 <script lang="ts">
 import { defineComponent, markRaw } from 'vue'
 import { PhX } from '@phosphor-icons/vue'
-import { mergeStyles } from '@/utils/mergeStyles'
-import sharedStyle from '@/styles/shared.module.scss'
 import style from './ModalBase.module.scss'
 import Button from '../Button/ButtonStyle.vue'
 import { componentProps } from './Modal.props'
@@ -16,12 +14,14 @@ export default defineComponent({
   emits: ['close'],
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      style,
       overlay: null as OverlayController | null,
       dragStart: 0,
       dragTime: 0,
       dragOffset: 0,
       dragging: false,
+      trackingTouch: false,
+      touchStartX: 0,
       backdropPressed: false,
     }
   },
@@ -42,26 +42,77 @@ export default defineComponent({
     activateOverlay() {
       const host = this.$refs.host as HTMLDialogElement | undefined
       if (!host || !this.open || !this.overlay) return
-      this.overlay?.open()
+      this.overlay.open()
       if (!host.open) host.showModal()
     },
     finishClose() {
       if (this.open) return
       this.overlay?.close()
-      this.dragOffset = 0
-      this.dragging = false
+      this.cancelDrag()
+    },
+    canStartDrag(target: EventTarget | null) {
+      if (!window.matchMedia('(max-width: 600px)').matches || !(target instanceof Element))
+        return false
+      if (target.closest('button, input, select, textarea, a, label, [contenteditable]'))
+        return false
+      const body = this.$refs.body as HTMLElement | undefined
+      return !body || !body.contains(target) || body.scrollTop === 0
     },
     startDrag(event: PointerEvent) {
-      if (!window.matchMedia('(max-width: 600px)').matches) return
+      if (event.pointerType === 'touch' || event.button !== 0 || !this.canStartDrag(event.target))
+        return
       this.dragStart = event.clientY
       this.dragTime = performance.now()
       this.dragging = true
-      ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
+      const panel = event.currentTarget as HTMLElement
+      panel.setPointerCapture(event.pointerId)
     },
     moveDrag(event: PointerEvent) {
-      if (this.dragging) this.dragOffset = Math.max(0, event.clientY - this.dragStart)
+      if (event.pointerType !== 'touch' && this.dragging) {
+        this.dragOffset = Math.max(0, event.clientY - this.dragStart)
+      }
+    },
+    endPointerDrag(event: PointerEvent) {
+      if (event.pointerType !== 'touch') this.endDrag()
+    },
+    cancelPointerDrag(event: PointerEvent) {
+      if (event.pointerType !== 'touch') this.cancelDrag()
+    },
+    startTouch(event: TouchEvent) {
+      this.cancelDrag()
+      const touch = event.touches[0]
+      if (event.touches.length !== 1 || !touch || !this.canStartDrag(event.target)) return
+      this.trackingTouch = true
+      this.touchStartX = touch.clientX
+      this.dragStart = touch.clientY
+      this.dragTime = performance.now()
+    },
+    moveTouch(event: TouchEvent) {
+      if (!this.trackingTouch) return
+      const touch = event.touches[0]
+      if (event.touches.length !== 1 || !touch) {
+        this.cancelDrag()
+        return
+      }
+      const offset = touch.clientY - this.dragStart
+      const horizontal = Math.abs(touch.clientX - this.touchStartX)
+      if (!this.dragging) {
+        if (Math.abs(offset) < 6 && horizontal < 6) return
+        if (offset <= 0 || horizontal > offset) {
+          this.cancelDrag()
+          return
+        }
+      }
+      if (!event.cancelable) {
+        this.cancelDrag()
+        return
+      }
+      event.preventDefault()
+      this.dragging = true
+      this.dragOffset = Math.max(0, offset)
     },
     endDrag() {
+      this.trackingTouch = false
       if (!this.dragging) return
       this.dragging = false
       const velocity = this.dragOffset / Math.max(1, performance.now() - this.dragTime)
@@ -69,6 +120,7 @@ export default defineComponent({
       else this.dragOffset = 0
     },
     cancelDrag() {
+      this.trackingTouch = false
       this.dragging = false
       this.dragOffset = 0
     },
@@ -101,18 +153,22 @@ export default defineComponent({
         @click="backdropClick">
         <section
           ref="panel"
+          @pointerdown="startDrag"
+          @pointermove="moveDrag"
+          @pointerup="endPointerDrag"
+          @pointercancel="cancelPointerDrag"
+          @touchstart.passive="startTouch"
+          @touchmove="moveTouch"
+          @touchend="endDrag"
+          @touchcancel="cancelDrag"
           :class="[
             style.uiDialog,
             appearance.uiDialog,
-            { [style.uiDialogWide || '']: wide, [style.isDragging || '']: dragging },
+            wide && style.uiDialogWide,
+            dragging && style.isDragging,
           ]"
           :style="{ '--sheet-offset': `${dragOffset}px` }">
-          <div
-            :class="style.uiSheetHandle"
-            @pointerdown="startDrag"
-            @pointermove="moveDrag"
-            @pointerup="endDrag"
-            @pointercancel="cancelDrag">
+          <div :class="style.uiSheetHandle">
             <span />
           </div>
           <header :class="[style.uiDialogHeader, appearance.uiDialogHeader]">
@@ -120,12 +176,15 @@ export default defineComponent({
             <Button
               variant="ghost"
               icon-only
-              title="Закрыть"
               @click="$emit('close')">
               <PhX />
             </Button>
           </header>
-          <div :class="style.uiDialogBody"><slot /></div>
+          <div
+            ref="body"
+            :class="style.uiDialogBody">
+            <slot />
+          </div>
         </section>
       </dialog>
     </Transition>

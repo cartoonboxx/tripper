@@ -1,10 +1,17 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
 import ButtonBase from './ButtonBase.vue'
-import sharedStyle from '@/styles/shared.module.scss'
 import style from './ButtonStyle.module.scss'
 import { defineComponent } from 'vue'
 import { componentProps } from './Button.props'
+
+const variants = {
+  primary: style.uiButtonPrimary,
+  secondary: style.uiButtonSecondary,
+  ghost: style.uiButtonGhost,
+  danger: style.uiButtonDanger,
+}
+
+const sizes = { sm: style.uiButtonSm, md: style.uiButton, lg: style.uiButtonLg }
 
 export default defineComponent({
   name: 'Button',
@@ -12,18 +19,11 @@ export default defineComponent({
   props: componentProps,
   computed: {
     appearanceClasses() {
-      const variants = {
-        primary: style.uiButtonPrimary,
-        secondary: style.uiButtonSecondary,
-        ghost: style.uiButtonGhost,
-        danger: style.uiButtonDanger,
-      }
-      const sizes = { sm: style.uiButtonSm, md: style.uiButton, lg: style.uiButtonLg }
-      return [variants[this.variant || 'primary'], sizes[this.size || 'md']]
+      return [variants[this.variant], sizes[this.size]]
     },
   },
   data() {
-    return { style: mergeStyles(sharedStyle, style) }
+    return { style }
   },
 })
 </script>
@@ -32,12 +32,6 @@ export default defineComponent({
     v-bind="$props"
     :appearance="style"
     :class="appearanceClasses">
-    <template
-      v-for="(_, name) in $slots"
-      #[name]="scope">
-      <slot
-        :name="name"
-        v-bind="scope || {}" />
-    </template>
+    <slot />
   </ButtonBase>
 </template>

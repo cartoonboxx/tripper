@@ -1,6 +1,4 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
-import sharedStyle from '@/styles/shared.module.scss'
 import style from './MobileNavigation.module.scss'
 import { defineComponent } from 'vue'
 import { PhDotsThree, PhCaretRight } from '@phosphor-icons/vue'
@@ -13,7 +11,7 @@ export default defineComponent({
   components: { PhDotsThree, PhCaretRight, Modal },
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      style,
       moreOpen: false,
       PhDotsThree: markRawValue(PhDotsThree),
       PhCaretRight: markRawValue(PhCaretRight),
@@ -38,15 +36,13 @@ export default defineComponent({
 </script>
 
 <template>
-  <nav
-    title="Мобильная навигация"
-    :class="[style.mobileNavigation]">
+  <nav :class="style.mobileNavigation">
     <AppLink
       v-for="item in mobileNavigation"
       :key="item.to"
       :to="item.to"
       :class="[style.mobileNavigationTab, { [style.isActive || '']: isCurrent(item.to) }]">
-      <span :class="[style.mobileNavigationIcon]">
+      <span :class="style.mobileNavigationIcon">
         <component
           :is="item.icon"
           :size="24"
@@ -58,7 +54,7 @@ export default defineComponent({
       type="button"
       :class="[style.mobileNavigationTab, { [style.isActive || '']: moreActive || moreOpen }]"
       @click="moreOpen = true">
-      <span :class="[style.mobileNavigationIcon]">
+      <span :class="style.mobileNavigationIcon">
         <PhDotsThree
           :size="28"
           weight="bold" />
@@ -70,9 +66,7 @@ export default defineComponent({
     :open="moreOpen"
     title="Ещё в Tripper"
     @close="moreOpen = false">
-    <nav
-      title="Дополнительные разделы"
-      :class="[style.mobileMoreNavigation]">
+    <nav :class="style.mobileMoreNavigation">
       <AppLink
         v-for="item in moreNavigation"
         :key="item.to"

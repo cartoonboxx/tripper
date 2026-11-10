@@ -2,44 +2,46 @@
   background: rgb(20 28 25 / 42%);
   backdrop-filter: blur(4px);
 }
+
 .uiDialog {
   background: var(--surface);
   box-shadow: 0 24px 80px #0002;
 }
+
 .overlayEnterActive {
   transition:
     background-color var(--motion-modal-enter) var(--ease-sheet),
     opacity var(--motion-modal-enter) var(--ease-sheet);
+
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: 1ms;
+  }
 }
+
 .overlayLeaveActive {
   transition: opacity var(--motion-modal-leave) var(--ease-sheet);
+
   > section {
     transition-duration: var(--motion-modal-leave);
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: 1ms;
+  }
 }
+
 .overlayEnterFrom,
 .overlayLeaveTo {
   opacity: 0;
+
   > section {
     transform: translate3d(0, var(--space-6), 0) scale(0.97);
-  }
-}
-@media (max-width: 600px) {
-  .overlayEnterFrom,
-  .overlayLeaveTo {
-    > section {
+
+    @media (max-width: 600px) {
       transform: translate3d(0, 100%, 0);
     }
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .overlayEnterActive,
-  .overlayLeaveActive {
-    transition-duration: 1ms;
-  }
-  .overlayEnterFrom,
-  .overlayLeaveTo {
-    > section {
+
+    @media (prefers-reduced-motion: reduce) {
       transform: none;
     }
   }

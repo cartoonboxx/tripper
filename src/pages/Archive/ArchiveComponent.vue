@@ -1,22 +1,28 @@
 <script lang="ts">
+import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import sharedStyle from '@/styles/shared.module.scss'
-import { defineComponent } from 'vue'
+import { defineComponent, markRaw } from 'vue'
 import { PhArchive, PhArrowRight, PhMagnifyingGlass } from '@phosphor-icons/vue'
 import { useTravelStore } from '@/stores/travel'
 import { Input, EmptyState, Button } from '@/components/ui'
 import TripCard from '@/components/trip/TripCard.vue'
-import { markRawValue } from '@/utils/markRawValue'
 
 export default defineComponent({
   name: 'ArchiveComponent',
-  components: { PhArrowRight, PhMagnifyingGlass, Input, EmptyState, Button, TripCard },
+  components: {
+    SectionHeader,
+    PhArrowRight,
+    PhMagnifyingGlass,
+    Input,
+    EmptyState,
+    Button,
+    TripCard,
+  },
   data() {
     return {
       style: sharedStyle,
       search: '',
-      PhArchive: markRawValue(PhArchive),
-      PhArrowRight: markRawValue(PhArrowRight),
-      PhMagnifyingGlass: markRawValue(PhMagnifyingGlass),
+      PhArchive: markRaw(PhArchive),
     }
   },
   computed: {
@@ -33,20 +39,17 @@ export default defineComponent({
 </script>
 <template>
   <div>
-    <header :class="[style.pageHeading]">
-      <div>
-        <span :class="[style.eyebrow]">У КАЖДОЙ ПОЕЗДКИ ЕСТЬ СВОЯ ИСТОРИЯ</span>
-        <h1>Архив путешествий</h1>
-        <p>Маршруты, впечатления и планы, к которым приятно возвращаться.</p>
-      </div>
-    </header>
-    <div :class="[style.toolbar]">
-      <span :class="[style.subtle]">{{ trips.length }} поездок в архиве</span>
+    <SectionHeader
+      header="Архив путешествий"
+      level="h1"
+      paragraph="Маршруты, впечатления и планы, к которым приятно возвращаться." />
+    <div :class="style.toolbar">
+      <span :class="style.subtle">{{ trips.length }} поездок в архиве</span>
       <Input
         v-model="search"
         placeholder="Найти в архиве…"
-        title="Поиск в архиве"
-        :class="[style.searchField]">
+        :class="style.searchField"
+        size="sm">
         <template #prefix>
           <PhMagnifyingGlass :size="16" />
         </template>
@@ -54,7 +57,7 @@ export default defineComponent({
     </div>
     <div
       v-if="trips.length"
-      :class="[style.tripGrid]">
+      :class="style.tripGrid">
       <TripCard
         v-for="trip in trips"
         :key="trip.id"

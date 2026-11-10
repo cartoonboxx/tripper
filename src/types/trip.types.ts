@@ -27,13 +27,15 @@ export interface PlanEvent {
 }
 export interface Place {
   id: string
-  tripId: string
   name: string
   category: string
   address: string
   image: string
-  planned: boolean
   description: string
+}
+export interface TripPlace {
+  tripId: string
+  placeId: string
 }
 export interface ChecklistItem {
   id: string

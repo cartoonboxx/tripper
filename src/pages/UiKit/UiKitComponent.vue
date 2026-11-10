@@ -1,5 +1,5 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
+import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import { defineComponent, markRaw } from 'vue'
 import {
   PhArrowRight,
@@ -36,6 +36,7 @@ import {
   spaces,
   radii,
   iconSamples,
+  fieldSizes,
 } from './UiKitComponent.data'
 import style from './UiKitComponent.module.scss'
 import sharedStyle from '@/styles/shared.module.scss'
@@ -43,6 +44,7 @@ import sharedStyle from '@/styles/shared.module.scss'
 export default defineComponent({
   name: 'UiKitComponent',
   components: {
+    SectionHeader,
     Avatar,
     Badge,
     Button,
@@ -67,16 +69,17 @@ export default defineComponent({
   },
   data() {
     return {
-      style: mergeStyles(sharedStyle, style),
+      sharedStyle,
+      style,
       catalog,
       destinations,
+      fieldSizes,
       tabLabels,
       lineLabels,
       colors,
       spaces,
       radii,
       iconSamples: markRaw(iconSamples),
-      PhCalendarDots: markRaw(PhCalendarDots),
       PhCompass: markRaw(PhCompass),
       text: '',
       search: '',
@@ -107,17 +110,16 @@ export default defineComponent({
 </script>
 <template>
   <div :class="style.kitPage">
-    <header :class="[style.pageHeading, style.kitHeader]">
-      <div>
-        <span :class="style.eyebrow">TRIPPER DESIGN SYSTEM</span>
-        <h1>UI-kit</h1>
-        <p>Все компоненты системы, варианты и интерактивные состояния.</p>
-      </div>
-      <Badge>12 компонентов UI</Badge>
-    </header>
-    <nav
-      :class="style.catalogNav"
-      title="Компоненты UI-kit">
+    <SectionHeader
+      header="UI-kit"
+      level="h1"
+      paragraph="Все компоненты системы, варианты и интерактивные состояния."
+      :class="style.kitHeader">
+      <template #actions>
+        <Badge>12 компонентов UI</Badge>
+      </template>
+    </SectionHeader>
+    <nav :class="style.catalogNav">
       <a
         v-for="item in catalog"
         :key="item.id"
@@ -127,12 +129,9 @@ export default defineComponent({
       <a href="#compositions">Готовые блоки</a>
     </nav>
     <section :class="style.kitSection">
-      <div :class="style.sectionHeading">
-        <div>
-          <span :class="style.eyebrow">ОСНОВА ИНТЕРФЕЙСА</span>
-          <h2>Цвет, типографика и геометрия</h2>
-        </div>
-      </div>
+      <SectionHeader
+        header="Цвет, типографика и геометрия"
+        level="h2" />
       <div :class="style.colorGrid">
         <div
           v-for="color in colors"
@@ -168,7 +167,7 @@ export default defineComponent({
               <code>{{ radius }}</code>
             </div>
           </div>
-          <p :class="style.subtle">Основной текст — 16 px, вспомогательный — 12–14 px.</p>
+          <p :class="sharedStyle.subtle">Основной текст — 16 px, вспомогательный — 12–14 px.</p>
         </div>
       </div>
       <div :class="style.iconSamples">
@@ -184,7 +183,7 @@ export default defineComponent({
       id="buttons"
       :class="style.kitSection">
       <h2>Button</h2>
-      <p :class="style.subtle">Варианты, размеры, кнопки с иконками и ссылка.</p>
+      <p :class="sharedStyle.subtle">Варианты, размеры, кнопки с иконками и ссылка.</p>
       <div :class="style.kitRow">
         <Button>Primary</Button>
         <Button variant="secondary">Secondary</Button>
@@ -200,9 +199,7 @@ export default defineComponent({
           <PhPlus :size="20" />
           Добавить поездку
         </Button>
-        <Button
-          icon-only
-          title="Добавить">
+        <Button icon-only>
           <PhPlus :size="20" />
         </Button>
         <Button
@@ -217,6 +214,18 @@ export default defineComponent({
       id="fields"
       :class="style.kitSection">
       <h2>Input</h2>
+      <h3>Размеры S, M, L</h3>
+      <div :class="style.sizeGrid">
+        <Input
+          v-for="size in fieldSizes"
+          :key="size.value"
+          v-model="text"
+          :size="size.value"
+          :label="`Input ${size.label}`"
+          placeholder="Введите текст">
+          <template #prefix><PhMagnifyingGlass :size="20" /></template>
+        </Input>
+      </div>
       <div :class="style.demoGrid">
         <Input
           v-model="text"
@@ -225,7 +234,8 @@ export default defineComponent({
         <Input
           v-model="search"
           label="Поиск"
-          placeholder="Найти место…">
+          placeholder="Найти место…"
+          size="sm">
           <template #prefix><PhMagnifyingGlass :size="20" /></template>
         </Input>
         <Input
@@ -233,6 +243,11 @@ export default defineComponent({
           label="Дата поездки"
           type="date" />
         <Input placeholder="Поле без подписи" />
+        <Input
+          v-model="text"
+          type="textarea"
+          label="Многострочные заметки"
+          placeholder="Планы и впечатления…" />
         <Input
           label="Обязательное поле"
           required
@@ -261,6 +276,16 @@ export default defineComponent({
       id="selects"
       :class="style.kitSection">
       <h2>Select</h2>
+      <h3>Размеры S, M, L</h3>
+      <div :class="style.sizeGrid">
+        <Select
+          v-for="size in fieldSizes"
+          :key="size.value"
+          v-model="destination"
+          :size="size.value"
+          :label="`Select ${size.label}`"
+          :options="destinations" />
+      </div>
       <div :class="style.demoGrid">
         <Select
           v-model="destination"
@@ -346,14 +371,14 @@ export default defineComponent({
       <h2>Card</h2>
       <div :class="style.demoGrid">
         <Card :class="style.demoCard">
-          <span :class="style.softIcon"><PhCompass :size="24" /></span>
+          <span :class="sharedStyle.softIcon"><PhCompass :size="24" /></span>
           <h3>Обычная карточка</h3>
           <p>Планы, места и маленькие детали путешествия.</p>
         </Card>
         <Card
           interactive
           :class="style.demoCard">
-          <span :class="style.softIcon"><PhCalendarDots :size="24" /></span>
+          <span :class="sharedStyle.softIcon"><PhCalendarDots :size="24" /></span>
           <h3>Интерактивная карточка</h3>
           <p>Наведите курсор, чтобы увидеть состояние hover.</p>
           <Button
@@ -431,7 +456,7 @@ export default defineComponent({
       id="modals"
       :class="style.kitSection">
       <h2>Modal</h2>
-      <p :class="style.subtle">
+      <p :class="sharedStyle.subtle">
         Закрытие по Escape, фону или кнопке. Фокус возвращается к вызвавшему элементу. На телефоне —
         панель снизу, которую можно закрыть свайпом за ручку.
       </p>
@@ -448,7 +473,7 @@ export default defineComponent({
       id="drawers"
       :class="style.kitSection">
       <h2>Drawer</h2>
-      <p :class="style.subtle">Подробности в боковой панели; на телефоне — во всю ширину.</p>
+      <p :class="sharedStyle.subtle">Подробности в боковой панели; на телефоне — во всю ширину.</p>
       <Button
         variant="secondary"
         @click="drawer = true">
@@ -459,7 +484,7 @@ export default defineComponent({
       id="compositions"
       :class="style.kitSection">
       <h2>Готовые блоки системы</h2>
-      <p :class="style.subtle">
+      <p :class="sharedStyle.subtle">
         TripCard, TripForm, EventForm, InviteForm и навигация используют те же компоненты и токены.
       </p>
       <div :class="style.compositionPreview">
@@ -487,12 +512,12 @@ export default defineComponent({
         </Button>
         <Button
           v-if="demoTrip"
-          :to="'/trips/' + demoTrip.id + '/overview'"
+          :to="'/trips/' + demoTrip.id + '/plan'"
           variant="ghost">
           TripLayout — обзор поездки
         </Button>
       </div>
-      <p :class="style.subtle">
+      <p :class="sharedStyle.subtle">
         AppLayout и MobileNavigation видны на этой странице. На мобильном экране разделы
         переключаются нижними вкладками.
       </p>
@@ -501,12 +526,14 @@ export default defineComponent({
       :open="modal"
       title="Планы на новый день"
       @close="modal = false">
-      <div :class="style.formStack">
+      <div :class="sharedStyle.formStack">
         <Input
           label="Название события"
           placeholder="Например, прогулка у реки" />
-        <p :class="style.subtle">Плавное открытие и закрытие. На телефоне потяните ручку вниз.</p>
-        <div :class="style.formActions">
+        <p :class="sharedStyle.subtle">
+          Плавное открытие и закрытие. На телефоне потяните ручку вниз.
+        </p>
+        <div :class="sharedStyle.formActions">
           <Button
             variant="secondary"
             @click="modal = false">
@@ -531,7 +558,9 @@ export default defineComponent({
           :options="destinations"
           model-value="italy" />
       </div>
-      <div :class="style.formActions"><Button @click="wideModal = false">Закрыть</Button></div>
+      <div :class="sharedStyle.formActions">
+        <Button @click="wideModal = false">Закрыть</Button>
+      </div>
     </Modal>
     <Drawer
       :open="drawer"
@@ -539,14 +568,14 @@ export default defineComponent({
       @close="drawer = false">
       <Badge>Предстоящая поездка</Badge>
       <h3 :class="style.drawerHeading">Флоренция ждёт</h3>
-      <p :class="style.subtle">
+      <p :class="sharedStyle.subtle">
         Боковая панель сохраняет контекст страницы. Здесь можно показывать сведения о месте или
         событии.
       </p>
       <Input
         label="Заметка"
         placeholder="Что важно не забыть?" />
-      <div :class="style.formActions"><Button @click="drawer = false">Готово</Button></div>
+      <div :class="sharedStyle.formActions"><Button @click="drawer = false">Готово</Button></div>
     </Drawer>
     <TripForm
       :open="tripForm"

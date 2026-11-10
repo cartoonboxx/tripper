@@ -1,18 +1,14 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
-import sharedStyle from '@/styles/shared.module.scss'
 import style from './EmptyStateBase.module.scss'
-import { defineComponent } from 'vue'
+import { defineComponent, markRaw } from 'vue'
 import { PhCompass } from '@phosphor-icons/vue'
 import { componentProps } from './EmptyState.props'
-import { markRawValue } from '@/utils/markRawValue'
 
 export default defineComponent({
   name: 'EmptyStateBase',
-  components: {},
   props: componentProps,
   data() {
-    return { style: mergeStyles(sharedStyle, style), PhCompass: markRawValue(PhCompass) }
+    return { style, PhCompass: markRaw(PhCompass) }
   },
 })
 </script>

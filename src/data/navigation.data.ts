@@ -18,14 +18,12 @@ export const navigation: NavItem[] = [
   { label: 'Архив', to: '/archive', icon: PhArchive },
 ]
 export const tripNavigation = [
-  { label: 'Обзор', path: 'overview' },
   { label: 'Сегодня', path: 'today' },
   { label: 'План поездки', path: 'plan' },
   { label: 'Места', path: 'places' },
   { label: 'Чек-листы', path: 'checklists' },
   { label: 'Расходы', path: 'expenses' },
   { label: 'Участники', path: 'participants' },
-  { label: 'Информация', path: 'information' },
 ]
 export const expenseCategories = [
   'Проживание',

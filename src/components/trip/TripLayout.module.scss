@@ -5,6 +5,23 @@
   justify-content: space-between;
   margin: calc(var(--space-2) * -1) 0 var(--space-5);
   font-size: var(--text-xs);
+
+  @include below(600px) {
+    > a:last-child {
+      font-size: var(--text-xs);
+    }
+
+    flex-wrap: wrap;
+    gap: var(--space-3);
+
+    > a:last-child {
+      font-size: var(--text-sm);
+    }
+
+    > :is(button, a) {
+      display: none;
+    }
+  }
 }
 
 .readonly {
@@ -31,6 +48,24 @@
     background:
       linear-gradient(90deg, #172b25a6, #172b2522), linear-gradient(0deg, #172b2555, transparent);
   }
+
+  @include below(600px) {
+    height: auto;
+    min-height: 240px;
+    padding: var(--space-18) var(--space-5) var(--space-6);
+  }
+
+  @include below(360px) {
+    padding-inline: var(--space-4);
+  }
+
+  > span {
+    position: absolute;
+    right: var(--space-6);
+    top: var(--space-5);
+    background: #ffffffed;
+    color: var(--primary);
+  }
 }
 
 .tripHeroContent {
@@ -41,6 +76,11 @@
     margin: var(--space-2) 0 var(--space-4);
     color: white;
     letter-spacing: -1px;
+
+    @include below(600px) {
+      font-size: var(--text-3xl);
+      overflow-wrap: anywhere;
+    }
   }
 }
 
@@ -61,14 +101,15 @@
   span {
     @include flex(var(--space-2));
   }
-}
 
-.tripHero > span {
-  position: absolute;
-  right: var(--space-6);
-  top: var(--space-5);
-  background: #ffffffed;
-  color: var(--primary);
+  @include below(600px) {
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  @include below(360px) {
+    font-size: var(--text-xs);
+  }
 }
 
 .heroMembers {
@@ -80,6 +121,10 @@
   span {
     border: 2px solid white;
     margin-left: calc(var(--space-1) * -1);
+  }
+
+  @include below(1050px) {
+    display: none;
   }
 }
 
@@ -101,87 +146,23 @@
       border-bottom-color: var(--primary);
       font-weight: 600;
     }
+
+    @include below(1200px) {
+      padding: var(--space-4) var(--space-3);
+    }
+
+    @include below(600px) {
+      min-height: 48px;
+      font-size: var(--text-sm);
+      padding: var(--space-4);
+    }
+  }
+
+  @include below(1200px) {
+    gap: 0;
   }
 }
 
 .tripContent {
   min-height: 260px;
-}
-
-@include below(1200px) {
-  .tripTabs {
-    gap: 0;
-
-    a {
-      padding: var(--space-4) var(--space-3);
-    }
-  }
-}
-
-@include below(1050px) {
-  .heroMembers {
-    display: none;
-  }
-}
-
-@include below(600px) {
-  .tripHero {
-    height: 200px;
-    padding: var(--space-6);
-  }
-
-  .tripHeroContent h1 {
-    font-size: var(--text-3xl);
-  }
-
-  .heroMeta {
-    gap: var(--space-3);
-    flex-wrap: wrap;
-  }
-
-  .tripBackRow > :is(button, a) {
-    display: none;
-  }
-
-  .tripBackRow > a:last-child {
-    font-size: var(--text-xs);
-  }
-}
-
-@include below(600px) {
-  .tripHero {
-    height: auto;
-    min-height: 240px;
-    padding: var(--space-18) var(--space-5) var(--space-6);
-  }
-
-  .tripHeroContent h1 {
-    font-size: var(--text-3xl);
-    overflow-wrap: anywhere;
-  }
-
-  .tripBackRow {
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-
-  .tripBackRow > a:last-child {
-    font-size: var(--text-sm);
-  }
-
-  .tripTabs a {
-    min-height: 48px;
-    font-size: var(--text-sm);
-    padding: var(--space-4);
-  }
-}
-
-@include below(360px) {
-  .tripHero {
-    padding-inline: var(--space-4);
-  }
-
-  .heroMeta {
-    font-size: var(--text-xs);
-  }
 }

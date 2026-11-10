@@ -1,12 +1,16 @@
-.uiBadgeGreen {
-  background: var(--primary-soft);
-  color: var(--primary);
-}
-.uiBadgeNeutral {
-  background: #f0f1ed;
-  color: #757c73;
-}
-.uiBadgeOrange {
-  background: #fbefdf;
-  color: #a4773f;
+.uiBadge {
+  &Green {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+
+  &Neutral {
+    background: #f0f1ed;
+    color: #757c73;
+  }
+
+  &Orange {
+    background: #fbefdf;
+    color: #a4773f;
+  }
 }

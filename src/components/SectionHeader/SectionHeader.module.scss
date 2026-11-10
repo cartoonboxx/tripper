@@ -1,0 +1,61 @@
+@use '@/styles/mixins' as *;
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+
+  .content {
+    min-width: 0;
+  }
+
+  .heading {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .paragraph {
+    margin: var(--space-1) 0 0;
+    color: var(--muted);
+    font-size: var(--text-sm);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  &.pageHeader {
+    align-items: center;
+    gap: var(--space-6);
+    margin-bottom: var(--space-8);
+
+    .paragraph {
+      margin-top: var(--space-2);
+    }
+
+    @include below(600px) {
+      align-items: stretch;
+      flex-direction: column;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+
+      .heading {
+        font-size: var(--text-2xl);
+      }
+
+      .actions {
+        width: 100%;
+
+        > :is(button, a) {
+          width: 100%;
+        }
+      }
+    }
+  }
+}

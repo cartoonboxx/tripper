@@ -1,33 +1,33 @@
 <script lang="ts">
-import { mergeStyles } from '@/utils/mergeStyles'
 import InputBase from './InputBase.vue'
-import sharedStyle from '@/styles/shared.module.scss'
 import style from './InputStyle.module.scss'
 import { defineComponent } from 'vue'
 import { componentProps } from './Input.props'
 
 export default defineComponent({
   name: 'Input',
-  inheritAttrs: false,
   components: { InputBase },
   props: componentProps,
   emits: ['update:modelValue'],
   data() {
-    return { style: mergeStyles(sharedStyle, style) }
+    return { style }
   },
 })
 </script>
 <template>
   <InputBase
     @update:model-value="$emit('update:modelValue', $event)"
-    v-bind="{ ...$props, ...$attrs }"
+    v-bind="$props"
     :appearance="style">
     <template
-      v-for="(_, name) in $slots"
-      #[name]="scope">
-      <slot
-        :name="name"
-        v-bind="scope || {}" />
+      v-if="$slots.prefix"
+      #prefix>
+      <slot name="prefix" />
+    </template>
+    <template
+      v-if="$slots.suffix"
+      #suffix>
+      <slot name="suffix" />
     </template>
   </InputBase>
 </template>

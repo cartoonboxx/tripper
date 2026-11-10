@@ -1,32 +1,46 @@
-.uiTabPill {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--muted);
-  &.isActive {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
+.uiTab {
+  &Pill {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--muted);
+
+    &.isActive {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
   }
-}
-.uiTabLine {
-  background: transparent;
-  border-radius: var(--radius-0);
-  border-bottom: 2px solid transparent;
-  color: var(--muted);
-  &.isActive {
-    color: var(--primary);
-    border-bottom-color: var(--primary);
-    font-weight: 600;
+
+  &Line {
+    background: transparent;
+    border-radius: var(--radius-0);
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+
+    &.isActive {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      font-weight: 600;
+    }
   }
-}
-.uiTabVertical {
-  background: transparent;
-  color: var(--text);
-  justify-content: space-between;
-  width: 100%;
-  &.isActive {
-    background: var(--primary-soft);
-    color: var(--primary);
-    font-weight: 550;
+
+  &Vertical {
+    background: transparent;
+    color: var(--text);
+    justify-content: space-between;
+    width: 100%;
+    transition: background 0.15s;
+
+    @media (hover: hover) and (pointer: fine) {
+      &:hover:not(:disabled):not(.isActive) {
+        background: var(--background);
+      }
+    }
+
+    &.isActive {
+      background: var(--primary-soft);
+      color: var(--primary);
+      font-weight: 550;
+    }
   }
 }

@@ -2,10 +2,12 @@
   background: var(--surface);
   border-color: var(--border);
 }
+
 .uiCardInteractive {
   transition:
     box-shadow 0.2s,
     transform 0.2s;
+
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       box-shadow: var(--shadow);
