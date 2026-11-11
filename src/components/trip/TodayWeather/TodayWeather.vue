@@ -1,3 +1,50 @@
+<template>
+  <Card :class="style.weather">
+    <div :class="style.heading">
+      <div>
+        <h2>Погода сегодня</h2>
+        <p>
+          <PhMapPin :size="15" />
+          По вашему местоположению
+        </p>
+      </div>
+      <Button
+        variant="ghost"
+        size="sm"
+        :disabled="loading"
+        @click="loadWeather">
+        {{ loading ? 'Загрузка…' : 'Обновить погоду' }}
+      </Button>
+    </div>
+    <div
+      v-if="forecast"
+      :class="style.forecast">
+      <component
+        :is="condition.icon"
+        :size="36" />
+      <strong>{{ forecast.temperature }}°C</strong>
+      <div>
+        <p>{{ condition.label }}</p>
+        <span>
+          Сегодня от {{ forecast.low }}° до {{ forecast.high }}° · Осадки
+          {{ forecast.precipitation }}%
+        </span>
+      </div>
+    </div>
+    <p
+      v-else
+      :class="style.message">
+      {{ loading ? 'Определяем местоположение и загружаем прогноз…' : error }}
+    </p>
+    <a
+      href="https://open-meteo.com/"
+      target="_blank"
+      rel="noopener noreferrer"
+      :class="style.source">
+      Данные Open-Meteo
+    </a>
+  </Card>
+</template>
 <script lang="ts">
 import { defineComponent, markRaw } from 'vue'
 import { PhMapPin } from '@phosphor-icons/vue'
@@ -98,50 +145,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <Card :class="style.weather">
-    <div :class="style.heading">
-      <div>
-        <h2>Погода сегодня</h2>
-        <p>
-          <PhMapPin :size="15" />
-          По вашему местоположению
-        </p>
-      </div>
-      <Button
-        variant="ghost"
-        size="sm"
-        :disabled="loading"
-        @click="loadWeather">
-        {{ loading ? 'Загрузка…' : 'Обновить погоду' }}
-      </Button>
-    </div>
-    <div
-      v-if="forecast"
-      :class="style.forecast">
-      <component
-        :is="condition.icon"
-        :size="36" />
-      <strong>{{ forecast.temperature }}°C</strong>
-      <div>
-        <p>{{ condition.label }}</p>
-        <span>
-          Сегодня от {{ forecast.low }}° до {{ forecast.high }}° · Осадки
-          {{ forecast.precipitation }}%
-        </span>
-      </div>
-    </div>
-    <p
-      v-else
-      :class="style.message">
-      {{ loading ? 'Определяем местоположение и загружаем прогноз…' : error }}
-    </p>
-    <a
-      href="https://open-meteo.com/"
-      target="_blank"
-      rel="noopener noreferrer"
-      :class="style.source">
-      Данные Open-Meteo
-    </a>
-  </Card>
-</template>

@@ -1,3 +1,11 @@
+<template>
+  <CardBase
+    v-bind="$props"
+    :appearance="style"
+    :class="[interactive && style.uiCardInteractive]">
+    <slot />
+  </CardBase>
+</template>
 <script lang="ts">
 import CardBase from './CardBase.vue'
 import style from './CardStyle.module.scss'
@@ -13,11 +21,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <CardBase
-    v-bind="$props"
-    :appearance="style"
-    :class="[interactive && style.uiCardInteractive]">
-    <slot />
-  </CardBase>
-</template>

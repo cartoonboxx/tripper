@@ -1,85 +1,3 @@
-<script lang="ts">
-import sharedStyle from '@/styles/shared.module.scss'
-import style from './AppLayout.module.scss'
-import { defineComponent } from 'vue'
-import {
-  PhSquaresFour,
-  PhBell,
-  PhCaretDown,
-  PhCaretRight,
-  PhCompass,
-  PhGearSix,
-  PhArrowRight,
-  PhSun,
-  PhWifiSlash,
-} from '@phosphor-icons/vue'
-import { Button, Avatar, Modal } from '@/components/ui'
-import MobileNavigation from './MobileNavigation/MobileNavigation.vue'
-import { navigation } from '@/data/navigation.data'
-import { useTravelStore } from '@/stores/travel'
-import { markRawValue } from '@/utils/markRawValue'
-
-export default defineComponent({
-  name: 'AppLayout',
-  components: {
-    PhSquaresFour,
-    PhBell,
-    PhCaretDown,
-    PhCaretRight,
-    PhCompass,
-    PhGearSix,
-    PhArrowRight,
-    PhSun,
-    PhWifiSlash,
-    Button,
-    Avatar,
-    Modal,
-    MobileNavigation,
-  },
-  data() {
-    return {
-      sharedStyle,
-      style,
-      notifications: false,
-      online: navigator.onLine,
-      PhBell: markRawValue(PhBell),
-      PhCaretDown: markRawValue(PhCaretDown),
-      PhCaretRight: markRawValue(PhCaretRight),
-      PhCompass: markRawValue(PhCompass),
-      PhGearSix: markRawValue(PhGearSix),
-      PhArrowRight: markRawValue(PhArrowRight),
-      PhSun: markRawValue(PhSun),
-      PhWifiSlash: markRawValue(PhWifiSlash),
-      navigation: markRawValue(navigation),
-    }
-  },
-  computed: {
-    store(): ReturnType<typeof useTravelStore> {
-      return useTravelStore()
-    },
-    route() {
-      return this.$route
-    },
-  },
-  methods: {
-    isCurrent(to: string) {
-      return to === '/' ? this.route.path === '/' : this.route.path.startsWith(to)
-    },
-    updateOnline() {
-      this.online = navigator.onLine
-    },
-  },
-  mounted() {
-    window.addEventListener('online', this.updateOnline)
-    window.addEventListener('offline', this.updateOnline)
-  },
-  beforeUnmount() {
-    window.removeEventListener('online', this.updateOnline)
-    window.removeEventListener('offline', this.updateOnline)
-  },
-})
-</script>
-
 <template>
   <div :class="style.appLayout">
     <aside :class="style.sidebar">
@@ -130,7 +48,7 @@ export default defineComponent({
           <span>.</span>
         </AppLink>
         <div :class="style.topbarBreadcrumb">
-          <span>Моё пространство</span>
+          <span>Навигация</span>
           <PhCaretRight :size="16" />
           <span :class="style.breadcrumbCurrent">{{ route.meta.section || 'Поездки' }}</span>
         </div>
@@ -150,15 +68,36 @@ export default defineComponent({
               :class="style.notificationDot" />
           </Button>
           <span :class="style.topbarDivider" />
-          <AppLink
-            to="/settings"
-            :class="style.profileLink">
-            <Avatar
-              :name="store.profile.name"
-              color="#e9dfcf" />
-            <span>{{ store.profile.name }}</span>
-            <PhCaretDown :size="16" />
-          </AppLink>
+          <FloatingPopup
+            v-model:open="userPopup"
+            placement="bottom-end">
+            <template #target>
+              <div :class="style.profileButton">
+                <Avatar
+                  :name="store.profile.name"
+                  color="#e9dfcf" />
+                <span :class="style.profileName">{{ store.profile.name }}</span>
+                <PhCaretDown
+                  :size="16"
+                  :class="[style.profileCaret, userPopup && style.isOpen]" />
+              </div>
+            </template>
+            <template #default="{ close }">
+              <Button
+                to="/settings"
+                variant="ghost"
+                @click="close">
+                <PhUser :size="20" />
+                Открыть профиль
+              </Button>
+              <Button
+                variant="danger"
+                @click="signOut">
+                <PhSignOut :size="20" />
+                Выйти
+              </Button>
+            </template>
+          </FloatingPopup>
         </div>
       </header>
       <div
@@ -193,3 +132,101 @@ export default defineComponent({
     </Modal>
   </div>
 </template>
+
+<script lang="ts">
+import sharedStyle from '@/styles/shared.module.scss'
+import style from './AppLayout.module.scss'
+import { defineComponent } from 'vue'
+import {
+  PhSquaresFour,
+  PhBell,
+  PhCaretDown,
+  PhCaretRight,
+  PhCompass,
+  PhGearSix,
+  PhArrowRight,
+  PhSun,
+  PhWifiSlash,
+  PhUser,
+  PhSignOut,
+} from '@phosphor-icons/vue'
+import { Button, Avatar, Modal, FloatingPopup } from '@/components/ui'
+import MobileNavigation from './MobileNavigation/MobileNavigation.vue'
+import { navigation } from '@/data/navigation.data'
+import { useTravelStore } from '@/stores/travel'
+import { markRawValue } from '@/utils/markRawValue'
+
+export default defineComponent({
+  name: 'AppLayout',
+  components: {
+    FloatingPopup,
+    PhSquaresFour,
+    PhBell,
+    PhCaretDown,
+    PhCaretRight,
+    PhCompass,
+    PhGearSix,
+    PhArrowRight,
+    PhSun,
+    PhWifiSlash,
+    PhUser,
+    PhSignOut,
+    Button,
+    Avatar,
+    Modal,
+    MobileNavigation,
+  },
+  data() {
+    return {
+      sharedStyle,
+      style,
+      notifications: false,
+      userPopup: false,
+      online: navigator.onLine,
+      PhBell: markRawValue(PhBell),
+      PhCaretDown: markRawValue(PhCaretDown),
+      PhCaretRight: markRawValue(PhCaretRight),
+      PhCompass: markRawValue(PhCompass),
+      PhGearSix: markRawValue(PhGearSix),
+      PhArrowRight: markRawValue(PhArrowRight),
+      PhSun: markRawValue(PhSun),
+      PhWifiSlash: markRawValue(PhWifiSlash),
+      navigation: markRawValue(navigation),
+    }
+  },
+  computed: {
+    store(): ReturnType<typeof useTravelStore> {
+      return useTravelStore()
+    },
+    route() {
+      return this.$route
+    },
+  },
+  watch: {
+    '$route.fullPath'() {
+      this.userPopup = false
+    },
+  },
+  methods: {
+    signOut() {
+      this.userPopup = false
+      this.store.session = false
+      this.$router.push('/login')
+    },
+    isCurrent(to: string) {
+      return to === '/' ? this.route.path === '/' : this.route.path.startsWith(to)
+    },
+    updateOnline() {
+      this.online = navigator.onLine
+    },
+  },
+  mounted() {
+    window.addEventListener('online', this.updateOnline)
+    window.addEventListener('offline', this.updateOnline)
+  },
+  beforeUnmount() {
+    window.removeEventListener('online', this.updateOnline)
+    window.removeEventListener('offline', this.updateOnline)
+  },
+})
+</script>

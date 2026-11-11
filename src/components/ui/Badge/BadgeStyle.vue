@@ -1,3 +1,11 @@
+<template>
+  <BadgeBase
+    v-bind="$props"
+    :appearance="style"
+    :class="appearanceClass">
+    <slot />
+  </BadgeBase>
+</template>
 <script lang="ts">
 import BadgeBase from './BadgeBase.vue'
 import style from './BadgeStyle.module.scss'
@@ -24,11 +32,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <BadgeBase
-    v-bind="$props"
-    :appearance="style"
-    :class="appearanceClass">
-    <slot />
-  </BadgeBase>
-</template>

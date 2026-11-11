@@ -1,0 +1,122 @@
+.settingsPage {
+  max-width: 840px;
+}
+
+.settingsCard {
+  padding: var(--space-7);
+  margin-bottom: var(--space-6);
+
+  @media (max-width: 600px) {
+    padding: var(--space-5);
+  }
+}
+
+.settingsSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  color: var(--primary);
+
+  h3 {
+    margin: 0;
+    font-size: var(--text-md);
+    color: var(--text);
+  }
+}
+
+.settingsAvatar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+  margin: var(--space-1) 0 var(--space-8);
+
+  strong {
+    font-size: var(--text-base);
+  }
+
+  p {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    margin: var(--space-2) 0 0;
+  }
+}
+
+.settingsPreference,
+.settingsAccountRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-6);
+  margin-top: var(--space-1);
+
+  strong {
+    font-size: var(--text-sm);
+    font-weight: 550;
+  }
+
+  p {
+    font-size: var(--text-xs);
+    color: var(--muted);
+    margin: var(--space-2) 0 0;
+  }
+}
+
+.settingsAccountRow {
+  margin-top: var(--space-6);
+
+  @media (max-width: 600px) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+.categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.customCategories {
+  list-style: none;
+  padding: 0;
+  margin: var(--space-5) 0 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+
+    > span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-size: var(--text-sm);
+    }
+
+    button {
+      flex-shrink: 0;
+    }
+  }
+}
+
+.categoryForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+
+  @media (max-width: 600px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.categoryError {
+  grid-column: 1 / -1;
+  margin: 0;
+}

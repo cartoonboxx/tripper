@@ -1,5 +1,5 @@
 import type { Component } from 'vue'
-export type TripStatus = 'upcoming' | 'active' | 'completed'
+export type TripStatus = 'upcoming' | 'active'
 export type MemberRole = 'organizer' | 'viewer'
 export interface Trip {
   id: string

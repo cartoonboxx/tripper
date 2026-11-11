@@ -1,40 +1,3 @@
-<script lang="ts">
-import style from './MobileNavigation.module.scss'
-import { defineComponent } from 'vue'
-import { PhDotsThree, PhCaretRight } from '@phosphor-icons/vue'
-import { Modal } from '@/components/ui'
-import { mobileNavigation, moreNavigation } from '@/data/navigation.data'
-import { markRawValue } from '@/utils/markRawValue'
-
-export default defineComponent({
-  name: 'MobileNavigation',
-  components: { PhDotsThree, PhCaretRight, Modal },
-  data() {
-    return {
-      style,
-      moreOpen: false,
-      PhDotsThree: markRawValue(PhDotsThree),
-      PhCaretRight: markRawValue(PhCaretRight),
-      mobileNavigation: markRawValue(mobileNavigation),
-      moreNavigation: markRawValue(moreNavigation),
-    }
-  },
-  computed: {
-    route() {
-      return this.$route
-    },
-    moreActive() {
-      return this.moreNavigation.some((item) => this.isCurrent(item.to))
-    },
-  },
-  methods: {
-    isCurrent(to: string) {
-      return to === '/' ? this.route.path === '/' : this.route.path.startsWith(to)
-    },
-  },
-})
-</script>
-
 <template>
   <nav :class="style.mobileNavigation">
     <AppLink
@@ -82,3 +45,40 @@ export default defineComponent({
     </nav>
   </Modal>
 </template>
+
+<script lang="ts">
+import style from './MobileNavigation.module.scss'
+import { defineComponent } from 'vue'
+import { PhDotsThree, PhCaretRight } from '@phosphor-icons/vue'
+import { Modal } from '@/components/ui'
+import { mobileNavigation, moreNavigation } from '@/data/navigation.data'
+import { markRawValue } from '@/utils/markRawValue'
+
+export default defineComponent({
+  name: 'MobileNavigation',
+  components: { PhDotsThree, PhCaretRight, Modal },
+  data() {
+    return {
+      style,
+      moreOpen: false,
+      PhDotsThree: markRawValue(PhDotsThree),
+      PhCaretRight: markRawValue(PhCaretRight),
+      mobileNavigation: markRawValue(mobileNavigation),
+      moreNavigation: markRawValue(moreNavigation),
+    }
+  },
+  computed: {
+    route() {
+      return this.$route
+    },
+    moreActive() {
+      return this.moreNavigation.some((item) => this.isCurrent(item.to))
+    },
+  },
+  methods: {
+    isCurrent(to: string) {
+      return to === '/' ? this.route.path === '/' : this.route.path.startsWith(to)
+    },
+  },
+})
+</script>

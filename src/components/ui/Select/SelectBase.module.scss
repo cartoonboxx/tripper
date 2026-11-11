@@ -31,7 +31,7 @@
     appearance: none;
     border-width: 1px;
     border-style: solid;
-    border-radius: var(--radius-4);
+    border-radius: var(--radius-6);
     font: inherit;
     font-size: var(--field-font-size);
     line-height: 1.5;
@@ -42,6 +42,7 @@
 
 .selectControl {
   position: relative;
+  width: 100%;
 
   .caret {
     position: absolute;
@@ -49,5 +50,56 @@
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
+
+    &.isOpen {
+      transform: translateY(-50%) rotate(180deg);
+    }
   }
+}
+
+.options {
+  max-height: min(320px, 45dvh);
+  overflow-y: auto;
+}
+
+.option {
+  &.isSelected {
+    font-weight: 500;
+  }
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--space-11);
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  font: inherit;
+  font-size: var(--text-sm);
+  text-align: left;
+  cursor: pointer;
+
+  span {
+    overflow-wrap: anywhere;
+  }
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &:focus-visible {
+    outline-offset: calc(-1 * var(--space-1));
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.empty {
+  padding: var(--space-4);
+  color: var(--muted);
+  font-size: var(--text-sm);
 }

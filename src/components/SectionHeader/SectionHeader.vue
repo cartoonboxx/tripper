@@ -1,19 +1,3 @@
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue'
-import style from './SectionHeader.module.scss'
-
-export default defineComponent({
-  name: 'SectionHeader',
-  props: {
-    header: { type: String, required: true },
-    paragraph: { type: String, default: '' },
-    level: { type: String as PropType<'h1' | 'h2' | 'h3'>, default: 'h2' },
-  },
-  data() {
-    return { style }
-  },
-})
-</script>
 <template>
   <header :class="[style.sectionHeader, level === 'h1' && style.pageHeader]">
     <div :class="style.content">
@@ -35,3 +19,19 @@ export default defineComponent({
     </div>
   </header>
 </template>
+<script lang="ts">
+import { defineComponent, type PropType } from 'vue'
+import style from './SectionHeader.module.scss'
+
+export default defineComponent({
+  name: 'SectionHeader',
+  props: {
+    header: { type: String, required: true },
+    paragraph: { type: String, default: '' },
+    level: { type: String as PropType<'h1' | 'h2' | 'h3'>, default: 'h2' },
+  },
+  data() {
+    return { style }
+  },
+})
+</script>

@@ -1,0 +1,33 @@
+import { expect, test } from '@playwright/test'
+
+for (const width of [1280, 375, 320]) {
+  test(`FloatingPopup actions, dismissal and bounds at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 })
+    await page.goto('/ui-kit')
+    const trigger = page.getByRole('button', { name: 'Действия', exact: true })
+    const popup = page.locator('#floating-popups [popover]')
+    await trigger.locator('span').click()
+    await expect(popup).toBeVisible()
+    await expect(popup.getByRole('button', { name: 'Редактировать поездку' })).toBeFocused()
+    await expect(popup.getByRole('button', { name: 'Архивировать поездку' })).toBeDisabled()
+    const bounds = await popup.boundingBox()
+    expect(bounds!.x).toBeGreaterThanOrEqual(0)
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width)
+    expect(bounds!.y).toBeGreaterThanOrEqual(0)
+    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(width <= 600 ? 724 : 800)
+    await page.keyboard.press('Escape')
+    await expect(popup).toBeHidden()
+    await expect(trigger).toBeFocused()
+    await trigger.press('Enter')
+    await popup.getByRole('button', { name: 'Копировать ссылку' }).click()
+    await expect(popup).toBeHidden()
+    await expect(page.getByText('Выбрано: Копировать ссылку', { exact: true })).toBeVisible()
+    await expect(trigger).toBeFocused()
+    await trigger.click()
+    await page.getByRole('heading', { name: 'FloatingPopup', exact: true }).click()
+    await expect(popup).toBeHidden()
+    await trigger.click()
+    await trigger.click()
+    await expect(popup).toBeHidden()
+  })
+}

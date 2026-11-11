@@ -3,7 +3,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { defineComponent, nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
 import { useTravelStore } from '@/stores/travel'
-import { initialPlaces } from '@/data/trips.data'
+import { imageAssets, initialTrips, initialEvents, initialPlaces } from '@/data/trips.data'
 
 beforeEach(() => {
   localStorage.clear()
@@ -146,6 +146,92 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
+describe('archived trips', () => {
+  for (const namespace of ['tripper', 'tripplan']) {
+    it(`migrates completed trips from ${namespace} without losing their data`, async () => {
+      const legacyTrip = { ...initialTrips[0]!, status: 'completed', archived: false }
+      const upcomingTrip = initialTrips[1]!
+      localStorage.setItem(`${namespace}:trips`, JSON.stringify([legacyTrip, upcomingTrip]))
+      const store = useTravelStore()
+      expect(store.trips[0]).toEqual({ ...legacyTrip, status: 'upcoming', archived: true })
+      expect(store.trips[1]).toEqual(upcomingTrip)
+      expect(store.events).toEqual(initialEvents)
+      expect(store.placesForTrip(legacyTrip.id)).not.toHaveLength(0)
+      expect(JSON.parse(localStorage.getItem('tripper:trips')!)[0].archived).toBe(true)
+
+      // Restoring a migrated trip must survive future reloads.
+      store.trips[0]!.archived = false
+      await nextTick()
+      setActivePinia(createPinia())
+      expect(useTravelStore().trips[0]).toEqual({
+        ...legacyTrip,
+        status: 'upcoming',
+        archived: false,
+      })
+    })
+  }
+
+  it('starts with past sample trips in the archive', () => {
+    const trip = useTravelStore().trips.find((trip) => trip.id === 'petersburg')!
+    expect(trip.archived).toBe(true)
+    expect(trip.status).toBe('upcoming')
+  })
+})
+
+describe('state restoration', () => {
+  it('falls back to defaults for broken JSON and incompatible stored values', () => {
+    localStorage.setItem('tripper:trips', '{broken')
+    localStorage.setItem('tripper:events', '{}')
+    localStorage.setItem('tripper:profile', 'null')
+    localStorage.setItem('tripper:session', '[]')
+    const store = useTravelStore()
+    expect(store.trips).toEqual(initialTrips)
+    expect(store.events).toEqual(initialEvents)
+    expect(store.profile.name).toBe('Александр')
+    expect(store.session).toBe(false)
+  })
+
+  it('refreshes saved build image URLs and keeps external images', () => {
+    localStorage.setItem(
+      'tripper:trips',
+      JSON.stringify([
+        { ...initialTrips[0], image: '/assets/florence-oldhash.jpg' },
+        { ...initialTrips[1], image: 'https://example.com/custom.jpg' },
+      ]),
+    )
+    localStorage.setItem(
+      'tripper:events',
+      JSON.stringify([{ ...initialEvents[0], image: '/assets/garden-oldhash.jpg' }]),
+    )
+    localStorage.setItem(
+      'tripper:places',
+      JSON.stringify([
+        { ...initialPlaces[0], image: '/assets/gallery-oldhash.jpg' },
+        { ...initialPlaces[1], image: 'data:image/png;base64,foodgallery' },
+      ]),
+    )
+    const store = useTravelStore()
+    expect(store.trips[0]!.image).toBe(imageAssets.florence)
+    expect(store.trips[1]!.image).toBe('https://example.com/custom.jpg')
+    expect(store.events[0]!.image).toBe(imageAssets.garden)
+    expect(store.places[0]!.image).toBe(imageAssets.gallery)
+    expect(store.places[1]!.image).toBe('data:image/png;base64,foodgallery')
+  })
+
+  it('uses current place links over legacy links and drops missing places', () => {
+    localStorage.setItem(
+      'tripper:places',
+      JSON.stringify([{ ...initialPlaces[0], tripId: 'florence' }]),
+    )
+    const link = { placeId: initialPlaces[0]!.id, tripId: 'altai' }
+    localStorage.setItem(
+      'tripper:tripPlaces',
+      JSON.stringify([link, { placeId: 'missing', tripId: 'florence' }]),
+    )
+    expect(useTravelStore().tripPlaces).toEqual([link])
+  })
+})
+
 describe('option store persistence', () => {
   it('initializes once and persists only changed durable fields', async () => {
     const write = vi.spyOn(Storage.prototype, 'setItem')
@@ -200,5 +286,54 @@ describe('option store persistence', () => {
     expect(store.toast).toBe('Второе')
     await vi.advanceTimersByTimeAsync(3000)
     expect(store.toast).toBe('')
+  })
+})
+
+describe('custom categories', () => {
+  it('normalizes names, rejects duplicates within each domain and persists additions', async () => {
+    const store = useTravelStore()
+    expect(store.addCategory('expenses', '  Страховка   и визы  ')).toBe(true)
+    expect(store.addCategory('expenses', 'страховка и ВИЗЫ')).toBe(false)
+    expect(store.addCategory('events', 'Страховка и визы')).toBe(true)
+    expect(store.addCategory('places', '   ')).toBe(false)
+    await nextTick()
+    setActivePinia(createPinia())
+    expect(useTravelStore().categoryOptions('expenses')).toContainEqual({
+      label: 'Страховка и визы',
+      value: 'Страховка и визы',
+    })
+  })
+
+  it('deletes custom categories without changing records or resurrecting them on reload', async () => {
+    const store = useTravelStore()
+    store.addCategory('places', 'Галерея')
+    store.places[0]!.category = 'Галерея'
+    expect(store.removeCategory('places', 'Музей')).toBe(false)
+    expect(store.removeCategory('places', 'Галерея')).toBe(true)
+    expect(store.removeCategory('places', 'Галерея')).toBe(false)
+    expect(store.places[0]!.category).toBe('Галерея')
+    await nextTick()
+    setActivePinia(createPinia())
+    const restored = useTravelStore()
+    expect(restored.categories.places).not.toContain('Галерея')
+    expect(restored.places[0]!.category).toBe('Галерея')
+    expect(restored.addCategory('places', 'Галерея')).toBe(true)
+  })
+
+  it('restores used categories and ignores malformed saved lists', () => {
+    localStorage.setItem(
+      'tripper:categories',
+      JSON.stringify({ expenses: [null, 4, ' Тест ', 'тест'], places: 'invalid' }),
+    )
+    localStorage.setItem(
+      'tripper:places',
+      JSON.stringify([{ ...initialPlaces[0], category: 'Галерея' }]),
+    )
+    const store = useTravelStore()
+    expect(
+      store.categories.expenses.filter((category) => category.toLowerCase() === 'тест'),
+    ).toEqual(['Тест'])
+    expect(store.categories.places).toContain('Галерея')
+    expect(store.categories.places).toContain('Парк')
   })
 })

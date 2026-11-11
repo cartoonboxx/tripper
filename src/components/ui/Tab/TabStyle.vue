@@ -1,3 +1,11 @@
+<template>
+  <TabBase
+    v-bind="$props"
+    :appearance="style"
+    :class="appearanceClasses">
+    <slot />
+  </TabBase>
+</template>
 <script lang="ts">
 import TabBase from './TabBase.vue'
 import style from './TabStyle.module.scss'
@@ -24,11 +32,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <TabBase
-    v-bind="$props"
-    :appearance="style"
-    :class="appearanceClasses">
-    <slot />
-  </TabBase>
-</template>

@@ -1,0 +1,54 @@
+.control {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+
+  &:focus-within {
+    border-color: var(--focus);
+    box-shadow: var(--field-focus-shadow);
+  }
+
+  &:has(input:disabled) {
+    background: var(--background);
+    color: var(--muted);
+    opacity: 0.6;
+  }
+
+  &.invalid {
+    border-color: var(--danger);
+  }
+}
+
+.picker {
+  color: var(--text);
+  background: var(--surface);
+
+  button {
+    @media (hover: hover) and (pointer: fine) {
+      &:hover:not(:disabled) {
+        background: var(--background);
+      }
+    }
+
+    &.today {
+      box-shadow: inset 0 0 0 1px var(--primary);
+    }
+
+    &.selected,
+    &.confirm {
+      color: white;
+      background: var(--primary);
+      opacity: 1;
+
+      @media (hover: hover) and (pointer: fine) {
+        &:hover:not(:disabled) {
+          background: var(--primary-hover);
+        }
+      }
+    }
+  }
+}
+
+.error {
+  color: var(--danger);
+}

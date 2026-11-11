@@ -2,9 +2,9 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { nextTick } from 'vue'
-import Checklists from '@/pages/Checklists/ChecklistsComponent.vue'
-import Expenses from '@/pages/Expenses/ExpensesComponent.vue'
-import Places from '@/pages/Places/PlacesComponent.vue'
+import Checklists from '@/pages/Checklists/ChecklistsPage.vue'
+import Expenses from '@/pages/Expenses/ExpensesPage.vue'
+import Places from '@/pages/Places/PlacesPage.vue'
 import { useTravelStore } from '@/stores/travel'
 
 const tripPage = {
@@ -63,7 +63,6 @@ describe('page actions', () => {
     general.vm.addItem()
     const source = general.vm.active!
     source.items[0]!.checked = true
-    general.vm.openAddToTrip()
     general.vm.targetTrip = 'florence'
     general.vm.addToTrip()
     const copy = scoped.vm.lists.find((list) => list.title === source.title)!
@@ -84,6 +83,63 @@ describe('page actions', () => {
     expect(useTravelStore().checklists.find((list) => list.id === copy.id)?.tripId).toBe('florence')
     scoped.unmount()
     general.unmount()
+  })
+
+  it('attaches a personal checklist from the trip page with independent progress', async () => {
+    const store = useTravelStore()
+    store.checklists = [
+      {
+        id: 'personal',
+        tripId: '',
+        title: 'Вещи',
+        items: [{ id: 'passport', title: 'Паспорт', checked: true }],
+      },
+      { id: 'other', tripId: 'altai', title: 'Другой список', items: [] },
+    ]
+    const wrapper = shallowMount(Checklists, { global: tripPage })
+    const page = wrapper.vm
+    expect(page.checklistOptions).toEqual([{ value: 'personal', label: 'Вещи' }])
+    page.openAttach()
+    page.attach()
+    const copy = page.active!
+    expect(copy.tripId).toBe('florence')
+    expect(copy.id).not.toBe('personal')
+    expect(copy.items[0]).toMatchObject({ title: 'Паспорт', checked: false })
+    expect(copy.items[0]!.id).not.toBe('passport')
+    expect(page.attaching).toBe(false)
+    copy.items[0]!.title = 'Загранпаспорт'
+    expect(store.checklists[0]!.items[0]).toEqual({
+      id: 'passport',
+      title: 'Паспорт',
+      checked: true,
+    })
+    await nextTick()
+    setActivePinia(createPinia())
+    expect(useTravelStore().checklists.find((list) => list.id === copy.id)).toMatchObject({
+      tripId: 'florence',
+    })
+    wrapper.unmount()
+  })
+
+  it('rejects attaching trip lists, missing sources and inaccessible trips', () => {
+    const store = useTravelStore()
+    store.checklists = [
+      { id: 'personal', tripId: '', title: 'Вещи', items: [] },
+      { id: 'attached', tripId: 'florence', title: 'Документы', items: [] },
+    ]
+    const originalCount = store.checklists.length
+    expect(store.copyChecklistToTrip('attached', 'altai')).toBeUndefined()
+    expect(store.copyChecklistToTrip('missing', 'florence')).toBeUndefined()
+    expect(store.copyChecklistToTrip('personal', 'missing')).toBeUndefined()
+    store.trips.find((trip) => trip.id === 'florence')!.role = 'viewer'
+    expect(store.copyChecklistToTrip('personal', 'florence')).toBeUndefined()
+    store.trips.find((trip) => trip.id === 'altai')!.archived = true
+    expect(store.copyChecklistToTrip('personal', 'altai')).toBeUndefined()
+    expect(store.checklists).toHaveLength(originalCount)
+    const wrapper = shallowMount(Checklists, { global: tripPage })
+    wrapper.vm.openAttach()
+    expect(wrapper.vm.attaching).toBe(false)
+    wrapper.unmount()
   })
 
   it('filters expenses, calculates totals and preserves store order', async () => {
@@ -137,6 +193,44 @@ describe('page actions', () => {
     wrapper.unmount()
   })
 
+  it('closes stale expense forms when changing trips and cannot save into another trip', async () => {
+    const wrapper = shallowMount(Expenses, {
+      global: { ...tripPage, mocks: { $route: { params: {} } } },
+    })
+    const page = wrapper.vm
+    const count = page.store.expenses.length
+    page.open()
+    page.form.title = 'Старая форма'
+    page.form.amount = '100'
+    page.category = 'Питание'
+    page.expenseTripId = 'altai'
+    await nextTick()
+    expect(page.creating).toBe(false)
+    expect(page.category).toBe('all')
+    page.save()
+    expect(page.store.expenses).toHaveLength(count)
+    page.open()
+    expect(page.form.tripId).toBe('altai')
+    wrapper.unmount()
+  })
+
+  it('allows place editing only in the global library, even for trip organizers', () => {
+    const wrapper = shallowMount(Places, { global: tripPage })
+    const page = wrapper.vm
+    const place = page.store.places[0]!
+    const name = place.name
+    page.open(place)
+    expect(page.creating).toBe(false)
+    page.editing = place
+    page.form.name = 'Изменено из поездки'
+    page.save()
+    expect(place.name).toBe(name)
+    page.deleting = place
+    page.remove()
+    expect(page.store.places).toContainEqual(place)
+    wrapper.unmount()
+  })
+
   it('shows only attached checklists in the trip and reacts to attachment changes', () => {
     const store = useTravelStore()
     store.checklists = [
@@ -154,7 +248,9 @@ describe('page actions', () => {
   })
 
   it('keeps place edits separate until save and resets the next creation form', () => {
-    const wrapper = shallowMount(Places, { global: tripPage })
+    const wrapper = shallowMount(Places, {
+      global: { ...tripPage, mocks: { $route: { params: {} } } },
+    })
     const page = wrapper.vm
     const existing = page.store.placesForTrip('florence')[0]!
     const originalName = existing.name
@@ -170,15 +266,15 @@ describe('page actions', () => {
     page.save()
     const created = page.store.places[page.store.places.length - 1]!
     expect(created).toMatchObject({ name: 'Новое место' })
+    expect(page.store.placesForTrip('florence')).not.toContainEqual(created)
+    page.detail = created
+    page.store.addPlaceToTrip(created.id, 'florence')
     expect(page.store.placesForTrip('florence')).toContainEqual(created)
     expect(created.id).not.toBe(existing.id)
-    page.detail = created
-    page.detachFromTrip('florence')
-    expect(page.store.placesForTrip('florence')).not.toContainEqual(created)
-    expect(page.store.places).toContainEqual(created)
     page.deleting = created
     page.remove()
     expect(page.store.places.some((place) => place.id === created.id)).toBe(false)
+    expect(page.store.placesForTrip('florence')).not.toContainEqual(created)
     wrapper.unmount()
   })
 

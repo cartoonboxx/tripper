@@ -1,74 +1,16 @@
-<script lang="ts">
-import sharedStyle from '@/styles/shared.module.scss'
-import style from './TripCard.module.scss'
-import { defineComponent } from 'vue'
-import {
-  PhArrowRight,
-  PhArrowUpRight,
-  PhCalendarDots,
-  PhDotsThree,
-  PhUser,
-} from '@phosphor-icons/vue'
-import { Card, Badge, Avatar, Button } from '@/components/ui'
-import { useTravelStore } from '@/stores/travel'
-import { dateRange } from '@/composables/format'
-import { componentProps } from './TripCard.props'
-import { markRawValue } from '@/utils/markRawValue'
-
-export default defineComponent({
-  name: 'TripCard',
-  components: {
-    PhArrowRight,
-    PhArrowUpRight,
-    PhCalendarDots,
-    PhDotsThree,
-    PhUser,
-    Card,
-    Badge,
-    Avatar,
-    Button,
-  },
-  props: componentProps,
-  data() {
-    return {
-      sharedStyle,
-      style,
-      menuOpen: false,
-      PhArrowRight: markRawValue(PhArrowRight),
-      PhArrowUpRight: markRawValue(PhArrowUpRight),
-      PhCalendarDots: markRawValue(PhCalendarDots),
-      PhDotsThree: markRawValue(PhDotsThree),
-      PhUser: markRawValue(PhUser),
-    }
-  },
-  computed: {
-    members() {
-      return this.store.members(this.trip.id)
-    },
-    store(): ReturnType<typeof useTravelStore> {
-      return useTravelStore()
-    },
-  },
-  methods: { dateRange },
-})
-</script>
 <template>
   <Card
     interactive
     :class="style.tripCard">
     <AppLink
-      :to="`/trips/${trip.id}/plan`"
+      :to="`/trips/${trip.id}/today`"
       :class="style.tripCardImage">
       <img
         :src="trip.image"
         :alt="trip.name" />
-      <Badge :variant="trip.status === 'completed' ? 'neutral' : 'green'">
+      <Badge :variant="trip.archived ? 'neutral' : 'green'">
         {{
-          trip.status === 'completed'
-            ? 'Завершена'
-            : trip.status === 'active'
-              ? 'В путешествии'
-              : 'Предстоящая'
+          trip.archived ? 'В архиве' : trip.status === 'active' ? 'В путешествии' : 'Предстоящая'
         }}
       </Badge>
       <span :class="style.tripCardImageArrow">
@@ -83,31 +25,31 @@ export default defineComponent({
             <h3>{{ trip.name }}</h3>
           </AppLink>
         </div>
-        <div
+        <FloatingPopup
           v-if="store.editable(trip.id)"
+          v-model:open="menuOpen"
+          placement="bottom-end"
           :class="style.cardMenu">
-          <Button
-            variant="ghost"
-            icon-only
-            @click="menuOpen = !menuOpen">
-            <PhDotsThree :size="19" />
-          </Button>
-          <div
-            v-if="menuOpen"
-            :class="style.dropdownMenu">
-            <AppLink :to="`/trips/${trip.id}/edit`">Редактировать</AppLink>
+          <template #target>
+            <Button
+              variant="ghost"
+              icon-only>
+              <PhDotsThree :size="19" />
+            </Button>
+          </template>
+          <template #default>
             <button
-              @click="
-                () => {
-                  trip.archived = !trip.archived
-                  menuOpen = false
-                  store.notify(trip.archived ? 'Поездка в архиве' : 'Поездка восстановлена')
-                }
-              ">
+              type="button"
+              @click="editTrip">
+              Редактировать
+            </button>
+            <button
+              type="button"
+              @click="toggleArchive">
               {{ trip.archived ? 'Восстановить' : 'В архив' }}
             </button>
-          </div>
-        </div>
+          </template>
+        </FloatingPopup>
       </div>
       <p :class="style.tripCardDates">
         <PhCalendarDots :size="16" />
@@ -139,5 +81,80 @@ export default defineComponent({
         </AppLink>
       </div>
     </div>
+    <TripForm
+      :open="editing"
+      :trip="trip"
+      @close="editing = false" />
   </Card>
 </template>
+<script lang="ts">
+import sharedStyle from '@/styles/shared.module.scss'
+import style from './TripCard.module.scss'
+import { defineComponent } from 'vue'
+import {
+  PhArrowRight,
+  PhArrowUpRight,
+  PhCalendarDots,
+  PhDotsThree,
+  PhUser,
+} from '@phosphor-icons/vue'
+import { Card, Badge, Avatar, Button, FloatingPopup } from '@/components/ui'
+import { useTravelStore } from '@/stores/travel'
+import { dateRange } from '@/composables/format'
+import { componentProps } from './TripCard.props'
+import { markRawValue } from '@/utils/markRawValue'
+import TripForm from './TripForm.vue'
+
+export default defineComponent({
+  name: 'TripCard',
+  components: {
+    PhArrowRight,
+    PhArrowUpRight,
+    PhCalendarDots,
+    PhDotsThree,
+    PhUser,
+    Card,
+    Badge,
+    Avatar,
+    Button,
+    FloatingPopup,
+    TripForm,
+  },
+  props: componentProps,
+  data() {
+    return {
+      sharedStyle,
+      style,
+      menuOpen: false,
+      editing: false,
+      PhArrowRight: markRawValue(PhArrowRight),
+      PhArrowUpRight: markRawValue(PhArrowUpRight),
+      PhCalendarDots: markRawValue(PhCalendarDots),
+      PhDotsThree: markRawValue(PhDotsThree),
+      PhUser: markRawValue(PhUser),
+    }
+  },
+  computed: {
+    members() {
+      return this.store.members(this.trip.id)
+    },
+    store(): ReturnType<typeof useTravelStore> {
+      return useTravelStore()
+    },
+  },
+  methods: {
+    dateRange,
+    editTrip() {
+      if (!this.store.editable(this.trip.id)) return
+      this.menuOpen = false
+      this.editing = true
+    },
+    toggleArchive() {
+      if (!this.store.editable(this.trip.id)) return
+      this.trip.archived = !this.trip.archived
+      this.menuOpen = false
+      this.store.notify(this.trip.archived ? 'Поездка в архиве' : 'Поездка восстановлена')
+    },
+  },
+})
+</script>

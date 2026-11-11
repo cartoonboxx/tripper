@@ -195,21 +195,42 @@
   }
 }
 
-.profileLink {
+.profileButton {
   @include flex(var(--space-2));
+  min-width: var(--space-11);
+  padding: var(--space-1) var(--space-2);
   font-size: var(--text-xs);
   color: var(--text);
 
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.profileName {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   @include below(1200px) {
-    > span:not(:first-child) {
-      display: none;
-    }
+    display: none;
+  }
+}
+
+.profileCaret {
+  flex-shrink: 0;
+  transition: transform var(--motion-press-out) var(--ease-soft);
+
+  &.isOpen {
+    transform: rotate(180deg);
   }
 
   @include below(900px) {
-    > svg {
-      display: none;
-    }
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
   }
 }
 

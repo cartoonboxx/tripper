@@ -21,3 +21,19 @@
     }
   }
 }
+
+.option {
+  background: var(--surface);
+  color: var(--text);
+
+  &.isSelected {
+    background: var(--primary-soft);
+    color: var(--primary);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    &:hover:not(:disabled) {
+      background: var(--background);
+    }
+  }
+}

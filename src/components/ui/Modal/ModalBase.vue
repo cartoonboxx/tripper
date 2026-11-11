@@ -1,3 +1,59 @@
+<template>
+  <Teleport to="body">
+    <Transition
+      appear
+      :enter-active-class="appearance.overlayEnterActive"
+      :leave-active-class="appearance.overlayLeaveActive"
+      :enter-from-class="appearance.overlayEnterFrom"
+      :leave-to-class="appearance.overlayLeaveTo"
+      @enter="activateOverlay"
+      @after-leave="finishClose">
+      <dialog
+        v-if="open"
+        ref="host"
+        :class="[style.uiOverlay, appearance.uiOverlay]"
+        @cancel.prevent="$emit('close')"
+        @pointerdown="backdropDown"
+        @click="backdropClick">
+        <section
+          ref="panel"
+          @pointerdown="startDrag"
+          @pointermove="moveDrag"
+          @pointerup="endPointerDrag"
+          @pointercancel="cancelPointerDrag"
+          @touchstart.passive="startTouch"
+          @touchmove="moveTouch"
+          @touchend="endDrag"
+          @touchcancel="cancelDrag"
+          :class="[
+            style.uiDialog,
+            appearance.uiDialog,
+            wide && style.uiDialogWide,
+            dragging && style.isDragging,
+          ]"
+          :style="{ '--sheet-offset': `${dragOffset}px` }">
+          <div :class="style.uiSheetHandle">
+            <span />
+          </div>
+          <header :class="[style.uiDialogHeader, appearance.uiDialogHeader]">
+            <h2>{{ title }}</h2>
+            <Button
+              variant="ghost"
+              icon-only
+              @click="$emit('close')">
+              <PhX />
+            </Button>
+          </header>
+          <div
+            ref="body"
+            :class="style.uiDialogBody">
+            <slot />
+          </div>
+        </section>
+      </dialog>
+    </Transition>
+  </Teleport>
+</template>
 <script lang="ts">
 import { defineComponent, markRaw } from 'vue'
 import { PhX } from '@phosphor-icons/vue'
@@ -134,59 +190,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <Teleport to="body">
-    <Transition
-      appear
-      :enter-active-class="appearance.overlayEnterActive"
-      :leave-active-class="appearance.overlayLeaveActive"
-      :enter-from-class="appearance.overlayEnterFrom"
-      :leave-to-class="appearance.overlayLeaveTo"
-      @enter="activateOverlay"
-      @after-leave="finishClose">
-      <dialog
-        v-if="open"
-        ref="host"
-        :class="[style.uiOverlay, appearance.uiOverlay]"
-        @cancel.prevent="$emit('close')"
-        @pointerdown="backdropDown"
-        @click="backdropClick">
-        <section
-          ref="panel"
-          @pointerdown="startDrag"
-          @pointermove="moveDrag"
-          @pointerup="endPointerDrag"
-          @pointercancel="cancelPointerDrag"
-          @touchstart.passive="startTouch"
-          @touchmove="moveTouch"
-          @touchend="endDrag"
-          @touchcancel="cancelDrag"
-          :class="[
-            style.uiDialog,
-            appearance.uiDialog,
-            wide && style.uiDialogWide,
-            dragging && style.isDragging,
-          ]"
-          :style="{ '--sheet-offset': `${dragOffset}px` }">
-          <div :class="style.uiSheetHandle">
-            <span />
-          </div>
-          <header :class="[style.uiDialogHeader, appearance.uiDialogHeader]">
-            <h2>{{ title }}</h2>
-            <Button
-              variant="ghost"
-              icon-only
-              @click="$emit('close')">
-              <PhX />
-            </Button>
-          </header>
-          <div
-            ref="body"
-            :class="style.uiDialogBody">
-            <slot />
-          </div>
-        </section>
-      </dialog>
-    </Transition>
-  </Teleport>
-</template>

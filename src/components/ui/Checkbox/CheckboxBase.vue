@@ -1,3 +1,15 @@
+<template>
+  <label :class="[style.uiCheckbox, appearance.uiCheckbox]">
+    <input
+      type="checkbox"
+      :checked="modelValue"
+      :disabled="disabled"
+      @change="$emit('update:modelValue', ($event.target as HTMLInputElement).checked)" />
+    <span v-if="label || $slots.default">
+      <slot>{{ label }}</slot>
+    </span>
+  </label>
+</template>
 <script lang="ts">
 import style from './CheckboxBase.module.scss'
 import { defineComponent } from 'vue'
@@ -12,15 +24,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <label :class="[style.uiCheckbox, appearance.uiCheckbox]">
-    <input
-      type="checkbox"
-      :checked="modelValue"
-      :disabled="disabled"
-      @change="$emit('update:modelValue', ($event.target as HTMLInputElement).checked)" />
-    <span v-if="label || $slots.default">
-      <slot>{{ label }}</slot>
-    </span>
-  </label>
-</template>

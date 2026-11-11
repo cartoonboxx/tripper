@@ -1,3 +1,102 @@
+<template>
+  <Modal
+    :open="open"
+    :title="trip ? 'Редактировать поездку' : 'Новое путешествие'"
+    @close="$emit('close')">
+    <form
+      @submit.prevent="save"
+      :class="sharedStyle.formStack">
+      <Input
+        v-model="form.name"
+        label="Название поездки"
+        placeholder="Например, выходные в Барселоне"
+        required />
+      <Input
+        v-model="form.country"
+        label="Страна или регион"
+        placeholder="Куда отправляемся?" />
+      <div :class="sharedStyle.formRow">
+        <Input
+          v-model="form.start"
+          label="Начало поездки"
+          type="date"
+          required />
+        <Input
+          v-model="form.end"
+          label="Конец поездки"
+          type="date"
+          :min="form.start"
+          required />
+      </div>
+      <Select
+        v-if="trip && !trip.archived"
+        v-model="form.status"
+        label="Статус поездки"
+        :options="[
+          { label: 'Предстоящая', value: 'upcoming' },
+          { label: 'Активная', value: 'active' },
+        ]" />
+      <Input
+        v-model="form.notes"
+        type="textarea"
+        label="Заметки о поездке" />
+      <div>
+        <span :class="sharedStyle.fieldLabel">Обложка</span>
+        <img
+          v-if="form.image.startsWith('data:')"
+          :src="form.image"
+          alt="Выбранная обложка"
+          :class="[style.coverPreview, sharedStyle.coverPreview]" />
+        <div :class="sharedStyle.coverOptions">
+          <button
+            v-for="cover in covers"
+            :key="cover"
+            type="button"
+            :class="{ [sharedStyle.selected || '']: form.image === cover }"
+            @click="form.image = cover">
+            <img
+              :src="cover"
+              alt="" />
+          </button>
+        </div>
+      </div>
+      <div :class="style.coverUpload">
+        <input
+          ref="fileInput"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          hidden
+          @change="chooseCover" />
+        <Button
+          variant="secondary"
+          size="sm"
+          @click="fileInput?.click()">
+          <PhImage :size="16" />
+          Выбрать изображение
+        </Button>
+        <span :class="sharedStyle.formHelp">JPG, PNG, WebP · до 1 МБ</span>
+      </div>
+      <p
+        v-if="error"
+        :class="sharedStyle.errorText">
+        {{ error }}
+      </p>
+      <div :class="sharedStyle.formActions">
+        <Button
+          variant="secondary"
+          @click="$emit('close')">
+          Отмена
+        </Button>
+        <Button type="submit">
+          <component
+            :is="trip ? PhCheck : PhPlus"
+            :size="16" />
+          {{ trip ? 'Сохранить' : 'Создать поездку' }}
+        </Button>
+      </div>
+    </form>
+  </Modal>
+</template>
 <script lang="ts">
 import style from './TripForm.module.scss'
 import sharedStyle from '@/styles/shared.module.scss'
@@ -137,103 +236,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <Modal
-    :open="open"
-    :title="trip ? 'Редактировать поездку' : 'Новое путешествие'"
-    @close="$emit('close')">
-    <form
-      @submit.prevent="save"
-      :class="sharedStyle.formStack">
-      <Input
-        v-model="form.name"
-        label="Название поездки"
-        placeholder="Например, выходные в Барселоне"
-        required />
-      <Input
-        v-model="form.country"
-        label="Страна или регион"
-        placeholder="Куда отправляемся?" />
-      <div :class="sharedStyle.formRow">
-        <Input
-          v-model="form.start"
-          label="Начало поездки"
-          type="date"
-          required />
-        <Input
-          v-model="form.end"
-          label="Конец поездки"
-          type="date"
-          :min="form.start"
-          required />
-      </div>
-      <Select
-        v-if="trip"
-        v-model="form.status"
-        label="Статус поездки"
-        :options="[
-          { label: 'Предстоящая', value: 'upcoming' },
-          { label: 'Активная', value: 'active' },
-          { label: 'Завершённая', value: 'completed' },
-        ]" />
-      <Input
-        v-model="form.notes"
-        type="textarea"
-        label="Заметки о поездке" />
-      <div>
-        <span :class="sharedStyle.fieldLabel">Обложка</span>
-        <img
-          v-if="form.image.startsWith('data:')"
-          :src="form.image"
-          alt="Выбранная обложка"
-          :class="[style.coverPreview, sharedStyle.coverPreview]" />
-        <div :class="sharedStyle.coverOptions">
-          <button
-            v-for="cover in covers"
-            :key="cover"
-            type="button"
-            :class="{ [sharedStyle.selected || '']: form.image === cover }"
-            @click="form.image = cover">
-            <img
-              :src="cover"
-              alt="" />
-          </button>
-        </div>
-      </div>
-      <div :class="style.coverUpload">
-        <input
-          ref="fileInput"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          hidden
-          @change="chooseCover" />
-        <Button
-          variant="secondary"
-          size="sm"
-          @click="fileInput?.click()">
-          <PhImage :size="16" />
-          Выбрать изображение
-        </Button>
-        <span :class="sharedStyle.formHelp">JPG, PNG, WebP · до 1 МБ</span>
-      </div>
-      <p
-        v-if="error"
-        :class="sharedStyle.errorText">
-        {{ error }}
-      </p>
-      <div :class="sharedStyle.formActions">
-        <Button
-          variant="secondary"
-          @click="$emit('close')">
-          Отмена
-        </Button>
-        <Button type="submit">
-          <component
-            :is="trip ? PhCheck : PhPlus"
-            :size="16" />
-          {{ trip ? 'Сохранить' : 'Создать поездку' }}
-        </Button>
-      </div>
-    </form>
-  </Modal>
-</template>

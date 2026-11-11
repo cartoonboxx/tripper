@@ -1,4 +1,3 @@
-import { PhSquaresFour } from '@phosphor-icons/vue'
 import { PhGearSix } from '@phosphor-icons/vue'
 import {
   PhHouse,
@@ -20,22 +19,12 @@ export const navigation: NavItem[] = [
 export const tripNavigation = [
   { label: 'Сегодня', path: 'today' },
   { label: 'План поездки', path: 'plan' },
-  { label: 'Места', path: 'places' },
   { label: 'Чек-листы', path: 'checklists' },
   { label: 'Расходы', path: 'expenses' },
   { label: 'Участники', path: 'participants' },
 ]
-export const expenseCategories = [
-  'Проживание',
-  'Транспорт',
-  'Питание',
-  'Развлечения',
-  'Прочее',
-].map((value) => ({ value, label: value }))
-
 export const mobileNavigation = navigation.slice(0, 4)
 export const moreNavigation: NavItem[] = [
   ...navigation.slice(4),
   { label: 'Настройки', to: '/settings', icon: PhGearSix },
-  { label: 'UI-kit', to: '/ui-kit', icon: PhSquaresFour },
 ]

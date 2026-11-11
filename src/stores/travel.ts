@@ -1,98 +1,17 @@
 import { defineStore } from 'pinia'
-import {
-  imageAssets,
-  initialTrips,
-  initialEvents,
-  initialPlaces,
-  initialTripPlaces,
-  initialChecklists,
-  initialParticipants,
-  initialExpenses,
-} from '@/data/trips.data'
-import type {
-  Trip,
-  PlanEvent,
-  Place,
-  TripPlace,
-  Checklist,
-  Participant,
-  Expense,
-  Profile,
-} from '@/types/trip.types'
-function restore<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(`tripper:${key}`) ?? localStorage.getItem(`tripplan:${key}`)
-    if (!raw) return structuredClone(fallback)
-    const parsed: unknown = JSON.parse(raw)
-    if (
-      parsed === null ||
-      typeof parsed !== typeof fallback ||
-      Array.isArray(parsed) !== Array.isArray(fallback)
-    )
-      return structuredClone(fallback)
-    return parsed as T
-  } catch {
-    return structuredClone(fallback)
-  }
-}
+import { createPasswordCredential, verifyPassword, savePasswordCredential } from '@/utils/password'
+import { defaultCategories } from '@/data/categories.data'
+import type { CategoryDomain } from '@/types/category.types'
+import { createTravelState } from './travel.state'
+import { persistTravelStore } from './travel.storage'
+
 const notificationTimers = new WeakMap<object, ReturnType<typeof setTimeout>>()
 
 const createTravelStore = defineStore('travel', {
-  state() {
-    const trips = restore<Trip[]>('trips', initialTrips)
-    const events = restore<PlanEvent[]>('events', initialEvents)
-    const savedPlaces = restore<(Place & { tripId?: string; planned?: boolean })[]>(
-      'places',
-      initialPlaces.map((place) => ({
-        ...place,
-        tripId: initialTripPlaces.find((link) => link.placeId === place.id)?.tripId,
-      })),
-    )
-    const legacyLinks = savedPlaces.flatMap((place) =>
-      place.tripId ? [{ placeId: place.id, tripId: place.tripId }] : [],
-    )
-    const places: Place[] = savedPlaces.map((place) => ({
-      id: place.id,
-      name: place.name,
-      category: place.category,
-      address: place.address,
-      image: place.image,
-      description: place.description,
-    }))
-    const tripPlaces = restore<TripPlace[]>('tripPlaces', legacyLinks).filter((link) =>
-      places.some((place) => place.id === link.placeId),
-    )
-    const checklists = restore<Checklist[]>('checklists', initialChecklists)
-    // Persisted asset URLs can change between development and production builds.
-    for (const records of [trips, events, places]) {
-      for (const record of records) {
-        const match = Object.entries(imageAssets).find(([name]) => record.image.includes(name))
-        if (match) record.image = match[1]
-      }
-    }
-    const participants = restore<Participant[]>('participants', initialParticipants)
-    const expenses = restore<Expense[]>('expenses', initialExpenses)
-    const profile = restore<Profile>('profile', {
-      name: 'Александр',
-      email: 'alex@example.com',
-      notifications: true,
-    })
-    const session = restore('session', false)
-    return {
-      trips,
-      events,
-      places,
-      tripPlaces,
-      checklists,
-      participants,
-      expenses,
-      profile,
-      session,
-      toast: '',
-      storageError: false,
-    }
-  },
+  state: createTravelState,
   getters: {
+    categoryOptions: (state) => (domain: CategoryDomain) =>
+      state.categories[domain].map((value) => ({ label: value, value })),
     members: (state) => (tripId: string) =>
       state.participants.filter((member) => member.tripId === tripId),
     editable: (state) => (tripId: string) =>
@@ -111,6 +30,39 @@ const createTravelStore = defineStore('travel', {
     },
   },
   actions: {
+    async changePassword(currentPassword: string, newPassword: string): Promise<string> {
+      if (newPassword.length < 8) return 'Новый пароль должен содержать не менее 8 символов.'
+      const previous = this.passwordCredential
+      if (previous && !(await verifyPassword(currentPassword, previous)))
+        return 'Текущий пароль указан неверно.'
+      if (previous && currentPassword === newPassword)
+        return 'Новый пароль должен отличаться от текущего.'
+      const credential = await createPasswordCredential(newPassword)
+      if (this.passwordCredential !== previous) return 'Пароль уже изменён. Попробуйте ещё раз.'
+      savePasswordCredential(credential)
+      this.passwordCredential = credential
+      return ''
+    },
+    addCategory(domain: CategoryDomain, value: string) {
+      const name = value.trim().replace(/\s+/g, ' ')
+      const categories = this.categories[domain]
+      if (
+        !name ||
+        !categories ||
+        categories.some(
+          (category) => category.toLocaleLowerCase('ru') === name.toLocaleLowerCase('ru'),
+        )
+      )
+        return false
+      categories.push(name)
+      return true
+    },
+    removeCategory(domain: CategoryDomain, name: string) {
+      if (defaultCategories[domain].includes(name) || !this.categories[domain].includes(name))
+        return false
+      this.categories[domain] = this.categories[domain].filter((category) => category !== name)
+      return true
+    },
     notify(message: string) {
       this.toast = message
       clearTimeout(notificationTimers.get(this))
@@ -121,6 +73,24 @@ const createTravelStore = defineStore('travel', {
           notificationTimers.delete(this)
         }, 3500),
       )
+    },
+    copyChecklistToTrip(checklistId: string, tripId: string) {
+      const source = this.checklists.find((list) => list.id === checklistId && !list.tripId)
+      const trip = this.trips.find((trip) => trip.id === tripId)
+      if (!source || !trip || trip.archived || !this.editable(tripId)) return
+
+      const id = crypto.randomUUID()
+      this.checklists.push({
+        id,
+        tripId,
+        title: source.title,
+        items: source.items.map((item) => ({
+          id: crypto.randomUUID(),
+          title: item.title,
+          checked: false,
+        })),
+      })
+      return id
     },
     addPlaceToTrip(placeId: string, tripId: string) {
       if (!this.editable(tripId) || !this.places.some((place) => place.id === placeId)) return false
@@ -151,19 +121,22 @@ const createTravelStore = defineStore('travel', {
         !this.editable(event.tripId)
       )
         return false
-      const events = this.events
+      const dayEvents = this.events
         .filter((item) => item.tripId === event.tripId && item.day === event.day)
         .sort((a, b) => a.start.localeCompare(b.start))
-      const slots = events.map((item) => ({ start: item.start, end: item.end }))
-      const from = events.indexOf(event)
-      const to = events.indexOf(target)
-      events.splice(from, 1)
-      events.splice(to, 0, event)
-      events.forEach((item, index) => Object.assign(item, slots[index]))
-      let index = 0
-      this.events = this.events.map((item) =>
-        item.tripId === event.tripId && item.day === event.day ? events[index++]! : item,
-      )
+      const timeSlots = dayEvents.map(({ start, end }) => ({ start, end }))
+      const from = dayEvents.indexOf(event)
+      const to = dayEvents.indexOf(target)
+      dayEvents.splice(from, 1)
+      dayEvents.splice(to, 0, event)
+
+      // Cards change position; the day's time slots stay in place.
+      dayEvents.forEach((item, index) => Object.assign(item, timeSlots[index]))
+      let dayIndex = 0
+      this.events = this.events.map((item) => {
+        if (item.tripId !== event.tripId || item.day !== event.day) return item
+        return dayEvents[dayIndex++]!
+      })
       return true
     },
     swapEvents(firstId: string, secondId: string) {
@@ -192,41 +165,12 @@ const createTravelStore = defineStore('travel', {
   },
 })
 
-const initializedStores = new WeakSet<object>()
-const persistedKeys = [
-  'trips',
-  'events',
-  'places',
-  'tripPlaces',
-  'checklists',
-  'participants',
-  'expenses',
-  'profile',
-  'session',
-] as const
+export type TravelStore = ReturnType<typeof createTravelStore>
 
-export const useTravelStore: typeof createTravelStore = Object.assign(
-  (...args: Parameters<typeof createTravelStore>) => {
-    const store = createTravelStore(...args)
-    if (!initializedStores.has(store)) {
-      initializedStores.add(store)
-      const savedValues = new Map<string, string>()
-      const persist = () => {
-        for (const key of persistedKeys) {
-          try {
-            const value = JSON.stringify(store[key])
-            if (savedValues.get(key) === value) continue
-            localStorage.setItem(`tripper:${key}`, value)
-            savedValues.set(key, value)
-          } catch {
-            store.storageError = true
-          }
-        }
-      }
-      persist()
-      store.$subscribe(persist, { detached: true })
-    }
-    return store
-  },
-  { $id: createTravelStore.$id },
-)
+export function useTravelStore(...args: Parameters<typeof createTravelStore>) {
+  const store = createTravelStore(...args)
+  persistTravelStore(store)
+  return store
+}
+
+useTravelStore.$id = createTravelStore.$id

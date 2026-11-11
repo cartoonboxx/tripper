@@ -1,3 +1,11 @@
+<template>
+  <button
+    type="button"
+    :class="[style.uiTab, appearance.uiTab, active && style.isActive]"
+    :disabled="disabled">
+    <slot />
+  </button>
+</template>
 <script lang="ts">
 import style from './TabBase.module.scss'
 import { defineComponent } from 'vue'
@@ -11,11 +19,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <button
-    type="button"
-    :class="[style.uiTab, appearance.uiTab, active && style.isActive]"
-    :disabled="disabled">
-    <slot />
-  </button>
-</template>

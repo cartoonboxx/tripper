@@ -1,3 +1,8 @@
+<template>
+  <div :class="[style.uiCard, appearance.uiCard, interactive && style.uiCardInteractive]">
+    <slot />
+  </div>
+</template>
 <script lang="ts">
 import style from './CardBase.module.scss'
 import { defineComponent } from 'vue'
@@ -11,8 +16,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <div :class="[style.uiCard, appearance.uiCard, interactive && style.uiCardInteractive]">
-    <slot />
-  </div>
-</template>

@@ -1,3 +1,40 @@
+<template>
+  <Teleport to="body">
+    <Transition
+      :enter-active-class="appearance.overlayEnterActive"
+      :leave-active-class="appearance.overlayLeaveActive"
+      :enter-from-class="appearance.overlayEnterFrom"
+      :leave-to-class="appearance.overlayLeaveTo">
+      <div
+        v-if="open"
+        @mousedown.self="$emit('close')"
+        :class="[appearance.uiOverlay, style.uiDrawerOverlay, appearance.uiDrawerOverlay]">
+        <dialog
+          open
+          ref="panel"
+          :class="[appearance.uiDialog, style.uiDrawer, appearance.uiDrawer]">
+          <header :class="[modalStyle.uiDialogHeader, appearance.uiDialogHeader]">
+            <h2>{{ title }}</h2>
+            <Button
+              variant="ghost"
+              icon-only
+              @click="$emit('close')">
+              <PhX />
+            </Button>
+          </header>
+          <div :class="style.uiDrawerBody">
+            <slot />
+          </div>
+          <footer
+            v-if="$slots.footer"
+            :class="[style.uiDrawerFooter, appearance.uiDrawerFooter]">
+            <slot name="footer" />
+          </footer>
+        </dialog>
+      </div>
+    </Transition>
+  </Teleport>
+</template>
 <script lang="ts">
 import style from './DrawerBase.module.scss'
 import modalStyle from '../Modal/ModalBase.module.scss'
@@ -46,33 +83,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <Teleport to="body">
-    <Transition
-      :enter-active-class="appearance.overlayEnterActive"
-      :leave-active-class="appearance.overlayLeaveActive"
-      :enter-from-class="appearance.overlayEnterFrom"
-      :leave-to-class="appearance.overlayLeaveTo">
-      <div
-        v-if="open"
-        @mousedown.self="$emit('close')"
-        :class="[appearance.uiOverlay, style.uiDrawerOverlay, appearance.uiDrawerOverlay]">
-        <dialog
-          open
-          ref="panel"
-          :class="[appearance.uiDialog, style.uiDrawer, appearance.uiDrawer]">
-          <header :class="[modalStyle.uiDialogHeader, appearance.uiDialogHeader]">
-            <h2>{{ title }}</h2>
-            <Button
-              variant="ghost"
-              icon-only
-              @click="$emit('close')">
-              <PhX />
-            </Button>
-          </header>
-          <slot />
-        </dialog>
-      </div>
-    </Transition>
-  </Teleport>
-</template>

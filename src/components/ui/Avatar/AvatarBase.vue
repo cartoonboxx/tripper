@@ -1,16 +1,3 @@
-<script lang="ts">
-import style from './AvatarBase.module.scss'
-import { defineComponent } from 'vue'
-import { componentProps } from './Avatar.props'
-
-export default defineComponent({
-  name: 'AvatarBase',
-  props: componentProps,
-  data() {
-    return { style }
-  },
-})
-</script>
 <template>
   <span
     :style="{ background: color }"
@@ -24,3 +11,16 @@ export default defineComponent({
     }}
   </span>
 </template>
+<script lang="ts">
+import style from './AvatarBase.module.scss'
+import { defineComponent } from 'vue'
+import { componentProps } from './Avatar.props'
+
+export default defineComponent({
+  name: 'AvatarBase',
+  props: componentProps,
+  data() {
+    return { style }
+  },
+})
+</script>

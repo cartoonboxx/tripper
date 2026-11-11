@@ -1,3 +1,9 @@
+<template>
+  <SelectBase
+    @update:model-value="$emit('update:modelValue', $event)"
+    v-bind="$props"
+    :appearance="style" />
+</template>
 <script lang="ts">
 import SelectBase from './SelectBase.vue'
 import style from './SelectStyle.module.scss'
@@ -14,9 +20,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <SelectBase
-    @update:model-value="$emit('update:modelValue', $event)"
-    v-bind="$props"
-    :appearance="style" />
-</template>

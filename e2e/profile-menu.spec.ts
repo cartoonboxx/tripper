@@ -1,0 +1,37 @@
+import { expect, test } from '@playwright/test'
+
+for (const width of [1440, 375, 320]) {
+  test(`profile menu navigation and sign out at ${width}px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 })
+    await page.addInitScript(() => {
+      localStorage.setItem('tripper:session', 'true')
+    })
+    await page.goto('/')
+    const profile = page.locator('header').getByRole('button').filter({ hasText: 'Александр' })
+    const popup = page.locator('header [popover]')
+    await profile.focus()
+    await profile.press('Enter')
+    await expect(popup).toBeVisible()
+    const link = popup.getByRole('link', { name: 'Открыть профиль' })
+    await expect(link).toBeFocused()
+    const bounds = await popup.boundingBox()
+    expect(bounds!.x).toBeGreaterThanOrEqual(0)
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width)
+    await page.keyboard.press('Escape')
+    await expect(popup).toBeHidden()
+    await expect(profile).toBeFocused()
+    await profile.click()
+    await link.click()
+    await expect(page).toHaveURL('/settings')
+    await expect(popup).toBeHidden()
+    await expect(page.getByRole('heading', { name: 'Личный профиль' })).toBeVisible()
+    await profile.click()
+    await popup.getByRole('link', { name: 'Открыть профиль' }).click()
+    await expect(popup).toBeHidden()
+    await profile.click()
+    await popup.getByRole('button', { name: 'Выйти', exact: true }).click()
+    await expect(page).toHaveURL('/login')
+    expect(await page.evaluate(() => localStorage.getItem('tripper:session'))).toBe('false')
+    expect(await page.evaluate(() => localStorage.getItem('tripper:profile'))).not.toBeNull()
+  })
+}

@@ -1,3 +1,16 @@
+<template>
+  <DrawerBase
+    @close="$emit('close')"
+    v-bind="$props"
+    :appearance="style">
+    <slot />
+    <template
+      v-if="$slots.footer"
+      #footer>
+      <slot name="footer" />
+    </template>
+  </DrawerBase>
+</template>
 <script lang="ts">
 import DrawerBase from './DrawerBase.vue'
 import style from './DrawerStyle.module.scss'
@@ -14,11 +27,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <DrawerBase
-    @close="$emit('close')"
-    v-bind="$props"
-    :appearance="style">
-    <slot />
-  </DrawerBase>
-</template>

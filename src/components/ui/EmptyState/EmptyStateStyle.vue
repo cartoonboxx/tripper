@@ -1,3 +1,10 @@
+<template>
+  <EmptyStateBase
+    v-bind="$props"
+    :appearance="style">
+    <slot />
+  </EmptyStateBase>
+</template>
 <script lang="ts">
 import EmptyStateBase from './EmptyStateBase.vue'
 import style from './EmptyStateStyle.module.scss'
@@ -13,10 +20,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <EmptyStateBase
-    v-bind="$props"
-    :appearance="style">
-    <slot />
-  </EmptyStateBase>
-</template>

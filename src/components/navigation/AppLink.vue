@@ -1,18 +1,3 @@
-<script lang="ts">
-import { defineComponent, type PropType } from 'vue'
-import { RouterLink as NativeRouterLink, type RouteLocationRaw } from 'vue-router'
-export default defineComponent({
-  name: 'AppLink',
-  components: { NativeRouterLink },
-  inheritAttrs: false,
-  props: {
-    to: { type: [String, Object] as PropType<RouteLocationRaw>, required: true },
-    activeClass: { type: String, default: '' },
-    exactActiveClass: { type: String, default: '' },
-    replace: Boolean,
-  },
-})
-</script>
 <template>
   <NativeRouterLink
     :to="to"
@@ -28,3 +13,18 @@ export default defineComponent({
     </a>
   </NativeRouterLink>
 </template>
+<script lang="ts">
+import { defineComponent, type PropType } from 'vue'
+import { RouterLink as NativeRouterLink, type RouteLocationRaw } from 'vue-router'
+export default defineComponent({
+  name: 'AppLink',
+  components: { NativeRouterLink },
+  inheritAttrs: false,
+  props: {
+    to: { type: [String, Object] as PropType<RouteLocationRaw>, required: true },
+    activeClass: { type: String, default: '' },
+    exactActiveClass: { type: String, default: '' },
+    replace: Boolean,
+  },
+})
+</script>

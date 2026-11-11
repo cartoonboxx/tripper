@@ -9,15 +9,15 @@ const forecast = {
   },
 }
 
-test('standalone places use a full-width search, a matching textarea and a right drawer', async ({
+test('standalone places have category filters, a matching textarea and a right drawer', async ({
   page,
 }) => {
   await page.goto('/places')
   const search = page.getByPlaceholder('Найти место…')
   const content = page.locator('main')
   const searchWidth = (await search.locator('..').locator('..').boundingBox())!.width
-  expect(searchWidth).toBeGreaterThan((await content.boundingBox())!.width * 0.9)
-  await expect(page.getByRole('combobox')).toHaveCount(0)
+  expect(searchWidth).toBeGreaterThan((await content.boundingBox())!.width * 0.5)
+  await expect(page.getByRole('combobox', { name: 'Категория места', exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Добавить место', exact: true }).click()
   let dialog = page.getByRole('dialog')
   await expect(dialog.getByLabel('Поездка', { exact: true })).toHaveCount(0)
@@ -25,13 +25,15 @@ test('standalone places use a full-width search, a matching textarea and a right
   const notes = dialog.getByLabel('Заметки', { exact: true })
   await expect(notes).toHaveJSProperty('tagName', 'TEXTAREA')
   await notes.fill('Две строки\nи заметки')
-  const fieldStyles = await dialog.locator('input, textarea').evaluateAll((fields) =>
-    fields.map((field) => ({
-      font: getComputedStyle(field).fontFamily,
-      size: getComputedStyle(field).fontSize,
-      color: getComputedStyle(field).color,
-    })),
-  )
+  const fieldStyles = await dialog
+    .locator('input:not([type=file]), textarea')
+    .evaluateAll((fields) =>
+      fields.map((field) => ({
+        font: getComputedStyle(field).fontFamily,
+        size: getComputedStyle(field).fontSize,
+        color: getComputedStyle(field).color,
+      })),
+    )
   expect(
     fieldStyles.every((field) => JSON.stringify(field) === JSON.stringify(fieldStyles[0])),
   ).toBe(true)
@@ -39,9 +41,11 @@ test('standalone places use a full-width search, a matching textarea and a right
   await expect(dialog).toHaveCount(0)
   await page.getByRole('button', { name: 'Новая находка', exact: true }).last().click()
   dialog = page.getByRole('dialog')
-  await expect(
-    dialog.getByText('Место пока не добавлено в поездки.', { exact: true }),
-  ).toBeVisible()
+  await expect(dialog.getByRole('heading', { name: 'В поездках', exact: true })).toHaveCount(0)
+  await expect(dialog.getByRole('button', { name: 'Убрать из поездки', exact: true })).toHaveCount(
+    0,
+  )
+  await expect(page.getByText(/^В поездках:/)).toHaveCount(0)
   await expect(dialog).toHaveCSS('transform', 'none')
   const bounds = (await dialog.boundingBox())!
   expect(bounds.x).toBeGreaterThan(0)
@@ -49,29 +53,24 @@ test('standalone places use a full-width search, a matching textarea and a right
   await page.setViewportSize({ width: 375, height: 812 })
   await expect(dialog).toHaveCSS('width', '375px')
   expect((await dialog.boundingBox())!.x).toBe(0)
-  await dialog.getByLabel(/^Добавить в поездку/).selectOption('florence')
-  await dialog.getByRole('button', { name: 'Добавить в поездку', exact: true }).click()
-  await expect(dialog.getByRole('link', { name: 'Флоренция', exact: true })).toBeVisible()
-  await dialog.getByRole('button', { name: 'Убрать из поездки', exact: true }).click()
-  await expect(
-    dialog.getByText('Место пока не добавлено в поездки.', { exact: true }),
-  ).toBeVisible()
+  await expect(dialog.getByRole('button', { name: 'Добавить в поездку', exact: true })).toHaveCount(
+    0,
+  )
+  await expect(dialog.getByRole('combobox')).toHaveCount(0)
   await page.keyboard.press('Escape')
   await page.reload()
   await expect(
     page.getByRole('button', { name: 'Новая находка', exact: true }).last(),
   ).toBeVisible()
   await page.goto('/trips/altai/places')
-  await page.getByRole('button', { name: 'Добавить место', exact: true }).first().click()
-  await page.getByRole('dialog').getByRole('button', { name: 'Новая находка', exact: true }).click()
-  await expect(
-    page.getByRole('button', { name: 'Новая находка', exact: true }).last(),
-  ).toBeVisible()
+  await expect(page).toHaveURL(/\/places$/)
+  await page.getByRole('button', { name: 'Новая находка', exact: true }).last().click()
+  await expect(dialog.getByRole('button', { name: 'Добавить в поездку', exact: true })).toHaveCount(
+    0,
+  )
 })
 
-test('today uses geolocation for weather and places checklists before expenses', async ({
-  page,
-}) => {
+test('today shows weather and checklists without the expenses block', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'geolocation', {
       value: {
@@ -92,7 +91,8 @@ test('today uses geolocation for weather and places checklists before expenses',
   await expect(page.getByText('Сегодня от 7° до 15° · Осадки 20%')).toBeVisible()
   const checklists = page.getByRole('heading', { name: 'Чек-листы поездки', exact: true })
   const expenses = page.getByRole('heading', { name: 'Расходы поездки', exact: true })
-  expect((await checklists.boundingBox())!.y).toBeLessThan((await expenses.boundingBox())!.y)
+  await expect(checklists).toBeVisible()
+  await expect(expenses).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Обзор', exact: true })).toHaveCount(0)
   await expect(page.getByRole('link', { name: 'Информация', exact: true })).toHaveCount(0)
   await page.setViewportSize({ width: 375, height: 812 })

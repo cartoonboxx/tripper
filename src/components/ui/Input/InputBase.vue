@@ -1,11 +1,78 @@
+<template>
+  <DateTimePicker
+    v-if="type === 'date' || type === 'time'"
+    v-bind="{ ...$props, ...$attrs }"
+    @update:model-value="$emit('update:modelValue', $event)">
+    <template
+      v-if="$slots.prefix"
+      #prefix>
+      <slot name="prefix" />
+    </template>
+    <template
+      v-if="$slots.suffix"
+      #suffix>
+      <slot name="suffix" />
+    </template>
+  </DateTimePicker>
+  <div
+    v-else
+    :class="[
+      style.uiField,
+      size === 'sm' && style.uiFieldSm,
+      size === 'lg' && style.uiFieldLg,
+      appearance.uiField,
+      $attrs.class,
+    ]"
+    :style="rootStyle">
+    <label
+      v-if="hasLabel"
+      :for="controlId">
+      {{ label }}
+      <span v-if="required">*</span>
+    </label>
+    <div
+      :class="[
+        style.uiInputWrap,
+        type === 'textarea' && style.multiline,
+        appearance.uiInputWrap,
+        error && appearance.invalid,
+        disabled && appearance.disabled,
+      ]">
+      <slot name="prefix" />
+      <component
+        :is="type === 'textarea' ? 'textarea' : 'input'"
+        ref="control"
+        v-bind="controlAttrs"
+        :id="controlId"
+        :value="modelValue"
+        :type="type === 'textarea' ? undefined : type"
+        :rows="type === 'textarea' ? rows : undefined"
+        :placeholder="placeholder"
+        :required="required"
+        :disabled="disabled"
+        :min="min"
+        :max="max"
+        :autocomplete="autocomplete"
+        @input="onInput" />
+      <slot name="suffix" />
+    </div>
+    <small
+      v-if="error"
+      :class="[style.uiFieldError, appearance.uiFieldError]">
+      {{ error }}
+    </small>
+  </div>
+</template>
 <script lang="ts">
 import style from './InputBase.module.scss'
 import { defineComponent, type StyleValue } from 'vue'
 import { createId } from '@/utils/createId'
+import DateTimePicker from '../DateTimePicker/DateTimePickerStyle.vue'
 import { componentProps } from './Input.props'
 
 export default defineComponent({
   name: 'InputBase',
+  components: { DateTimePicker },
   inheritAttrs: false,
   props: componentProps,
   computed: {
@@ -64,52 +131,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <div
-    :class="[
-      style.uiField,
-      size === 'sm' && style.uiFieldSm,
-      size === 'lg' && style.uiFieldLg,
-      appearance.uiField,
-      $attrs.class,
-    ]"
-    :style="rootStyle">
-    <label
-      v-if="hasLabel"
-      :for="controlId">
-      {{ label }}
-      <span v-if="required">*</span>
-    </label>
-    <div
-      :class="[
-        style.uiInputWrap,
-        type === 'textarea' && style.multiline,
-        appearance.uiInputWrap,
-        error && appearance.invalid,
-        disabled && appearance.disabled,
-      ]">
-      <slot name="prefix" />
-      <component
-        :is="type === 'textarea' ? 'textarea' : 'input'"
-        ref="control"
-        v-bind="controlAttrs"
-        :id="controlId"
-        :value="modelValue"
-        :type="type === 'textarea' ? undefined : type"
-        :rows="type === 'textarea' ? rows : undefined"
-        :placeholder="placeholder"
-        :required="required"
-        :disabled="disabled"
-        :min="min"
-        :max="max"
-        :autocomplete="autocomplete"
-        @input="onInput" />
-      <slot name="suffix" />
-    </div>
-    <small
-      v-if="error"
-      :class="[style.uiFieldError, appearance.uiFieldError]">
-      {{ error }}
-    </small>
-  </div>
-</template>

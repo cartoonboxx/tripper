@@ -1,3 +1,11 @@
+<template>
+  <ButtonBase
+    v-bind="$props"
+    :appearance="style"
+    :class="appearanceClasses">
+    <slot />
+  </ButtonBase>
+</template>
 <script lang="ts">
 import ButtonBase from './ButtonBase.vue'
 import style from './ButtonStyle.module.scss'
@@ -27,11 +35,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <ButtonBase
-    v-bind="$props"
-    :appearance="style"
-    :class="appearanceClasses">
-    <slot />
-  </ButtonBase>
-</template>

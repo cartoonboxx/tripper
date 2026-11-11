@@ -1,3 +1,9 @@
+<template>
+  <AvatarBase
+    v-bind="$props"
+    :appearance="style"
+    :class="appearanceClass" />
+</template>
 <script lang="ts">
 import AvatarBase from './AvatarBase.vue'
 import style from './AvatarStyle.module.scss'
@@ -20,9 +26,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <AvatarBase
-    v-bind="$props"
-    :appearance="style"
-    :class="appearanceClass" />
-</template>

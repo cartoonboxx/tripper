@@ -1,3 +1,64 @@
+<template>
+  <Modal
+    :open="open"
+    :title="event ? 'Редактирование' : 'Добавление'"
+    @close="$emit('close')">
+    <form
+      @submit.prevent="save"
+      :class="style.formStack">
+      <Input
+        v-model="form.title"
+        label="Название"
+        placeholder="Что запланируем?"
+        required />
+      <Input
+        v-model="form.day"
+        label="Дата"
+        type="date"
+        :min="trip?.start"
+        :max="trip?.end"
+        required />
+      <div :class="style.formRow">
+        <Input
+          v-model="form.start"
+          label="Начало"
+          type="time"
+          required />
+        <Input
+          v-model="form.end"
+          label="Окончание"
+          type="time"
+          required />
+      </div>
+      <Select
+        v-model="form.category"
+        label="Категория события"
+        :options="categoryOptions" />
+      <Select
+        v-model="form.place"
+        label="Место"
+        :options="places" />
+      <Input
+        v-model="form.description"
+        type="textarea"
+        label="Описание"
+        placeholder="Билеты, заметки, важные детали…" />
+      <p
+        v-if="error"
+        :class="style.errorText">
+        {{ error }}
+      </p>
+      <div :class="style.formActions">
+        <Button
+          variant="secondary"
+          @click="$emit('close')">
+          Отмена
+        </Button>
+        <Button type="submit">{{ event ? 'Сохранить' : 'Добавить' }}</Button>
+      </div>
+    </form>
+  </Modal>
+</template>
 <script lang="ts">
 import sharedStyle from '@/styles/shared.module.scss'
 import { defineComponent } from 'vue'
@@ -33,6 +94,13 @@ export default defineComponent({
     },
     trip() {
       return this.store.trips.find((t) => t.id === this.tripId)
+    },
+    categoryOptions() {
+      const options = this.store.categoryOptions('events')
+      const category = this.event?.category
+      if (category && !options.some((option) => option.value === category))
+        options.push({ label: category, value: category })
+      return options
     },
     places() {
       return [
@@ -90,60 +158,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <Modal
-    :open="open"
-    :title="event ? 'Редактировать событие' : 'Добавить событие'"
-    @close="$emit('close')">
-    <form
-      @submit.prevent="save"
-      :class="style.formStack">
-      <Input
-        v-model="form.title"
-        label="Название"
-        placeholder="Что запланируем?"
-        required />
-      <Input
-        v-model="form.day"
-        label="Дата"
-        type="date"
-        :min="trip?.start"
-        :max="trip?.end"
-        required />
-      <div :class="style.formRow">
-        <Input
-          v-model="form.start"
-          label="Начало"
-          type="time"
-          required />
-        <Input
-          v-model="form.end"
-          label="Окончание"
-          type="time"
-          required />
-      </div>
-      <Select
-        v-model="form.place"
-        label="Сохранённое место"
-        :options="places" />
-      <Input
-        v-model="form.description"
-        type="textarea"
-        label="Описание"
-        placeholder="Билеты, заметки, важные детали…" />
-      <p
-        v-if="error"
-        :class="style.errorText">
-        {{ error }}
-      </p>
-      <div :class="style.formActions">
-        <Button
-          variant="secondary"
-          @click="$emit('close')">
-          Отмена
-        </Button>
-        <Button type="submit">{{ event ? 'Сохранить' : 'Добавить событие' }}</Button>
-      </div>
-    </form>
-  </Modal>
-</template>

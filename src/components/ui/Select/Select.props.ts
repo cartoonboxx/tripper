@@ -5,7 +5,7 @@ export const componentProps = {
   modelValue: { type: String as PropType<SelectProps['modelValue']> },
   size: { type: String as PropType<SelectProps['size']>, default: 'md' },
   label: { type: String as PropType<SelectProps['label']>, default: '' },
-  options: { type: Array as PropType<SelectProps['options']>, required: true as const },
+  options: { type: Array as PropType<SelectProps['options']>, default: () => [] },
   disabled: { type: Boolean as PropType<SelectProps['disabled']> },
   required: { type: Boolean as PropType<SelectProps['required']> },
 }

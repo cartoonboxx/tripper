@@ -36,7 +36,11 @@ export default defineConfigWithVueTs(
 
   {
     files: ['src/**/*.vue'],
-    rules: { 'vue/multi-word-component-names': 'off', 'vue/no-reserved-component-names': 'off' },
+    rules: {
+      'vue/multi-word-component-names': 'off',
+      'vue/no-reserved-component-names': 'off',
+      'vue/block-order': ['error', { order: ['template', 'script', 'style'] }],
+    },
   },
   skipFormatting,
 )

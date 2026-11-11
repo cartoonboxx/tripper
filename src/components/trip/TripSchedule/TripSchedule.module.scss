@@ -1,0 +1,365 @@
+@use '@/styles/mixins' as *;
+
+.scheduleLayout {
+  display: grid;
+  grid-template-columns: 174px minmax(0, 1fr);
+  gap: var(--space-7);
+
+  &Today {
+    grid-template-columns: 1fr;
+  }
+
+  @include below(1100px) {
+    grid-template-columns: 140px minmax(0, 1fr);
+    gap: var(--space-5);
+
+    &Today {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @include below(650px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dayList {
+  @include panel;
+  padding: var(--space-5) var(--space-3);
+  height: fit-content;
+
+  .eyebrow {
+    padding: 0 var(--space-3);
+    font-size: var(--text-xs);
+    margin: 0 0 var(--space-4);
+    display: block;
+  }
+
+  button {
+    margin-bottom: var(--space-2);
+    padding: var(--space-3) var(--space-3);
+
+    strong {
+      font-size: var(--text-sm);
+      font-weight: 550;
+      display: block;
+      text-align: left;
+    }
+
+    small {
+      display: block;
+      font-size: var(--text-xs);
+      color: var(--muted);
+      margin-top: var(--space-1);
+    }
+
+    .dayEventCount {
+      font-size: var(--text-xs);
+      opacity: 0.6;
+    }
+
+    @include below(650px) {
+      min-width: 110px;
+      margin: 0;
+    }
+  }
+
+  @include below(650px) {
+    display: flex;
+    overflow-x: auto;
+    padding: var(--space-2);
+    gap: var(--space-2);
+    .eyebrow,
+    .daysNote {
+      display: none;
+    }
+
+    .dayEventCount {
+      display: none;
+    }
+  }
+}
+
+.daysNote {
+  @include flex(var(--space-2));
+  margin: var(--space-5) var(--space-3) var(--space-1);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--muted);
+
+  svg {
+    color: #b59f76;
+  }
+}
+
+.scheduleMain {
+  min-width: 0;
+
+  .sectionHeader {
+    min-height: 58px;
+    margin-bottom: var(--space-5);
+
+    @include below(650px) {
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: var(--space-4);
+
+      :is(button, a) {
+        width: 100%;
+      }
+    }
+  }
+
+  .eyebrow {
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-2);
+    display: block;
+  }
+
+  h2 {
+    font-size: var(--text-lg);
+  }
+}
+
+.eventList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.eventSlot {
+  min-width: 0;
+
+  &.isPlaceholder {
+    transform: none !important;
+    transition: none;
+    border: 1px dashed var(--primary);
+    border-radius: var(--radius-3);
+    background: var(--primary-soft);
+  }
+}
+
+.eventMove {
+  transition: transform 0.18s ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.eventCard {
+  @include panel;
+  @include flex(var(--space-4));
+  padding: var(--space-5);
+  position: relative;
+  min-height: 125px;
+
+  &.isMovable {
+    cursor: grab;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  &.isDragging {
+    position: fixed;
+    z-index: 60;
+    margin: 0;
+    cursor: grabbing;
+    pointer-events: none;
+    border-color: var(--primary);
+    box-shadow: var(--shadow);
+  }
+
+  @include below(1100px) {
+    padding: var(--space-4);
+    gap: var(--space-3);
+  }
+
+  @include below(650px) {
+    gap: var(--space-3);
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr);
+    align-items: start;
+    padding: var(--space-4);
+  }
+}
+
+.eventTime {
+  width: 56px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  position: relative;
+
+  strong {
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  span {
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
+
+  @include below(650px) {
+    width: auto;
+  }
+}
+
+.eventDetailsButton {
+  border: 0;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: left;
+  flex: 1;
+  min-width: 0;
+
+  img {
+    width: 78px;
+    height: 84px;
+    border-radius: var(--radius-2);
+    flex-shrink: 0;
+
+    @include below(1100px) {
+      width: 58px;
+      height: 70px;
+    }
+
+    @include below(650px) {
+      width: 48px;
+      height: 62px;
+    }
+  }
+
+  h3 {
+    font-size: var(--text-base);
+    margin: var(--space-2) 0 var(--space-2);
+    line-height: 1.5;
+
+    @include below(650px) {
+      font-size: var(--text-base);
+      margin-top: 0;
+    }
+  }
+
+  p {
+    @include flex(var(--space-1));
+    font-size: var(--text-xs);
+    color: var(--muted);
+    margin: 0;
+
+    @include below(650px) {
+      font-size: var(--text-xs);
+      align-items: flex-start;
+      overflow-wrap: anywhere;
+    }
+
+    @include below(600px) {
+      svg {
+        margin-top: var(--space-0-5);
+      }
+    }
+  }
+
+  span {
+    font-size: var(--text-xs);
+    padding: var(--space-1) var(--space-2);
+
+    @include below(650px) {
+      display: none;
+    }
+  }
+
+  @include below(1100px) {
+    gap: var(--space-3);
+  }
+
+  @include below(650px) {
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+}
+
+.eventActions {
+  flex-wrap: wrap;
+
+  @include flex(var(--space-2));
+  margin-left: auto;
+
+  :is(button, a) {
+    width: 44px;
+    color: var(--muted);
+
+    @include below(650px) {
+      width: 44px;
+      min-height: 44px;
+    }
+  }
+
+  @include below(1100px) {
+    flex-direction: column;
+  }
+
+  @include below(650px) {
+    grid-column: 2;
+    flex-direction: row;
+    gap: var(--space-2);
+    margin-left: 0;
+    justify-content: flex-end;
+  }
+}
+
+.scheduleEnd {
+  @include flex(var(--space-3));
+  justify-content: center;
+  font-size: var(--text-xs);
+  color: #a3aa9d;
+  padding: var(--space-2) var(--space-8);
+
+  span {
+    height: 1px;
+    background: var(--border);
+    flex: 1;
+  }
+}
+
+.scheduleTip {
+  @include flex(var(--space-2));
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--muted);
+  padding: var(--space-5) var(--space-6);
+  background: #f0f2eb;
+  border-radius: var(--radius-2);
+  margin-top: var(--space-4);
+
+  svg {
+    color: #a29273;
+  }
+
+  @include below(650px) {
+    align-items: flex-start;
+    font-size: var(--text-sm);
+  }
+}
+
+.reorderHint {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  margin-bottom: var(--space-4);
+}
+
+.todaySections {
+  margin-top: var(--space-8);
+  padding-top: var(--space-7);
+  border-top: 1px solid var(--border);
+}

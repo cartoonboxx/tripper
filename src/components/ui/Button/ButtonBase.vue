@@ -1,3 +1,13 @@
+<template>
+  <component
+    :is="to ? 'AppLink' : 'button'"
+    :to="to"
+    :class="[style.uiButton, appearance.uiButton, iconOnly && style.uiButtonIcon]"
+    :type="to ? undefined : type"
+    :disabled="disabled">
+    <slot />
+  </component>
+</template>
 <script lang="ts">
 import style from './ButtonBase.module.scss'
 import { defineComponent } from 'vue'
@@ -13,13 +23,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <component
-    :is="to ? 'AppLink' : 'button'"
-    :to="to"
-    :class="[style.uiButton, appearance.uiButton, iconOnly && style.uiButtonIcon]"
-    :type="to ? undefined : type"
-    :disabled="disabled">
-    <slot />
-  </component>
-</template>

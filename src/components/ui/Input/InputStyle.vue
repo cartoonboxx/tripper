@@ -1,19 +1,3 @@
-<script lang="ts">
-import InputBase from './InputBase.vue'
-import style from './InputStyle.module.scss'
-import { defineComponent } from 'vue'
-import { componentProps } from './Input.props'
-
-export default defineComponent({
-  name: 'Input',
-  components: { InputBase },
-  props: componentProps,
-  emits: ['update:modelValue'],
-  data() {
-    return { style }
-  },
-})
-</script>
 <template>
   <InputBase
     @update:model-value="$emit('update:modelValue', $event)"
@@ -31,3 +15,19 @@ export default defineComponent({
     </template>
   </InputBase>
 </template>
+<script lang="ts">
+import InputBase from './InputBase.vue'
+import style from './InputStyle.module.scss'
+import { defineComponent } from 'vue'
+import { componentProps } from './Input.props'
+
+export default defineComponent({
+  name: 'Input',
+  components: { InputBase },
+  props: componentProps,
+  emits: ['update:modelValue'],
+  data() {
+    return { style }
+  },
+})
+</script>

@@ -1,3 +1,11 @@
+<template>
+  <ModalBase
+    @close="$emit('close')"
+    v-bind="$props"
+    :appearance="style">
+    <slot />
+  </ModalBase>
+</template>
 <script lang="ts">
 import ModalBase from './ModalBase.vue'
 import style from './ModalStyle.module.scss'
@@ -14,11 +22,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <ModalBase
-    @close="$emit('close')"
-    v-bind="$props"
-    :appearance="style">
-    <slot />
-  </ModalBase>
-</template>

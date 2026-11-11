@@ -66,7 +66,7 @@ test('add, edit and delete an event', async ({ page }) => {
   await page.getByRole('button', { name: 'Добавить событие', exact: true }).click()
   let dialog = page.getByRole('dialog')
   await dialog.getByLabel('Название', { exact: false }).fill('Прогулка по набережной')
-  await dialog.getByRole('button', { name: 'Добавить событие', exact: true }).click()
+  await dialog.getByRole('button', { name: 'Добавить', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Прогулка по набережной' })).toBeVisible()
   await page
     .getByRole('article')
@@ -98,7 +98,8 @@ test('checklists persist and viewer cannot edit the shared plan', async ({ page 
   await expect(page.getByRole('button', { name: 'Добавить событие', exact: true })).toHaveCount(0)
   await expect(page.getByText('Только просмотр', { exact: true })).toBeVisible()
   await page.getByRole('link', { name: 'Места', exact: true }).last().click()
-  await expect(page.getByRole('button', { name: 'Добавить место', exact: true })).toHaveCount(0)
+  await expect(page).toHaveURL(/\/places$/)
+  await expect(page.getByRole('button', { name: 'Добавить место', exact: true })).toBeVisible()
 })
 
 test('invitation generates QR and modal closes with Escape', async ({ page }) => {

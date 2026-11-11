@@ -1,3 +1,10 @@
+<template>
+  <SwitchBase
+    @update:model-value="$emit('update:modelValue', $event)"
+    v-bind="$props"
+    :appearance="style"
+    :class="[modelValue && style.isActive]" />
+</template>
 <script lang="ts">
 import SwitchBase from './SwitchBase.vue'
 import style from './SwitchStyle.module.scss'
@@ -14,10 +21,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <SwitchBase
-    @update:model-value="$emit('update:modelValue', $event)"
-    v-bind="$props"
-    :appearance="style"
-    :class="[modelValue && style.isActive]" />
-</template>

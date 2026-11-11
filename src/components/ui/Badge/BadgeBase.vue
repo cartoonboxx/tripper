@@ -1,3 +1,8 @@
+<template>
+  <span :class="[style.uiBadge, appearance.uiBadge]">
+    <slot />
+  </span>
+</template>
 <script lang="ts">
 import style from './BadgeBase.module.scss'
 import { defineComponent } from 'vue'
@@ -11,8 +16,3 @@ export default defineComponent({
   },
 })
 </script>
-<template>
-  <span :class="[style.uiBadge, appearance.uiBadge]">
-    <slot />
-  </span>
-</template>
