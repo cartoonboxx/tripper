@@ -73,11 +73,14 @@ describe('page actions', () => {
     copy.items[0]!.title = 'Другой пункт'
     expect(source.items[0]!.title).toBe('Паспорт')
     general.vm.openCreate()
-    general.vm.title = 'Сразу на Алтай'
-    general.vm.linkedTrip = 'altai'
+    general.vm.title = 'Ещё один личный список'
     general.vm.create()
-    expect(general.vm.lists.map((list) => list.title)).toEqual(['Общий список'])
-    expect(scoped.vm.lists.some((list) => list.title === 'Сразу на Алтай')).toBe(false)
+    expect(general.vm.active?.tripId).toBe('')
+    expect(general.vm.lists.map((list) => list.title)).toEqual([
+      'Общий список',
+      'Ещё один личный список',
+    ])
+    expect(scoped.vm.lists.some((list) => list.title === 'Ещё один личный список')).toBe(false)
     await nextTick()
     setActivePinia(createPinia())
     expect(useTravelStore().checklists.find((list) => list.id === copy.id)?.tripId).toBe('florence')

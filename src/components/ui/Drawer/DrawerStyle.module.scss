@@ -1,4 +1,11 @@
-@use '../Modal/ModalStyle.module';
+.uiOverlay {
+  background: rgb(20 28 25 / 42%);
+  backdrop-filter: blur(4px);
+}
+
+.uiDialog {
+  background: var(--surface);
+}
 
 .uiDrawer {
   box-shadow: -12px 0 60px #0001;
@@ -6,20 +13,32 @@
 
 .overlayEnterActive,
 .overlayLeaveActive {
+  transition: background-color var(--motion-modal-enter) var(--ease-sheet);
+
   > dialog {
     transition: transform var(--motion-modal-enter) var(--ease-sheet);
+  }
 
-    @media (prefers-reduced-motion: reduce) {
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: 1ms;
+
+    > dialog {
       transition-duration: 1ms;
     }
   }
 }
 
 .overlayLeaveActive {
+  transition-duration: var(--motion-modal-leave);
+
   > dialog {
     transition-duration: var(--motion-modal-leave);
+  }
 
-    @media (prefers-reduced-motion: reduce) {
+  @media (prefers-reduced-motion: reduce) {
+    transition-duration: 1ms;
+
+    > dialog {
       transition-duration: 1ms;
     }
   }
@@ -27,8 +46,10 @@
 
 .overlayEnterFrom,
 .overlayLeaveTo {
+  background-color: transparent;
+
   > dialog {
-    transform: translateX(100%);
+    transform: translate3d(100%, 0, 0);
   }
 }
 

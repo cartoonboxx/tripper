@@ -21,15 +21,20 @@ export interface PlanEvent {
   start: string
   end: string
   place: string
+  placeId?: string
   description: string
   image: string
-  category: string
+}
+export interface PlaceCoordinates {
+  latitude: number
+  longitude: number
 }
 export interface Place {
   id: string
   name: string
   category: string
   address: string
+  coordinates?: PlaceCoordinates
   image: string
   description: string
 }

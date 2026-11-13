@@ -12,6 +12,8 @@ import { defineConfig, devices } from '@playwright/test'
  */
 export default defineConfig({
   testDir: './e2e',
+  // Map SDK integration runs on a separate server with a fixture key.
+  testIgnore: '**/place-map*.spec.ts',
   /* Maximum time one test can run for. */
   timeout: 30 * 1000,
   expect: {

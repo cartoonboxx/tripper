@@ -240,7 +240,6 @@ export default defineComponent({
       categoryForms: {
         expenses: { name: '', error: '' },
         places: { name: '', error: '' },
-        events: { name: '', error: '' },
       },
     }
   },

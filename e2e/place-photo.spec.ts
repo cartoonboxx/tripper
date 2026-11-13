@@ -15,6 +15,7 @@ test('place photos can be uploaded, saved, replaced and cancelled without changi
   const dialog = page.getByRole('dialog')
   await dialog.getByLabel(/^Название/).fill('Место с фото')
   const file = dialog.locator('input[type=file]')
+  await expect(dialog.getByRole('button', { name: /Загрузить фото/ })).toBeVisible()
   await file.setInputFiles({ name: 'photo.png', mimeType: 'image/png', buffer: png })
   const preview = dialog.getByRole('img', { name: 'Выбранное фото места', exact: true })
   await expect(preview).toBeVisible()
@@ -91,4 +92,11 @@ test('place photos can be uploaded, saved, replaced and cancelled without changi
     'src',
     replacement!,
   )
+  await page.getByRole('button', { name: 'Место с фото', exact: true }).last().click()
+  await dialog.getByRole('button', { name: 'Редактировать', exact: true }).click()
+  await edit.getByRole('button', { name: 'Удалить фото', exact: true }).click()
+  await expect(edit.getByRole('button', { name: /Загрузить фото/ })).toBeVisible()
+  await edit.getByRole('button', { name: 'Сохранить место', exact: true }).click()
+  await page.reload()
+  await expect(page.getByRole('img', { name: 'Место с фото', exact: true })).toHaveCount(0)
 })

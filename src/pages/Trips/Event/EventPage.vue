@@ -9,10 +9,13 @@
       </AppLink>
       <div :class="[sharedStyle.panel, style.eventPage]">
         <img
-          :src="event.image"
+          v-if="store.imageForEvent(event)"
+          :src="store.imageForEvent(event)"
           :alt="event.title"
           :class="[sharedStyle.detailCover, style.detailCover]" />
-        <Badge>{{ event.category }}</Badge>
+        <Badge v-if="store.placeForEvent(event)?.category">
+          {{ store.placeForEvent(event)?.category }}
+        </Badge>
         <SectionHeader
           :header="event.title"
           level="h2">

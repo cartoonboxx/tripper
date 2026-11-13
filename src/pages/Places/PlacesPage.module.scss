@@ -6,6 +6,7 @@
   border: 0;
   cursor: pointer;
   overflow: hidden;
+  background: var(--primary-soft);
 
   img {
     height: 100%;
@@ -18,7 +19,7 @@
     top: var(--space-3);
     display: grid;
     place-items: center;
-    background: white;
+    background: var(--surface);
     width: 29px;
     height: 32px;
     border-radius: var(--radius-2);
@@ -59,6 +60,7 @@
 .placeCardFooter {
   display: flex;
   align-items: center;
+  gap: var(--space-1);
   justify-content: flex-end;
   margin-top: var(--space-4);
   border-top: 1px solid var(--border);
@@ -85,10 +87,6 @@
   }
 }
 
-.searchField {
-  width: 100%;
-}
-
 .placeDetails {
   display: flex;
   flex-direction: column;
@@ -107,23 +105,4 @@
   color: var(--muted);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-}
-
-.photoPreview {
-  width: 100%;
-  max-height: 240px;
-  object-fit: cover;
-  border-radius: var(--radius-3);
-  margin-bottom: var(--space-3);
-}
-
-.photoUpload {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-
-  input {
-    display: none;
-  }
 }

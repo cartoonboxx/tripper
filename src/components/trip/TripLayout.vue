@@ -25,7 +25,7 @@
       </Button>
     </div>
     <section
-      :style="{ backgroundImage: `url(${trip.image})` }"
+      :style="{ backgroundImage: trip.image ? `url(${trip.image})` : undefined }"
       :class="style.tripHero">
       <div :class="style.tripHeroContent">
         <span :class="style.heroEyebrow">

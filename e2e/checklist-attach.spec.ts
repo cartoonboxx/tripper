@@ -8,6 +8,7 @@ for (const width of [1440, 375, 320]) {
     await page.goto('/checklists')
     await page.getByRole('button', { name: 'Создать чек-лист', exact: true }).click()
     const dialog = page.getByRole('dialog')
+    await expect(dialog.getByRole('combobox')).toHaveCount(0)
     await dialog.getByLabel(/^Название/).fill('Мои документы')
     await dialog.getByRole('button', { name: 'Создать', exact: true }).click()
     await expect(dialog).toHaveCount(0)

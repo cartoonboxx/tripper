@@ -28,10 +28,10 @@ export function createOverlayController(
       last = items[items.length - 1]
     if (event.shiftKey && (document.activeElement === first || document.activeElement === panel)) {
       event.preventDefault()
-      last?.focus()
+      last?.focus({ preventScroll: true })
     } else if (!event.shiftKey && document.activeElement === last) {
       event.preventDefault()
-      first?.focus()
+      first?.focus({ preventScroll: true })
     }
   }
   return {
@@ -43,7 +43,9 @@ export function createOverlayController(
       document.body.style.overflow = 'hidden'
       if (!native) {
         document.addEventListener('keydown', keydown)
-        element()?.querySelector<HTMLElement>('button, input, select, textarea, a[href]')?.focus()
+        element()
+          ?.querySelector<HTMLElement>('button, input, select, textarea, a[href]')
+          ?.focus({ preventScroll: true })
       }
     },
     close() {
@@ -53,7 +55,7 @@ export function createOverlayController(
       if (index >= 0) stack.splice(index, 1)
       document.removeEventListener('keydown', keydown)
       if (!stack.length) document.body.style.overflow = ''
-      previous?.focus()
+      previous?.focus({ preventScroll: true })
     },
   }
 }

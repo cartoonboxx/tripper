@@ -70,7 +70,7 @@ export default defineComponent({
       return useTravelStore()
     },
     trips() {
-      return this.store.trips.filter(
+      return this.store.sortedTrips.filter(
         (t) => t.archived && t.name.toLowerCase().includes(this.search.toLowerCase()),
       )
     },

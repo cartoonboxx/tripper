@@ -4,7 +4,8 @@
       :enter-active-class="appearance.overlayEnterActive"
       :leave-active-class="appearance.overlayLeaveActive"
       :enter-from-class="appearance.overlayEnterFrom"
-      :leave-to-class="appearance.overlayLeaveTo">
+      :leave-to-class="appearance.overlayLeaveTo"
+      @after-leave="finishClose">
       <div
         v-if="open"
         @mousedown.self="$emit('close')"
@@ -60,7 +61,6 @@ export default defineComponent({
   watch: {
     open(open: boolean) {
       if (open) this.activateOverlay()
-      else this.overlay?.close()
     },
   },
   mounted() {
@@ -76,6 +76,9 @@ export default defineComponent({
     this.overlay?.close()
   },
   methods: {
+    finishClose() {
+      if (!this.open) this.overlay?.close()
+    },
     async activateOverlay() {
       await this.$nextTick()
       if (this.open) this.overlay?.open()

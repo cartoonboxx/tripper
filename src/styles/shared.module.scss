@@ -180,6 +180,11 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+
+  .formHelp {
+    font-size: var(--text-xs);
+    color: var(--muted);
+  }
 }
 
 .formRow {
@@ -231,43 +236,6 @@
   font-size: var(--text-base);
   line-height: 1.7;
   color: var(--text);
-}
-
-.coverOptions {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-2);
-
-  button {
-    min-width: 0;
-    border: 2px solid transparent;
-    padding: var(--space-1);
-    border-radius: var(--radius-2);
-    background: none;
-    cursor: pointer;
-
-    &.selected {
-      border-color: var(--primary);
-    }
-
-    img {
-      height: 54px;
-      width: 100%;
-      border-radius: var(--radius-1);
-    }
-  }
-}
-
-.formHelp {
-  color: var(--muted);
-  font-size: var(--text-xs);
-  margin: 0;
-}
-
-.coverPreview {
-  height: 160px;
-  width: 100%;
-  border-radius: var(--radius-2);
 }
 
 .errorText {

@@ -1,7 +1,7 @@
 <template>
   <div>
     <SectionHeader
-      :header="`Ваша компания ${members.length}`"
+      :header="`Ваша компания: ${members.length}`"
       level="h2"
       paragraph="Хорошо, когда все знают, что впереди.">
       <template #actions>

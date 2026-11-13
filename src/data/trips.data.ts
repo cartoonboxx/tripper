@@ -7,15 +7,6 @@ import type {
   Participant,
   Expense,
 } from '@/types/trip.types'
-import florence from '@/assets/images/florence.jpg'
-import altai from '@/assets/images/altai.jpg'
-import petersburg from '@/assets/images/petersburg.jpg'
-import garden from '@/assets/images/garden.jpg'
-import gallery from '@/assets/images/gallery.jpg'
-import food from '@/assets/images/food.jpg'
-import coast from '@/assets/images/coast.jpg'
-export const imageAssets = { florence, altai, petersburg, garden, gallery, food, coast }
-export const covers = [florence, altai, petersburg, coast]
 export const initialTrips: Trip[] = [
   {
     id: 'florence',
@@ -23,7 +14,7 @@ export const initialTrips: Trip[] = [
     country: 'Италия',
     start: '2026-11-10',
     end: '2026-11-15',
-    image: florence,
+    image: '',
     status: 'upcoming',
     archived: false,
     notes:
@@ -36,7 +27,7 @@ export const initialTrips: Trip[] = [
     country: 'Россия',
     start: '2026-12-05',
     end: '2026-12-12',
-    image: altai,
+    image: '',
     status: 'upcoming',
     archived: false,
     notes: 'Взять тёплые вещи и удобную обувь для прогулок.',
@@ -48,7 +39,7 @@ export const initialTrips: Trip[] = [
     country: 'Россия',
     start: '2026-10-01',
     end: '2026-10-04',
-    image: petersburg,
+    image: '',
     status: 'upcoming',
     archived: true,
     notes: 'Город, в который хочется вернуться.',
@@ -65,8 +56,7 @@ export const initialEvents: PlanEvent[] = [
     end: '12:00',
     place: 'Piazzale degli Uffizi, 6',
     description: 'Билеты онлайн, вход с 9:45. Не забудьте взять документ.',
-    image: gallery,
-    category: 'Музей',
+    image: '',
   },
   {
     id: 'e2',
@@ -77,8 +67,7 @@ export const initialEvents: PlanEvent[] = [
     end: '14:00',
     place: 'Via dei Servi, 26',
     description: 'Попробовать флорентийский стейк и домашнюю пасту.',
-    image: food,
-    category: 'Еда',
+    image: '',
   },
   {
     id: 'e3',
@@ -89,8 +78,7 @@ export const initialEvents: PlanEvent[] = [
     end: '16:30',
     place: 'Piazza del Duomo',
     description: 'Подняться на купол и посмотреть на город с высоты.',
-    image: florence,
-    category: 'Достопримечательность',
+    image: '',
   },
   {
     id: 'e4',
@@ -101,8 +89,7 @@ export const initialEvents: PlanEvent[] = [
     end: '17:00',
     place: 'Исторический центр',
     description: 'Оставить вещи и познакомиться с городом.',
-    image: florence,
-    category: 'Прогулка',
+    image: '',
   },
 ]
 export const initialPlaces: Place[] = [
@@ -111,7 +98,7 @@ export const initialPlaces: Place[] = [
     name: 'Сады Боболи',
     category: 'Парк',
     address: 'Piazza de’ Pitti, 1',
-    image: garden,
+    image: '',
     description: 'Зелёные аллеи, скульптуры и прекрасный вид на Флоренцию.',
   },
   {
@@ -119,7 +106,7 @@ export const initialPlaces: Place[] = [
     name: 'Площадь Микеланджело',
     category: 'Смотровая площадка',
     address: 'Piazzale Michelangelo',
-    image: florence,
+    image: '',
     description: 'Лучшее место, чтобы проводить закат над городом.',
   },
   {
@@ -127,7 +114,7 @@ export const initialPlaces: Place[] = [
     name: 'Рынок Сан-Лоренцо',
     category: 'Рынок',
     address: 'Piazza del Mercato Centrale',
-    image: food,
+    image: '',
     description: 'Свежие продукты и маленькие гастрономические открытия.',
   },
 ]

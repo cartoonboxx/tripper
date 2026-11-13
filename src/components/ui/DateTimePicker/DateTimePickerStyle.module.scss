@@ -3,11 +3,6 @@
   border-color: var(--border);
   color: var(--text);
 
-  &:focus-within {
-    border-color: var(--focus);
-    box-shadow: var(--field-focus-shadow);
-  }
-
   &:has(input:disabled) {
     background: var(--background);
     color: var(--muted);

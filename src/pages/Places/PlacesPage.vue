@@ -12,7 +12,7 @@
         <Button
           v-if="canManagePlaces"
           :size="tripId ? 'sm' : 'md'"
-          @click="startAdd">
+          @click="open()">
           <PhPlus :size="16" />
           Добавить место
         </Button>
@@ -22,8 +22,7 @@
       <Input
         v-model="search"
         label="Поиск мест"
-        placeholder="Найти место…"
-        :class="style.searchField">
+        placeholder="Найти место…">
         <template #prefix><PhMagnifyingGlass :size="16" /></template>
       </Input>
       <Select
@@ -39,16 +38,17 @@
         :key="place.id"
         interactive>
         <button
-          @click="showDetail(place)"
+          @click="detail = place"
           :class="style.placeImage">
           <img
+            v-if="place.image"
             :src="place.image"
             :alt="place.name" />
           <span :class="style.bookmarkMark"><PhBookmarkSimple :size="17" /></span>
         </button>
         <div :class="style.placeCardBody">
           <button
-            @click="showDetail(place)"
+            @click="detail = place"
             :class="style.placeTitle">
             {{ place.name }}
           </button>
@@ -57,13 +57,20 @@
             <PhMapPin :size="16" />
             {{ place.address || 'Адрес не указан' }}
           </div>
-          <div :class="style.placeCardFooter">
+          <div
+            v-if="canManagePlaces"
+            :class="style.placeCardFooter">
             <Button
-              v-if="canManagePlaces"
               variant="ghost"
               icon-only
               @click="open(place)">
               <PhPencilSimple :size="16" />
+            </Button>
+            <Button
+              variant="ghost"
+              icon-only
+              @click="deleting = place">
+              <PhTrash size="16" />
             </Button>
           </div>
         </div>
@@ -86,7 +93,7 @@
       </Button>
       <Button
         v-else-if="canManagePlaces"
-        @click="startAdd">
+        @click="open()">
         Добавить место
       </Button>
     </EmptyState>
@@ -109,58 +116,30 @@
         <Input
           v-model="form.address"
           label="Адрес"
-          placeholder="Улица, дом или ориентир" />
+          placeholder="Улица, дом или ориентир">
+          <template #suffix>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon-only
+              @click="selectingPoint = true">
+              <PhMapPin :size="20" />
+            </Button>
+          </template>
+        </Input>
         <Input
           v-model="form.description"
           type="textarea"
           label="Заметки"
           placeholder="Что стоит знать об этом месте?" />
-        <div>
-          <span :class="sharedStyle.fieldLabel">Фото</span>
-          <img
-            v-if="form.image.startsWith('data:')"
-            :src="form.image"
-            alt="Выбранное фото места"
-            :class="style.photoPreview" />
-          <div :class="sharedStyle.coverOptions">
-            <button
-              v-for="cover in covers"
-              :key="cover"
-              type="button"
-              :class="{ [sharedStyle.selected || '']: form.image === cover }"
-              @click="selectCover(cover)">
-              <img
-                :src="cover"
-                alt="" />
-            </button>
-          </div>
-        </div>
-        <div :class="style.photoUpload">
-          <input
-            ref="photoInput"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            hidden
-            @change="uploadPhoto" />
-          <Button
-            variant="secondary"
-            size="sm"
-            @click="choosePhoto">
-            <PhImage :size="16" />
-            Загрузить фото
-          </Button>
-          <span :class="sharedStyle.formHelp">JPG, PNG, WebP · до 1 МБ</span>
-        </div>
-        <p
-          v-if="imageLoading"
-          :class="sharedStyle.formHelp">
-          Загрузка фото…
-        </p>
-        <p
-          v-if="imageError"
-          :class="sharedStyle.errorText">
-          {{ imageError }}
-        </p>
+        <PhotoUpload
+          label="Фото"
+          preview-alt="Выбранное фото места"
+          :image="form.image"
+          :loading="imageLoading"
+          :error="imageError"
+          @upload="uploadPhoto"
+          @remove="removePhoto()" />
         <div :class="sharedStyle.formActions">
           <Button
             variant="secondary"
@@ -175,6 +154,12 @@
         </div>
       </form>
     </Modal>
+    <PlaceMapPicker
+      v-if="creating && selectingPoint"
+      :coordinates="form.coordinates"
+      :address="form.address"
+      @select="selectPoint"
+      @close="selectingPoint = false" />
     <Drawer
       :open="!!detail"
       :title="detail?.name || 'Место'"
@@ -183,6 +168,7 @@
         v-if="detail"
         :class="style.placeDetails">
         <img
+          v-if="detail.image"
           :src="detail.image"
           :alt="detail.name"
           :class="sharedStyle.detailCover" />
@@ -190,6 +176,12 @@
         <p :class="style.placeAddress">
           <PhMapPin :size="17" />
           {{ detail.address || 'Адрес не указан' }}
+        </p>
+        <p
+          v-if="detail.coordinates"
+          :class="style.placeAddress">
+          Точка: {{ detail.coordinates.latitude.toFixed(6) }},
+          {{ detail.coordinates.longitude.toFixed(6) }}
         </p>
         <p :class="style.description">
           {{ detail.description || 'Добавьте заметку об этом месте.' }}
@@ -231,29 +223,32 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent, markRaw } from 'vue'
+import { defineAsyncComponent, defineComponent, markRaw } from 'vue'
 import {
   PhBookmarkSimple,
-  PhImage,
   PhMagnifyingGlass,
   PhMapPin,
   PhPencilSimple,
   PhPlus,
+  PhTrash,
 } from '@phosphor-icons/vue'
 import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import { Button, Card, Badge, Modal, Input, Select, EmptyState, Drawer } from '@/components/ui'
-import { covers } from '@/data/trips.data'
-import type { Place } from '@/types/trip.types'
+import PhotoUpload from '@/components/PhotoUpload/PhotoUpload.vue'
+import type { Place, PlaceCoordinates } from '@/types/trip.types'
 import tripContext from '@/mixins/tripContext'
 import sharedStyle from '@/styles/shared.module.scss'
 import style from './PlacesPage.module.scss'
+import type { PlaceMapSelection } from './PlaceMapPicker/PlaceMapPicker.types'
 
 export default defineComponent({
   name: 'PlacesPage',
   components: {
+    PhTrash,
+    PlaceMapPicker: defineAsyncComponent(() => import('./PlaceMapPicker/PlaceMapPicker.vue')),
     SectionHeader,
+    PhotoUpload,
     PhBookmarkSimple,
-    PhImage,
     PhMagnifyingGlass,
     PhMapPin,
     PhPencilSimple,
@@ -272,7 +267,6 @@ export default defineComponent({
     return {
       style,
       sharedStyle,
-      covers,
       PhBookmarkSimple: markRaw(PhBookmarkSimple),
       search: '',
       selectedCategory: '',
@@ -280,6 +274,7 @@ export default defineComponent({
       imageLoading: false,
       photoRequest: 0,
       creating: false,
+      selectingPoint: false,
       detail: undefined as Place | undefined,
       editing: undefined as Place | undefined,
       deleting: undefined as Place | undefined,
@@ -287,8 +282,9 @@ export default defineComponent({
         name: '',
         category: 'Достопримечательность',
         address: '',
+        coordinates: undefined as PlaceCoordinates | undefined,
         description: '',
-        image: covers[0] || '',
+        image: '',
       },
     }
   },
@@ -332,13 +328,14 @@ export default defineComponent({
     this.photoRequest += 1
   },
   methods: {
+    selectPoint(selection: PlaceMapSelection) {
+      this.form.coordinates = { latitude: selection.latitude, longitude: selection.longitude }
+      if (selection.address !== undefined) this.form.address = selection.address
+      this.selectingPoint = false
+    },
     resetFilters() {
       this.search = ''
       this.selectedCategory = ''
-    },
-    startAdd() {
-      if (!this.canManagePlaces) return
-      this.open()
     },
     open(place?: Place) {
       if (!this.canManagePlaces) return
@@ -349,8 +346,9 @@ export default defineComponent({
         name: place?.name || '',
         category: place?.category || 'Достопримечательность',
         address: place?.address || '',
+        coordinates: place?.coordinates ? { ...place.coordinates } : undefined,
         description: place?.description || '',
-        image: place?.image || this.covers[0] || '',
+        image: place?.image || '',
       }
       this.detail = undefined
       this.creating = true
@@ -366,19 +364,17 @@ export default defineComponent({
       this.closeForm()
       this.store.notify('Место сохранено')
     },
-    showDetail(place: Place) {
-      this.detail = place
-    },
     closeForm() {
       this.photoRequest += 1
       this.imageLoading = false
+      this.selectingPoint = false
       this.creating = false
     },
-    selectCover(cover: string) {
+    removePhoto() {
       this.photoRequest += 1
       this.imageLoading = false
       this.imageError = ''
-      this.form.image = cover
+      this.form.image = ''
     },
     uploadPhoto(event: Event) {
       const input = event.target as HTMLInputElement
@@ -415,9 +411,6 @@ export default defineComponent({
         image.src = String(reader.result)
       }
       reader.readAsDataURL(file)
-    },
-    choosePhoto() {
-      ;(this.$refs.photoInput as HTMLInputElement | undefined)?.click()
     },
     remove() {
       if (!this.deleting || !this.canManagePlaces) return

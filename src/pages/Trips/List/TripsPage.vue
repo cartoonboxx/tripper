@@ -220,7 +220,7 @@ export default defineComponent({
       return this.route.name === 'home'
     },
     activeTrips() {
-      return this.store.trips.filter((trip) => !trip.archived)
+      return this.store.sortedTrips.filter((trip) => !trip.archived)
     },
     filtered() {
       const search = this.search.toLowerCase()
@@ -231,7 +231,7 @@ export default defineComponent({
       )
     },
     nextTrip() {
-      return [...this.activeTrips].sort((a, b) => a.start.localeCompare(b.start))[0]
+      return this.activeTrips[0]
     },
     checklist() {
       return this.store.checklists.find((c) => c.tripId === this.nextTrip?.id)

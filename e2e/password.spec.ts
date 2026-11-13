@@ -38,7 +38,7 @@ test('settings sets and changes the password, and login accepts only the saved p
 })
 
 test('registration stores a password that can be changed in settings', async ({ page }) => {
-  await page.goto('/register')
+  await page.goto('/registration')
   await page.getByLabel(/^Ваше имя/).fill('Анна')
   await page.getByLabel(/^Электронная почта/).fill('anna@example.com')
   await page.getByLabel(/^Пароль/).fill('registered-password')

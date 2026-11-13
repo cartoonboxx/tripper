@@ -4,6 +4,7 @@
       v-if="trip"
       :class="style.joinCard">
       <img
+        v-if="trip.image"
         :src="trip.image"
         :alt="trip.name" />
       <div>

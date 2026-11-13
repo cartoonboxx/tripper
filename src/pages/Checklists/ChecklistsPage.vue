@@ -70,38 +70,77 @@
           <template
             v-if="!attachedOnly && canManage"
             #actions>
-            <Button
-              variant="ghost"
-              icon-only
-              @click="deleting = true">
-              <PhTrash :size="16" />
-            </Button>
+            <div :class="style.headerButtons">
+              <Button
+                variant="ghost"
+                icon-only
+                @click="startEditTitleChecklist">
+                <PhPencilSimple size="16" />
+              </Button>
+              <Button
+                variant="ghost"
+                icon-only
+                @click="deleting = true">
+                <PhTrash :size="16" />
+              </Button>
+            </div>
           </template>
         </SectionHeader>
         <div :class="style.checklistProgress"><span :style="{ width: percent + '%' }" /></div>
-        <div
-          v-for="item in active.items"
-          :key="item.id"
-          :class="style.checklistItem">
-          <Checkbox
-            v-model="item.checked"
-            :disabled="!canManage"
-            :label="item.title" />
-          <Button
-            v-if="!attachedOnly && canManage"
-            variant="ghost"
-            icon-only
-            @click="startEdit(item)">
-            <PhPencilSimple :size="16" />
-          </Button>
-          <Button
-            v-if="!attachedOnly && canManage"
-            variant="ghost"
-            icon-only
-            @click="removeItem(item)">
-            <PhX :size="16" />
-          </Button>
-        </div>
+        <p
+          v-if="canReorder"
+          :class="style.reorderHint">
+          Зажмите пункт мышью или значок слева пальцем и перетащите на нужное место.
+        </p>
+        <TransitionGroup
+          tag="div"
+          :move-class="style.itemMove">
+          <div
+            v-for="item in displayedItems"
+            :key="item.id"
+            :ref="(element) => setItemCard(item.id, element)"
+            :class="[style.itemSlot, draggedItemId === item.id && style.isPlaceholder]"
+            :style="draggedItemId === item.id ? { height: `${dragHeight}px` } : undefined">
+            <div
+              :class="[
+                style.checklistItem,
+                canReorder && style.isMovable,
+                draggedItemId === item.id && style.isDragging,
+              ]"
+              :style="draggedItemId === item.id ? draggedCardStyle : undefined"
+              @pointerdown="startPointer($event, item)"
+              @click.capture="suppressDragClick"
+              @contextmenu="preventReorderMenu"
+              @dragstart.prevent>
+              <button
+                v-if="canReorder"
+                type="button"
+                :class="style.dragHandle"
+                @keydown="moveItemByKey($event, item)">
+                <PhDotsSixVertical :size="18" />
+                <span :class="style.handleLabel">Переместить {{ item.title }}</span>
+              </button>
+              <Checkbox
+                v-model="item.checked"
+                :disabled="!canManage"
+                :label="item.title" />
+              <Button
+                v-if="!attachedOnly && canManage"
+                variant="ghost"
+                icon-only
+                @click="startEdit(item)">
+                <PhPencilSimple :size="16" />
+              </Button>
+              <Button
+                v-if="!attachedOnly && canManage"
+                variant="ghost"
+                icon-only
+                @click="removeItem(item)">
+                <PhX :size="16" />
+              </Button>
+            </div>
+          </div>
+        </TransitionGroup>
         <p
           v-if="!active.items.length"
           :class="[style.checklistsDetail1, sharedStyle.subtle]">
@@ -208,14 +247,9 @@
           label="Название"
           placeholder="Например, вещи в дорогу"
           required />
-        <Select
-          v-if="!tripId"
-          v-model="linkedTrip"
-          label="Добавить в поездку"
-          :options="tripOptions" />
         <p :class="sharedStyle.formHelp">
           {{
-            tripId || linkedTrip
+            tripId
               ? 'Чек-лист будет доступен только в выбранной поездке.'
               : 'Чек-лист сохранится в общем списке.'
           }}
@@ -260,6 +294,31 @@
             type="submit"
             :disabled="!targetTrip">
             Добавить
+          </Button>
+        </div>
+      </form>
+    </Modal>
+    <Modal
+      :open="!!editingChecklistId"
+      title="Изменить название чек-листа"
+      @close="editingChecklistId = ''">
+      <form
+        @submit.prevent="saveTitleChecklist"
+        :class="sharedStyle.formStack">
+        <Input
+          v-model="editChecklistTitle"
+          label="Название"
+          required />
+        <div :class="sharedStyle.formActions">
+          <Button
+            variant="secondary"
+            @click="editingChecklistId = ''">
+            Отмена
+          </Button>
+          <Button
+            type="submit"
+            :disabled="!editChecklistTitle.trim()">
+            Сохранить
           </Button>
         </div>
       </form>
@@ -315,9 +374,10 @@
 import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import sharedStyle from '@/styles/shared.module.scss'
 import style from './ChecklistsPage.module.scss'
-import { defineComponent, markRaw } from 'vue'
+import { defineComponent, markRaw, type CSSProperties } from 'vue'
 import {
   PhChecks,
+  PhDotsSixVertical,
   PhListChecks,
   PhLink,
   PhLockKey,
@@ -335,6 +395,7 @@ export default defineComponent({
   components: {
     SectionHeader,
     PhChecks,
+    PhDotsSixVertical,
     PhLink,
     PhLockKey,
     PhPencilSimple,
@@ -356,14 +417,31 @@ export default defineComponent({
       sharedStyle,
       style,
       selected: '',
+      itemCards: markRaw(new Map<string, HTMLElement>()),
+      heldItemId: '',
+      draggedItemId: '',
+      previewIds: [] as string[],
+      dragWidth: 0,
+      dragHeight: 0,
+      dragOffsetX: 0,
+      dragOffsetY: 0,
+      pointerId: null as number | null,
+      suppressClickUntil: 0,
+      dragX: 0,
+      dragY: 0,
+      pressX: 0,
+      pressY: 0,
+      pressTimer: null as ReturnType<typeof setTimeout> | null,
+      scrollFrame: null as number | null,
       creating: false,
       attaching: false,
       sourceChecklist: '',
       title: '',
-      linkedTrip: '',
       addingToTrip: false,
       targetTrip: '',
       newItem: '',
+      editingChecklistId: '',
+      editChecklistTitle: '',
       editingItem: undefined as ChecklistItem | undefined,
       editTitle: '',
       deleting: false,
@@ -371,6 +449,29 @@ export default defineComponent({
     }
   },
   computed: {
+    canReorder(): boolean {
+      return this.canManage && !this.attachedOnly && (this.active?.items.length || 0) > 1
+    },
+    itemIds(): string[] {
+      return this.active?.items.map((item) => item.id) || []
+    },
+    displayedItems(): ChecklistItem[] {
+      const items = this.active?.items || []
+      if (!this.draggedItemId) return items
+      const byId = new Map(items.map((item) => [item.id, item]))
+      return this.previewIds
+        .map((id) => byId.get(id))
+        .filter((item): item is ChecklistItem => !!item)
+    },
+    draggedCardStyle(): CSSProperties | undefined {
+      if (!this.draggedItemId) return undefined
+      return {
+        width: `${this.dragWidth}px`,
+        height: `${this.dragHeight}px`,
+        left: `${this.dragX - this.dragOffsetX}px`,
+        top: `${this.dragY - this.dragOffsetY}px`,
+      }
+    },
     canAttach() {
       return Boolean(this.tripId && this.canManage && !this.attachedOnly && !this.trip?.archived)
     },
@@ -383,7 +484,7 @@ export default defineComponent({
       return this.store.checklists.find((list) => list.id === this.sourceChecklist && !list.tripId)
     },
     tripOptions() {
-      const trips = this.store.trips
+      const trips = this.store.sortedTrips
         .filter((trip) => !trip.archived && trip.role === 'organizer')
         .map((trip) => ({ label: trip.name, value: trip.id }))
       return [{ label: 'Оставить в общих чек-листах', value: '' }, ...trips]
@@ -416,7 +517,157 @@ export default defineComponent({
       return Math.round((this.done / (this.active?.items.length || 1)) * 100)
     },
   },
+  mounted() {
+    window.addEventListener('pointermove', this.movePointer)
+    window.addEventListener('pointerup', this.finishPointer)
+    window.addEventListener('pointercancel', this.cancelPointer)
+    window.addEventListener('blur', this.cancelReorder)
+    window.addEventListener('keydown', this.cancelByKey)
+  },
+  beforeUnmount() {
+    this.cancelReorder()
+    window.removeEventListener('pointermove', this.movePointer)
+    window.removeEventListener('pointerup', this.finishPointer)
+    window.removeEventListener('pointercancel', this.cancelPointer)
+    window.removeEventListener('blur', this.cancelReorder)
+    window.removeEventListener('keydown', this.cancelByKey)
+  },
+  watch: {
+    active(current, previous) {
+      if (current?.id !== previous?.id) this.cancelReorder()
+    },
+    itemIds() {
+      this.cancelReorder()
+    },
+    canReorder(allowed: boolean) {
+      if (!allowed) this.cancelReorder()
+    },
+  },
   methods: {
+    setItemCard(id: string, element: unknown) {
+      if (element instanceof HTMLElement) this.itemCards.set(id, element)
+      else this.itemCards.delete(id)
+    },
+    startPointer(pointer: PointerEvent, item: ChecklistItem) {
+      if (!this.canReorder || pointer.button !== 0 || !pointer.isPrimary || this.heldItemId) return
+      const target = pointer.target
+      if (!(target instanceof Element)) return
+      const handle = target.closest(`.${style.dragHandle}`)
+      if (!handle && (pointer.pointerType !== 'mouse' || target.closest('button, input, a'))) return
+      this.startReorder(item, pointer.clientX, pointer.clientY)
+      this.pointerId = pointer.pointerId
+    },
+    startReorder(item: ChecklistItem, x: number, y: number) {
+      this.cancelReorder()
+      this.heldItemId = item.id
+      this.pressX = this.dragX = x
+      this.pressY = this.dragY = y
+      this.pressTimer = setTimeout(() => {
+        const card = this.itemCards.get(item.id)
+        if (!card) return this.cancelReorder()
+        const bounds = card.getBoundingClientRect()
+        this.dragWidth = bounds.width
+        this.dragHeight = bounds.height
+        this.dragOffsetX = this.dragX - bounds.left
+        this.dragOffsetY = this.dragY - bounds.top
+        this.previewIds = this.itemIds.slice()
+        this.draggedItemId = item.id
+        this.suppressClickUntil = Number.POSITIVE_INFINITY
+        window.getSelection()?.removeAllRanges()
+        this.animateReorder()
+      }, 350)
+    },
+    movePointer(pointer: PointerEvent) {
+      if (pointer.pointerId !== this.pointerId) return
+      this.moveReorder(pointer.clientX, pointer.clientY)
+    },
+    moveReorder(x: number, y: number) {
+      if (!this.heldItemId) return
+      this.dragX = x
+      this.dragY = y
+      if (!this.draggedItemId) {
+        if (Math.hypot(x - this.pressX, y - this.pressY) > 8) this.cancelReorder()
+        return
+      }
+      this.updateDropTarget()
+    },
+    updateDropTarget() {
+      const remaining = this.previewIds.filter((id) => id !== this.draggedItemId)
+      let targetIndex = remaining.length
+      for (let index = 0; index < remaining.length; index++) {
+        const card = this.itemCards.get(remaining[index]!)
+        if (!card) continue
+        const bounds = card.getBoundingClientRect()
+        if (this.dragY < bounds.top + bounds.height / 2) {
+          targetIndex = index
+          break
+        }
+      }
+      const currentIndex = this.previewIds.indexOf(this.draggedItemId)
+      if (currentIndex === targetIndex) return
+      remaining.splice(targetIndex, 0, this.draggedItemId)
+      this.previewIds = remaining
+    },
+    animateReorder() {
+      if (!this.draggedItemId) return
+      const edge = 80
+      const bottom = window.innerHeight - (window.innerWidth <= 900 ? 96 : 0)
+      if (this.dragY < edge) window.scrollBy(0, -12)
+      else if (this.dragY > bottom - edge) window.scrollBy(0, 12)
+      this.updateDropTarget()
+      this.scrollFrame = requestAnimationFrame(this.animateReorder)
+    },
+    finishPointer(pointer: PointerEvent) {
+      if (pointer.pointerId === this.pointerId) this.finishReorder()
+    },
+    cancelPointer(pointer: PointerEvent) {
+      if (pointer.pointerId === this.pointerId) this.cancelReorder()
+    },
+    finishReorder() {
+      if (this.draggedItemId && this.canReorder && this.active) {
+        const byId = new Map(this.active.items.map((item) => [item.id, item]))
+        const items = this.previewIds
+          .map((id) => byId.get(id))
+          .filter((item): item is ChecklistItem => !!item)
+        if (items.length === this.active.items.length) this.active.items = items
+      }
+      this.cancelReorder()
+    },
+    moveItemByKey(key: KeyboardEvent, item: ChecklistItem) {
+      if (!this.canReorder || !this.active || !['ArrowUp', 'ArrowDown'].includes(key.key)) return
+      key.preventDefault()
+      this.cancelReorder()
+      const items = [...this.active.items]
+      const index = items.findIndex((current) => current.id === item.id)
+      const target = index + (key.key === 'ArrowUp' ? -1 : 1)
+      if (index < 0 || target < 0 || target >= items.length) return
+      items.splice(index, 1)
+      items.splice(target, 0, item)
+      this.active.items = items
+    },
+    cancelReorder() {
+      if (this.pressTimer) clearTimeout(this.pressTimer)
+      if (this.scrollFrame !== null) cancelAnimationFrame(this.scrollFrame)
+      if (this.draggedItemId) this.suppressClickUntil = Date.now() + 400
+      this.pressTimer = null
+      this.scrollFrame = null
+      this.heldItemId = this.draggedItemId = ''
+      this.previewIds = []
+      this.pointerId = null
+    },
+    cancelByKey(key: KeyboardEvent) {
+      if (key.key === 'Escape') this.cancelReorder()
+    },
+    suppressDragClick(click: MouseEvent) {
+      if (Date.now() < this.suppressClickUntil) {
+        click.preventDefault()
+        click.stopPropagation()
+      }
+    },
+    preventReorderMenu(menu: MouseEvent) {
+      if (this.heldItemId || this.draggedItemId) menu.preventDefault()
+    },
+
     completedCount(items: ChecklistItem[]) {
       return items.filter((item) => item.checked).length
     },
@@ -424,7 +675,6 @@ export default defineComponent({
       if (!this.canManage) return
       this.attaching = false
       this.title = ''
-      this.linkedTrip = this.tripId
       this.creating = true
     },
     openAttach() {
@@ -451,9 +701,7 @@ export default defineComponent({
     },
     create() {
       if (!this.canManage || !this.title.trim()) return
-      const tripId = this.tripId || this.linkedTrip
-      if (!this.tripId && tripId && !this.availableTrips.some((trip) => trip.value === tripId))
-        return
+      const tripId = this.tripId
       const id = crypto.randomUUID()
       this.store.checklists.push({
         id,
@@ -486,6 +734,19 @@ export default defineComponent({
         checked: false,
       })
       this.newItem = ''
+    },
+    startEditTitleChecklist() {
+      if (!this.canManage || this.attachedOnly || !this.active) return
+      this.editingChecklistId = this.active.id
+      this.editChecklistTitle = this.active.title
+    },
+    saveTitleChecklist() {
+      if (!this.canManage || this.attachedOnly || !this.editChecklistTitle.trim()) return
+      const checklist = this.lists.find((list) => list.id === this.editingChecklistId)
+      if (!checklist) return
+      checklist.title = this.editChecklistTitle.trim()
+      this.editingChecklistId = ''
+      this.store.notify('Название чек-листа сохранено')
     },
     startEdit(item: ChecklistItem) {
       if (!this.canManage) return

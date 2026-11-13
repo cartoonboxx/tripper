@@ -53,6 +53,7 @@ export default defineComponent({
       top: 0,
       observer: null as ResizeObserver | null,
       previousFocus: null as HTMLElement | null,
+      focusInteraction: 'pointer' as 'pointer' | 'keyboard' | 'tab',
     }
   },
   watch: {
@@ -74,15 +75,33 @@ export default defineComponent({
     }
     window.addEventListener('resize', this.updatePosition)
     window.addEventListener('scroll', this.updatePosition, true)
+    document.addEventListener('pointerdown', this.onPointerDown, true)
+    document.addEventListener('keydown', this.onKeyDown, true)
+    document.addEventListener('focusout', this.onFocusOut)
     this.syncOpen()
   },
   beforeUnmount() {
     this.observer?.disconnect()
     window.removeEventListener('resize', this.updatePosition)
     window.removeEventListener('scroll', this.updatePosition, true)
+    document.removeEventListener('pointerdown', this.onPointerDown, true)
+    document.removeEventListener('keydown', this.onKeyDown, true)
+    document.removeEventListener('focusout', this.onFocusOut)
     if (this.open) this.restoreFocus()
   },
   methods: {
+    onPointerDown() {
+      this.focusInteraction = 'pointer'
+    },
+    onKeyDown(event: KeyboardEvent) {
+      this.focusInteraction = event.key === 'Tab' ? 'tab' : 'keyboard'
+    },
+    async onFocusOut() {
+      if (!this.open || this.focusInteraction !== 'tab') return
+      await this.$nextTick()
+      const panel = this.$refs.panel as HTMLElement | undefined
+      if (this.open && !panel?.contains(document.activeElement)) this.close()
+    },
     toggle() {
       this.$emit('update:open', !(this.triggerWasOpen ?? this.open))
       this.triggerWasOpen = null
@@ -96,8 +115,15 @@ export default defineComponent({
       this.$emit('close')
     },
     restoreFocus() {
-      if (this.previousFocus?.isConnected) this.previousFocus.focus({ preventScroll: true })
+      const previous = this.previousFocus
       this.previousFocus = null
+      if (!previous?.isConnected) return
+      const active = document.activeElement
+      const panel = this.$refs.panel as HTMLElement | undefined
+      const anchor = this.$refs.anchor as HTMLElement | undefined
+      if (active !== document.body && !panel?.contains(active) && !anchor?.contains(active)) return
+      if (this.focusInteraction === 'keyboard') previous.focus({ preventScroll: true })
+      else if (this.focusInteraction === 'pointer' && active instanceof HTMLElement) active.blur()
     },
     syncOpen() {
       const panel = this.$refs.panel as HTMLElement | undefined
@@ -126,12 +152,7 @@ export default defineComponent({
       if ((event as ToggleEvent).newState !== 'closed') return
       const panel = this.$refs.panel as HTMLElement
       if (panel.matches(':popover-open')) return
-      // Preserve focus when the user clicked another control outside the popup.
-      if (document.activeElement === document.body || panel.contains(document.activeElement)) {
-        this.restoreFocus()
-      } else {
-        this.previousFocus = null
-      }
+      this.restoreFocus()
     },
     updatePosition() {
       const panel = this.$refs.panel as HTMLElement | undefined

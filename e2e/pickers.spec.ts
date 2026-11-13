@@ -84,7 +84,7 @@ for (const width of [1440, 375, 320]) {
       .click()
     await popup.getByRole('button', { name: 'Готово', exact: true }).click()
     await expect(eventStart).toHaveValue('16:20')
-    await dialog.getByRole('combobox', { name: 'Сохранённое место', exact: true }).click()
+    await dialog.getByRole('combobox', { name: 'Место', exact: true }).click()
     await popup.getByRole('button', { name: 'Без привязки к месту', exact: true }).click()
     await expect(popup).toHaveCount(0)
     await expect(dialog).toBeVisible()

@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import type { PlanEvent } from '@/types/trip.types'
 import { createPasswordCredential, verifyPassword, savePasswordCredential } from '@/utils/password'
 import { defaultCategories } from '@/data/categories.data'
 import type { CategoryDomain } from '@/types/category.types'
@@ -10,6 +11,15 @@ const notificationTimers = new WeakMap<object, ReturnType<typeof setTimeout>>()
 const createTravelStore = defineStore('travel', {
   state: createTravelState,
   getters: {
+    sortedTrips: (state) => [...state.trips].sort((a, b) => a.start.localeCompare(b.start)),
+    imageForEvent(): (event: PlanEvent) => string {
+      return (event) => this.placeForEvent(event)?.image || event.image
+    },
+    placeForEvent: (state) => (event: PlanEvent) => {
+      if (event.placeId) return state.places.find((place) => place.id === event.placeId)
+      const matches = state.places.filter((place) => place.name === event.place)
+      return matches.length === 1 ? matches[0] : undefined
+    },
     categoryOptions: (state) => (domain: CategoryDomain) =>
       state.categories[domain].map((value) => ({ label: value, value })),
     members: (state) => (tripId: string) =>

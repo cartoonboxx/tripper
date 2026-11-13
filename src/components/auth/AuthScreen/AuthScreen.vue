@@ -10,10 +10,10 @@
       </AppLink>
       <div :class="style.authForm">
         <span :class="[sharedStyle.eyebrow, style.eyebrow]">ПУТЕШЕСТВИЯ НАЧИНАЮТСЯ ЗДЕСЬ</span>
-        <h1>{{ register ? 'Ваши планы. Ваши открытия.' : 'Рады видеть вас снова' }}</h1>
+        <h1>{{ registration ? 'Ваши планы. Ваши открытия.' : 'Рады видеть вас снова' }}</h1>
         <p :class="style.authIntro">
           {{
-            register
+            registration
               ? 'Соберите все идеи в одном месте — и отправляйтесь навстречу новому.'
               : 'Ваши маршруты, любимые места и будущие впечатления уже ждут.'
           }}
@@ -22,7 +22,7 @@
           @submit.prevent="submit"
           :class="sharedStyle.formStack">
           <Input
-            v-if="register"
+            v-if="registration"
             v-model="name"
             label="Ваше имя"
             placeholder="Как к вам обращаться?"
@@ -42,9 +42,9 @@
             placeholder="Не менее 8 символов"
             minlength="8"
             required
-            :autocomplete="register ? 'new-password' : 'current-password'" />
+            :autocomplete="registration ? 'new-password' : 'current-password'" />
           <Checkbox
-            v-if="register"
+            v-if="registration"
             v-model="accepted"
             label="Согласен с хранением данных в этом браузере" />
           <p
@@ -56,14 +56,14 @@
             type="submit"
             size="lg"
             :disabled="submitting">
-            {{ register ? 'Создать аккаунт' : 'Войти' }}
+            {{ registration ? 'Создать аккаунт' : 'Войти' }}
             <PhArrowRight :size="17" />
           </Button>
         </form>
         <p :class="style.authSwitch">
-          {{ register ? 'Уже с нами?' : 'Ещё нет аккаунта?' }}
-          <AppLink :to="register ? '/login' : '/register'">
-            {{ register ? 'Войти' : 'Зарегистрироваться' }}
+          {{ registration ? 'Уже с нами?' : 'Ещё нет аккаунта?' }}
+          <AppLink :to="registration ? '/login' : '/registration'">
+            {{ registration ? 'Войти' : 'Зарегистрироваться' }}
           </AppLink>
         </p>
         <div :class="style.authDemo">
@@ -136,7 +136,7 @@ export default defineComponent({
     Button,
     Checkbox,
   },
-  props: { register: { type: Boolean, default: false } },
+  props: { registration: { type: Boolean, default: false } },
   data() {
     return {
       sharedStyle,
@@ -166,7 +166,7 @@ export default defineComponent({
         this.error = 'Пароль должен содержать не менее 8 символов.'
         return
       }
-      if (this.register && !this.accepted) {
+      if (this.registration && !this.accepted) {
         this.error = 'Подтвердите согласие с локальным хранением данных.'
         return
       }
@@ -175,7 +175,7 @@ export default defineComponent({
       const name = this.name.trim()
       this.submitting = true
       try {
-        if (this.register) {
+        if (this.registration) {
           if (this.store.passwordCredential) {
             this.error = 'На этом устройстве уже есть аккаунт. Войдите в него.'
             return
@@ -195,7 +195,7 @@ export default defineComponent({
         this.store.profile.email = email
         this.store.session = true
         this.password = ''
-        this.store.notify(this.register ? 'Добро пожаловать в Tripper' : 'С возвращением!')
+        this.store.notify(this.registration ? 'Добро пожаловать в Tripper' : 'С возвращением!')
         this.router.push('/')
       } catch {
         this.error = 'Не удалось выполнить вход. Попробуйте ещё раз.'

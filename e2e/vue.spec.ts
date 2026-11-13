@@ -22,7 +22,7 @@ test('all main routes render without runtime errors', async ({ page }) => {
     '/settings',
     '/ui-kit',
     '/login',
-    '/register',
+    '/registration',
     '/join/florence',
     '/missing',
   ]
@@ -132,7 +132,7 @@ for (const device of [
       '/trips/florence/today',
       '/settings',
       '/login',
-      '/register',
+      '/registration',
     ]) {
       await page.goto(route)
       await expect(page.locator('h1,h2,h3').first()).toBeVisible()
@@ -359,7 +359,7 @@ test('auth images stay within the viewport while long forms remain scrollable', 
     await page.setViewportSize(viewport)
     for (const route of [
       { path: '/login', button: 'Войти' },
-      { path: '/register', button: 'Создать аккаунт' },
+      { path: '/registration', button: 'Создать аккаунт' },
     ]) {
       await page.goto(route.path)
       await page.evaluate(() => document.fonts.ready)

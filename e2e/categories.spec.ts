@@ -4,10 +4,10 @@ test('custom categories persist and are available in all related forms and expen
   page,
 }) => {
   await page.goto('/settings')
+  await expect(page.getByRole('heading', { name: 'Категории событий', exact: true })).toHaveCount(0)
   for (const [domain, name] of [
     ['Категории расходов', 'Страховка'],
     ['Категории мест', 'Галерея'],
-    ['Категории событий', 'Концерт'],
   ]) {
     const block = page
       .locator('section')
@@ -16,14 +16,14 @@ test('custom categories persist and are available in all related forms and expen
     await block.getByRole('button', { name: 'Добавить', exact: true }).click()
     await expect(page.getByText(name!, { exact: true })).toBeVisible()
   }
-  const eventsBlock = page
+  const placesBlock = page
     .locator('section')
-    .filter({ has: page.getByRole('heading', { name: 'Категории событий', exact: true }) })
-  await eventsBlock.getByLabel(/^Новая категория/).fill(' концерт ')
-  await eventsBlock.getByRole('button', { name: 'Добавить', exact: true }).click()
+    .filter({ has: page.getByRole('heading', { name: 'Категории мест', exact: true }) })
+  await placesBlock.getByLabel(/^Новая категория/).fill(' галерея ')
+  await placesBlock.getByRole('button', { name: 'Добавить', exact: true }).click()
   await expect(page.getByText('Такая категория уже существует.')).toBeVisible()
   await page.reload()
-  await expect(page.getByText('Концерт', { exact: true })).toBeVisible()
+  await expect(placesBlock.getByText('Галерея', { exact: true })).toBeVisible()
   await page.goto('/places')
   await page.getByRole('button', { name: 'Добавить место', exact: true }).click()
   let dialog = page.getByRole('dialog')
@@ -31,7 +31,7 @@ test('custom categories persist and are available in all related forms and expen
   await dialog.getByLabel('Категория', { exact: true }).selectOption('Галерея')
   await dialog.getByRole('button', { name: 'Сохранить место', exact: true }).click()
   await expect(dialog).toHaveCount(0)
-  await expect(page.getByText('Галерея', { exact: true })).toBeVisible()
+  await expect(page.getByRole('paragraph').filter({ hasText: /^Галерея$/ })).toBeVisible()
   await page.goto('/trips/altai/expenses')
   await page.getByRole('button', { name: 'Добавить расход', exact: true }).click()
   dialog = page.getByRole('dialog')
@@ -49,13 +49,9 @@ test('custom categories persist and are available in all related forms and expen
     .filter({ has: page.getByRole('link', { name: 'Сегодня', exact: true }) })
   await expect(tripNavigation.getByRole('link', { name: 'Места', exact: true })).toHaveCount(0)
   await page.getByRole('button', { name: 'Добавить событие', exact: true }).click()
-  await page
-    .getByRole('dialog')
-    .getByLabel('Категория события', { exact: true })
-    .selectOption('Концерт')
   await expect(
     page.getByRole('dialog').getByLabel('Категория события', { exact: true }),
-  ).toHaveValue('Концерт')
+  ).toHaveCount(0)
 })
 
 test('each category block deletes only custom categories and preserves existing records', async ({
@@ -63,7 +59,7 @@ test('each category block deletes only custom categories and preserves existing 
 }) => {
   await page.goto('/settings')
   await expect(page.getByRole('combobox', { name: 'Раздел категорий' })).toHaveCount(0)
-  for (const heading of ['Категории расходов', 'Категории мест', 'Категории событий']) {
+  for (const heading of ['Категории расходов', 'Категории мест']) {
     const block = page
       .locator('section')
       .filter({ has: page.getByRole('heading', { name: heading, exact: true }) })

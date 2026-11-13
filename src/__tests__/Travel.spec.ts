@@ -3,14 +3,95 @@ import { createPinia, setActivePinia } from 'pinia'
 import { defineComponent, nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
 import { useTravelStore } from '@/stores/travel'
-import { imageAssets, initialTrips, initialEvents, initialPlaces } from '@/data/trips.data'
+import { initialTrips, initialEvents, initialPlaces } from '@/data/trips.data'
 
 beforeEach(() => {
   localStorage.clear()
   setActivePinia(createPinia())
 })
 
+it('sorts trips by start date and updates the order after date changes without mutating stored order', () => {
+  const store = useTravelStore()
+  const original = store.trips.map((trip) => trip.id)
+  store.trips[0]!.start = '2027-04-01'
+  store.trips[1]!.start = '2027-02-01'
+  store.trips[2]!.start = '2027-03-01'
+  expect(store.sortedTrips.map((trip) => trip.id)).toEqual([original[1], original[2], original[0]])
+  store.trips[0]!.start = '2027-01-01'
+  expect(store.sortedTrips.map((trip) => trip.id)).toEqual([original[0], original[1], original[2]])
+  expect(store.trips.map((trip) => trip.id)).toEqual(original)
+})
+
 describe('saved places', () => {
+  it('uses the current place photo for events and falls back to the event photo', () => {
+    const store = useTravelStore()
+    const event = store.events[0]!
+    const place = store.places[0]!
+    event.placeId = place.id
+    event.image = 'data:image/png;base64,event'
+    expect(store.imageForEvent(event)).toBe(event.image)
+    place.image = 'data:image/png;base64,place'
+    expect(store.imageForEvent(event)).toBe(place.image)
+    place.image = 'data:image/png;base64,replaced'
+    expect(store.imageForEvent(event)).toBe(place.image)
+    place.image = ''
+    expect(store.imageForEvent(event)).toBe(event.image)
+    place.image = 'data:image/png;base64,place'
+    delete event.placeId
+    expect(store.imageForEvent(event)).toBe(event.image)
+    event.placeId = place.id
+    store.removePlace(place.id)
+    expect(store.imageForEvent(event)).toBe(event.image)
+  })
+
+  it('uses the linked place category and never guesses between duplicate place names', () => {
+    const store = useTravelStore()
+    const event = store.events[0]!
+    const place = store.places[0]!
+    event.placeId = place.id
+    expect(store.placeForEvent(event)?.category).toBe(place.category)
+    place.category = 'Новая категория'
+    expect(store.placeForEvent(event)?.category).toBe('Новая категория')
+    event.placeId = 'deleted'
+    event.place = place.name
+    expect(store.placeForEvent(event)).toBeUndefined()
+    delete event.placeId
+    expect(store.placeForEvent(event)?.id).toBe(place.id)
+    store.places.push({ ...place, id: 'duplicate' })
+    expect(store.placeForEvent(event)).toBeUndefined()
+  })
+
+  it('drops legacy event categories and their settings on restore', () => {
+    localStorage.setItem(
+      'tripper:events',
+      JSON.stringify([{ ...initialEvents[0], category: 'Еда' }]),
+    )
+    localStorage.setItem('tripper:categories', JSON.stringify({ events: ['Еда'] }))
+    const store = useTravelStore()
+    expect(store.events[0]).not.toHaveProperty('category')
+    expect(store.categories).not.toHaveProperty('events')
+  })
+
+  it('restores coordinates including zero and keeps legacy places without a point', async () => {
+    localStorage.setItem(
+      'tripper:places',
+      JSON.stringify([
+        { ...initialPlaces[0], coordinates: { latitude: 0, longitude: 0 } },
+        initialPlaces[1],
+      ]),
+    )
+    const store = useTravelStore()
+    expect(store.places[0]!.coordinates).toEqual({ latitude: 0, longitude: 0 })
+    expect(store.places[1]!.coordinates).toBeUndefined()
+    store.places[0]!.coordinates = { latitude: 59.93863, longitude: 30.31413 }
+    await nextTick()
+    setActivePinia(createPinia())
+    expect(useTravelStore().places[0]!.coordinates).toEqual({
+      latitude: 59.93863,
+      longitude: 30.31413,
+    })
+  })
+
   it('migrates legacy links and preserves them through repeated reloads', () => {
     localStorage.setItem(
       'tripplan:places',
@@ -191,12 +272,13 @@ describe('state restoration', () => {
     expect(store.session).toBe(false)
   })
 
-  it('refreshes saved build image URLs and keeps external images', () => {
+  it('removes legacy stock covers and keeps uploaded and external images', () => {
     localStorage.setItem(
       'tripper:trips',
       JSON.stringify([
         { ...initialTrips[0], image: '/assets/florence-oldhash.jpg' },
         { ...initialTrips[1], image: 'https://example.com/custom.jpg' },
+        { ...initialTrips[2], image: 'https://example.com/florence.jpg' },
       ]),
     )
     localStorage.setItem(
@@ -211,10 +293,11 @@ describe('state restoration', () => {
       ]),
     )
     const store = useTravelStore()
-    expect(store.trips[0]!.image).toBe(imageAssets.florence)
+    expect(store.trips[0]!.image).toBe('')
     expect(store.trips[1]!.image).toBe('https://example.com/custom.jpg')
-    expect(store.events[0]!.image).toBe(imageAssets.garden)
-    expect(store.places[0]!.image).toBe(imageAssets.gallery)
+    expect(store.trips[2]!.image).toBe('https://example.com/florence.jpg')
+    expect(store.events[0]!.image).toBe('')
+    expect(store.places[0]!.image).toBe('')
     expect(store.places[1]!.image).toBe('data:image/png;base64,foodgallery')
   })
 
@@ -294,7 +377,7 @@ describe('custom categories', () => {
     const store = useTravelStore()
     expect(store.addCategory('expenses', '  Страховка   и визы  ')).toBe(true)
     expect(store.addCategory('expenses', 'страховка и ВИЗЫ')).toBe(false)
-    expect(store.addCategory('events', 'Страховка и визы')).toBe(true)
+    expect(store.addCategory('places', 'Страховка и визы')).toBe(true)
     expect(store.addCategory('places', '   ')).toBe(false)
     await nextTick()
     setActivePinia(createPinia())

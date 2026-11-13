@@ -83,10 +83,15 @@
                 @click="detail = event"
                 :class="style.eventDetailsButton">
                 <img
-                  :src="event.image"
+                  v-if="store.imageForEvent(event)"
+                  :src="store.imageForEvent(event)"
                   :alt="event.title" />
                 <div>
-                  <Badge variant="neutral">{{ event.category }}</Badge>
+                  <Badge
+                    v-if="store.placeForEvent(event)?.category"
+                    variant="neutral">
+                    {{ store.placeForEvent(event)?.category }}
+                  </Badge>
                   <h3>{{ event.title }}</h3>
                   <p>
                     <PhMapPin :size="16" />
@@ -165,10 +170,13 @@
       @close="detail = undefined">
       <template v-if="detail">
         <img
-          :src="detail.image"
+          v-if="store.imageForEvent(detail)"
+          :src="store.imageForEvent(detail)"
           :alt="detail.title"
           :class="sharedStyle.detailCover" />
-        <Badge>{{ detail.category }}</Badge>
+        <Badge v-if="store.placeForEvent(detail)?.category">
+          {{ store.placeForEvent(detail)?.category }}
+        </Badge>
         <div :class="sharedStyle.detailMeta">
           <p>
             <PhCalendarDots :size="17" />

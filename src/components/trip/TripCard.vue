@@ -6,6 +6,7 @@
       :to="`/trips/${trip.id}/today`"
       :class="style.tripCardImage">
       <img
+        v-if="trip.image"
         :src="trip.image"
         :alt="trip.name" />
       <Badge :variant="trip.archived ? 'neutral' : 'green'">

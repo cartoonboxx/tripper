@@ -40,42 +40,14 @@
         v-model="form.notes"
         type="textarea"
         label="Заметки о поездке" />
-      <div>
-        <span :class="sharedStyle.fieldLabel">Обложка</span>
-        <img
-          v-if="form.image.startsWith('data:')"
-          :src="form.image"
-          alt="Выбранная обложка"
-          :class="[style.coverPreview, sharedStyle.coverPreview]" />
-        <div :class="sharedStyle.coverOptions">
-          <button
-            v-for="cover in covers"
-            :key="cover"
-            type="button"
-            :class="{ [sharedStyle.selected || '']: form.image === cover }"
-            @click="form.image = cover">
-            <img
-              :src="cover"
-              alt="" />
-          </button>
-        </div>
-      </div>
-      <div :class="style.coverUpload">
-        <input
-          ref="fileInput"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          hidden
-          @change="chooseCover" />
-        <Button
-          variant="secondary"
-          size="sm"
-          @click="fileInput?.click()">
-          <PhImage :size="16" />
-          Выбрать изображение
-        </Button>
-        <span :class="sharedStyle.formHelp">JPG, PNG, WebP · до 1 МБ</span>
-      </div>
+      <PhotoUpload
+        label="Обложка"
+        preview-alt="Выбранная обложка"
+        :image="form.image"
+        :loading="imageLoading"
+        :error="imageError"
+        @upload="chooseCover"
+        @remove="removePhoto" />
       <p
         v-if="error"
         :class="sharedStyle.errorText">
@@ -87,7 +59,9 @@
           @click="$emit('close')">
           Отмена
         </Button>
-        <Button type="submit">
+        <Button
+          type="submit"
+          :disabled="imageLoading">
           <component
             :is="trip ? PhCheck : PhPlus"
             :size="16" />
@@ -98,39 +72,38 @@
   </Modal>
 </template>
 <script lang="ts">
-import style from './TripForm.module.scss'
 import sharedStyle from '@/styles/shared.module.scss'
 import { defineComponent } from 'vue'
-import { PhCheck, PhImage, PhPlus } from '@phosphor-icons/vue'
+import { PhCheck, PhPlus } from '@phosphor-icons/vue'
 import { Modal, Input, Button, Select } from '@/components/ui'
-import { covers } from '@/data/trips.data'
+import PhotoUpload from '@/components/PhotoUpload/PhotoUpload.vue'
 import { useTravelStore } from '@/stores/travel'
 import { componentProps } from './TripForm.props'
 import { markRawValue } from '@/utils/markRawValue'
 
 export default defineComponent({
   name: 'TripForm',
-  components: { PhImage, Modal, Input, Button, Select },
+  components: { Modal, Input, Button, Select, PhotoUpload },
   props: componentProps,
   emits: ['close'],
   data() {
     return {
       sharedStyle,
-      style,
       error: '',
+      imageError: '',
+      imageLoading: false,
+      photoRequest: 0,
       form: {
         name: '',
         country: '',
         start: '',
         end: '',
-        image: covers[0] || '',
+        image: '',
         status: 'upcoming',
         notes: '',
       },
       PhCheck: markRawValue(PhCheck),
-      PhImage: markRawValue(PhImage),
       PhPlus: markRawValue(PhPlus),
-      covers: markRawValue(covers),
     }
   },
   computed: {
@@ -140,32 +113,55 @@ export default defineComponent({
     router() {
       return this.$router
     },
-    fileInput(): HTMLInputElement | undefined {
-      return this.$refs.fileInput as HTMLInputElement | undefined
-    },
+  },
+  beforeUnmount() {
+    this.photoRequest += 1
   },
   methods: {
+    removePhoto() {
+      this.photoRequest += 1
+      this.imageLoading = false
+      this.imageError = ''
+      this.form.image = ''
+    },
     chooseCover(event: Event) {
-      const file = (event.target as HTMLInputElement).files?.[0]
+      const input = event.target as HTMLInputElement
+      const file = input.files?.[0]
+      input.value = ''
       if (!file) return
+      const request = ++this.photoRequest
+      this.imageLoading = false
+      this.imageError = ''
       if (
         !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
         file.size > 1024 * 1024
       ) {
-        this.error = 'Выберите JPG, PNG или WebP размером до 1 МБ.'
+        this.imageError = 'Выберите JPG, PNG или WebP размером до 1 МБ.'
         return
       }
+      this.imageLoading = true
       const reader = new FileReader()
-      reader.onload = () => {
-        this.form.image = String(reader.result)
-        this.error = ''
+      const fail = () => {
+        if (request !== this.photoRequest) return
+        this.imageLoading = false
+        this.imageError = 'Не удалось открыть изображение. Попробуйте другой файл.'
       }
-      reader.onerror = () => {
-        this.error = 'Не удалось открыть изображение. Попробуйте другой файл.'
+      reader.onerror = fail
+      reader.onload = () => {
+        if (request !== this.photoRequest) return
+        const image = new Image()
+        image.onerror = fail
+        image.onload = () => {
+          if (request !== this.photoRequest) return
+          this.form.image = String(reader.result)
+          this.imageLoading = false
+        }
+        image.src = String(reader.result)
       }
       reader.readAsDataURL(file)
     },
     save() {
+      if (this.imageLoading) return
       if (!this.form.name.trim() || !this.form.start || !this.form.end) {
         this.error = 'Заполните название и даты поездки.'
         return
@@ -214,6 +210,9 @@ export default defineComponent({
   watch: {
     open: {
       handler(open: boolean) {
+        this.photoRequest += 1
+        this.imageLoading = false
+        this.imageError = ''
         if (open) {
           Object.assign(
             this.form,
@@ -222,7 +221,7 @@ export default defineComponent({
               country: '',
               start: '',
               end: '',
-              image: this.covers[0],
+              image: '',
               status: 'upcoming',
               notes: '',
             },

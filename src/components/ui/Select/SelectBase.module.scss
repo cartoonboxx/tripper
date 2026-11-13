@@ -88,10 +88,6 @@
     flex-shrink: 0;
   }
 
-  &:focus-visible {
-    outline-offset: calc(-1 * var(--space-1));
-  }
-
   &:disabled {
     opacity: 0.45;
     cursor: not-allowed;

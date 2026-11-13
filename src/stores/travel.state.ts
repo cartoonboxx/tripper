@@ -1,5 +1,4 @@
 import {
-  imageAssets,
   initialTrips,
   initialEvents,
   initialPlaces,
@@ -24,11 +23,16 @@ import { defaultCategories } from '@/data/categories.data'
 import type { Categories, CategoryDomain } from '@/types/category.types'
 
 function restoreImages<T extends { image: string }>(records: T[]): T[] {
-  // Build asset URLs can differ from the URLs saved in localStorage.
+  // Remove legacy stock covers while preserving uploaded and external photos.
   for (const record of records) {
     if (record.image.startsWith('data:')) continue
-    const asset = Object.entries(imageAssets).find(([name]) => record.image.includes(name))
-    if (asset) record.image = asset[1]
+    const localAsset = /^\/(?:assets|src\/assets\/images)\//.test(record.image)
+    const stock =
+      localAsset &&
+      /\/(?:florence|altai|petersburg|garden|gallery|food|coast)(?:-[^/]+)?\.jpg$/.test(
+        record.image,
+      )
+    if (stock) record.image = ''
   }
   return records
 }
@@ -60,6 +64,7 @@ function restorePlaces() {
     name: place.name,
     category: place.category,
     address: place.address,
+    coordinates: place.coordinates,
     image: place.image,
     description: place.description,
   }))
@@ -75,7 +80,8 @@ export function createTravelState() {
   const expenses = restore<Expense[]>('expenses', initialExpenses)
   const saved = restore<Partial<Categories>>('categories', {})
   const categories = structuredClone(defaultCategories)
-  const records = { places, events, expenses }
+  for (const event of events) delete (event as PlanEvent & { category?: string }).category
+  const records = { places, expenses }
   for (const domain of Object.keys(categories) as CategoryDomain[]) {
     // A saved list is authoritative: deleted categories must not return from older records.
     const stored = Array.isArray(saved[domain])

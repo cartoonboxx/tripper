@@ -60,19 +60,18 @@
         :class="[style.picker, appearance.picker]">
         <template v-if="!isTime">
           <div :class="style.calendarHeader">
-            <button
-              type="button"
+            <Button
               :disabled="!canPrevious"
               @click="changeMonth(-1)">
-              Назад
-            </button>
+              <PhCaretLeft size="16" />
+            </Button>
             <strong>{{ monthLabel }}</strong>
-            <button
+            <Button
               type="button"
               :disabled="!canNext"
               @click="changeMonth(1)">
-              Вперёд
-            </button>
+              <PhCaretRight size="16" />
+            </Button>
           </div>
           <table :class="style.calendar">
             <thead>
@@ -198,7 +197,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, type StyleValue } from 'vue'
-import { PhCalendarDots, PhClock } from '@phosphor-icons/vue'
+import { PhCalendarDots, PhCaretLeft, PhCaretRight, PhClock } from '@phosphor-icons/vue'
 import FloatingPopup from '../FloatingPopup/FloatingPopupStyle.vue'
 import { componentProps } from './DateTimePicker.props'
 import {
@@ -213,10 +212,11 @@ import {
 import { createId } from '@/utils/createId'
 import fieldStyle from '../Input/InputBase.module.scss'
 import style from './DateTimePickerBase.module.scss'
+import Button from '@/components/ui/Button/ButtonStyle.vue'
 
 export default defineComponent({
   name: 'DateTimePickerBase',
-  components: { FloatingPopup, PhCalendarDots, PhClock },
+  components: { PhCaretRight, Button, PhCaretLeft, FloatingPopup, PhCalendarDots, PhClock },
   inheritAttrs: false,
   props: componentProps,
   emits: ['update:modelValue'],

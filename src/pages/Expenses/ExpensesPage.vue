@@ -169,7 +169,7 @@ export default defineComponent({
       },
     },
     tripOptions() {
-      return this.store.trips.map((trip) => ({ label: trip.name, value: trip.id }))
+      return this.store.sortedTrips.map((trip) => ({ label: trip.name, value: trip.id }))
     },
     tripExpenses() {
       return this.store.expenses.filter((expense) => expense.tripId === this.expenseTripId)

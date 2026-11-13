@@ -14,10 +14,12 @@
     "lint": "run-s \"lint:*\"",
     "lint:oxlint": "oxlint . --fix",
     "lint:eslint": "eslint . --fix --cache",
-    "format": "prettier --write --experimental-cli src/"
+    "format": "prettier --write --experimental-cli src/",
+    "test:e2e:maps": "playwright test --config playwright.maps.config.ts"
   },
   "dependencies": {
     "@phosphor-icons/vue": "^2.2.1",
+    "mapbox-gl": "^3.34.2",
     "pinia": "^4.0.3",
     "qrcode": "^1.5.4",
     "sass": "^1.108.1",

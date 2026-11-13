@@ -5,12 +5,6 @@
   gap: $gap;
 }
 
-// Добавляет заметную рамку фокуса с отступом от элемента.
-@mixin focus-ring {
-  outline: 3px solid var(--focus);
-  outline-offset: 3px;
-}
-
 // Задаёт панели фон поверхности, тонкую границу и скруглённые углы.
 @mixin panel {
   background: var(--surface);

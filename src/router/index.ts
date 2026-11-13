@@ -12,9 +12,9 @@ const router = createRouter({
       meta: { title: 'Вход' },
     },
     {
-      path: '/register',
-      name: 'register',
-      component: () => import('@/pages/Auth/Register/RegisterPage.vue'),
+      path: '/registration',
+      name: 'registration',
+      component: () => import('@/pages/Auth/Registration/RegistrationPage.vue'),
       meta: { title: 'Регистрация' },
     },
     {
