@@ -34,6 +34,7 @@
       :class="[
         style.uiInputWrap,
         type === 'textarea' && style.multiline,
+        !$slots.suffix && style.withoutSuffix,
         appearance.uiInputWrap,
         error && appearance.invalid,
         disabled && appearance.disabled,

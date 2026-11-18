@@ -11,9 +11,11 @@
       <Button
         variant="ghost"
         size="sm"
+        iconOnly
         :disabled="loading"
         @click="loadWeather">
-        {{ loading ? 'Загрузка…' : 'Обновить погоду' }}
+        <PhSpinner v-if="loading" />
+        <PhArrowClockwise v-else />
       </Button>
     </div>
     <div
@@ -47,7 +49,7 @@
 </template>
 <script lang="ts">
 import { defineComponent, markRaw } from 'vue'
-import { PhMapPin } from '@phosphor-icons/vue'
+import { PhArrowClockwise, PhMapPin, PhSpinner } from '@phosphor-icons/vue'
 import { Button, Card } from '@/components/ui'
 import type { TodayForecast, WeatherResponse } from './TodayWeather.types'
 import { weatherCondition } from './TodayWeather.data'
@@ -55,7 +57,7 @@ import style from './TodayWeather.module.scss'
 
 export default defineComponent({
   name: 'TodayWeather',
-  components: { Button, Card, PhMapPin },
+  components: { PhSpinner, PhArrowClockwise, Button, Card, PhMapPin },
   data() {
     return {
       style,

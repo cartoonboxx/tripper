@@ -100,11 +100,11 @@ import {
   PhUser,
 } from '@phosphor-icons/vue'
 import { Card, Badge, Avatar, Button, FloatingPopup } from '@/components/ui'
-import { useTravelStore } from '@/stores/travel'
-import { dateRange } from '@/composables/format'
-import { componentProps } from './TripCard.props'
-import { markRawValue } from '@/utils/markRawValue'
-import TripForm from './TripForm.vue'
+import { useTravelStore } from '@/stores/travel.ts'
+import { dateRange } from '@/composables/format.ts'
+import { componentProps } from './TripCard.props.ts'
+import { markRawValue } from '@/utils/markRawValue.ts'
+import TripForm from '../TripForm/TripForm.vue'
 
 export default defineComponent({
   name: 'TripCard',

@@ -25,7 +25,7 @@
 <script lang="ts">
 import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import { defineComponent } from 'vue'
-import TripForm from '@/components/trip/TripForm.vue'
+import TripForm from '@/components/trip/TripForm/TripForm.vue'
 import { EmptyState, Button } from '@/components/ui'
 import tripContext from '@/mixins/tripContext'
 

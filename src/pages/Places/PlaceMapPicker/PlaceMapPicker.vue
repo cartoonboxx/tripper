@@ -11,6 +11,7 @@
           paragraph="Укажите адрес места на карте.">
           <template #actions>
             <Button
+              :class="style.fullscreenButton"
               variant="ghost"
               size="md"
               @click="fullscreen = !fullscreen">
@@ -33,50 +34,62 @@
         </SectionHeader>
         <div :class="style.workspace">
           <aside :class="style.sidebar">
-            <form
-              :class="style.search"
-              @submit.prevent="searchPlaces">
-              <Input
-                v-model="query"
-                label="Поиск адреса"
-                placeholder="Город, улица, дом"
-                autocomplete="off">
-                <template #prefix><PhMagnifyingGlass :size="18" /></template>
-              </Input>
-              <Button
-                type="submit"
-                :disabled="!mapReady || searching || !query.trim()">
-                {{ searching ? 'Ищем…' : 'Найти' }}
-              </Button>
-            </form>
-            <p
-              v-if="searchError"
-              :class="style.error">
-              {{ searchError }}
-            </p>
-            <ul
-              v-if="results.length"
-              :class="style.results">
-              <li
-                v-for="(result, index) in results"
-                :key="index">
-                <button
-                  type="button"
-                  @click="chooseResult(result)">
-                  <PhMapPin :size="20" />
-                  <span>
-                    <strong>{{ result.address || result.name || 'Место на карте' }}</strong>
-                    <small>{{ result.locality }}</small>
-                  </span>
-                </button>
-              </li>
-            </ul>
+            <div :class="style.searchPanel">
+              <form
+                ref="search"
+                :class="style.search"
+                @submit.prevent="searchPlaces">
+                <Input
+                  v-model="query"
+                  label="Поиск адреса"
+                  placeholder="Город, улица, дом"
+                  autocomplete="off"
+                  :enterkeyhint="mobile ? 'search' : undefined"
+                  @blur="searchOnBlur">
+                  <template #prefix><PhMagnifyingGlass :size="18" /></template>
+                </Input>
+                <Button
+                  v-if="!mobile"
+                  type="submit"
+                  :disabled="!mapReady || searching || !query.trim()">
+                  {{ searching ? 'Ищем…' : 'Найти' }}
+                </Button>
+              </form>
+              <p
+                v-if="mobile && searching"
+                :class="style.help">
+                Ищем…
+              </p>
+              <p
+                v-if="searchError"
+                :class="style.error">
+                {{ searchError }}
+              </p>
+              <ul
+                v-if="results.length"
+                :class="style.results">
+                <li
+                  v-for="(result, index) in results"
+                  :key="index">
+                  <button
+                    type="button"
+                    @click="chooseResult(result)">
+                    <PhMapPin :size="20" />
+                    <span>
+                      <strong>{{ result.address || result.name || 'Место на карте' }}</strong>
+                      <small>{{ result.locality }}</small>
+                    </span>
+                  </button>
+                </li>
+              </ul>
+            </div>
             <div :class="style.addressCard">
               <div :class="style.addressHeading">
                 <PhMapPin :size="20" />
                 <span>{{ resolving ? 'Определяем адрес…' : 'Выбранное место' }}</span>
               </div>
               <Input
+                :class="style.addressInput"
                 v-model="selectedAddress"
                 label="Улица и дом"
                 :disabled="resolving"
@@ -93,15 +106,10 @@
               </p>
               <p
                 v-else
-                :class="style.help">
+                :class="[style.help, style.addressHelp]">
                 Этот адрес будет сохранён в карточке места. При необходимости его можно исправить.
               </p>
             </div>
-            <p
-              v-if="locationError"
-              :class="style.help">
-              {{ locationError }}
-            </p>
           </aside>
           <div
             :class="style.viewport"
@@ -111,6 +119,11 @@
             <div
               ref="map"
               :class="style.map" />
+            <p
+              v-if="locating || locationError"
+              :class="style.locationStatus">
+              {{ locating ? 'Определяем местоположение…' : locationError }}
+            </p>
             <div :class="style.hint">Нажмите на нужный дом</div>
 
             <div :class="style.zoom">
@@ -133,9 +146,13 @@
               type="button"
               :class="style.locate"
               :disabled="locating || !mapReady"
-              @click="locate">
-              <PhNavigationArrow :size="18" />
-              {{ locating ? 'Определяем…' : 'Моё местоположение' }}
+              @click="locate()">
+              <PhSpinner
+                v-if="locating"
+                :size="18" />
+              <PhNavigationArrow
+                :size="18"
+                v-else />
             </button>
             <div
               v-if="loadingMap || mapError"
@@ -187,6 +204,7 @@ import {
   PhPlus,
   PhMinus,
   PhX,
+  PhSpinner,
 } from '@phosphor-icons/vue'
 import { Button, Input } from '@/components/ui'
 import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
@@ -201,6 +219,7 @@ import style from './PlaceMapPicker.module.scss'
 export default defineComponent({
   name: 'PlaceMapPicker',
   components: {
+    PhSpinner,
     Button,
     Input,
     SectionHeader,
@@ -226,6 +245,8 @@ export default defineComponent({
     return {
       style,
       fullscreen: false,
+      mobile: window.matchMedia('(max-width: 700px)').matches,
+      mobileViewport: null as MediaQueryList | null,
       overlay: null as OverlayController | null,
       mapbox: null as typeof import('mapbox-gl').default | null,
       map: null as Raw<MapboxMap> | null,
@@ -238,11 +259,11 @@ export default defineComponent({
       loadingMap: false,
       mapError: '',
       missingKey: !getMapboxToken(),
-      latitude: this.coordinates?.latitude ?? 55.7558,
-      longitude: this.coordinates?.longitude ?? 37.6173,
+      latitude: this.coordinates?.latitude ?? 20,
+      longitude: this.coordinates?.longitude ?? 0,
       hasPoint: Boolean(this.coordinates),
-      zoom: this.coordinates ? 17 : 12,
-      zoomTarget: this.coordinates ? 17 : 12,
+      zoom: this.coordinates ? 17 : 2,
+      zoomTarget: this.coordinates ? 17 : 2,
       reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
       locating: false,
       locationError: '',
@@ -250,6 +271,7 @@ export default defineComponent({
       query: this.address,
       results: [] as GeocodedPlace[],
       searching: false,
+      lastSearchQuery: '',
       searchError: '',
       resolving: false,
       selectedAddress: this.coordinates ? this.address : '',
@@ -259,6 +281,8 @@ export default defineComponent({
     }
   },
   mounted() {
+    this.mobileViewport = markRaw(window.matchMedia('(max-width: 700px)'))
+    this.mobileViewport.addEventListener('change', this.updateMobileViewport)
     this.overlay = markRaw(
       createOverlayController(
         () => this.$refs.dialog as HTMLElement,
@@ -271,6 +295,7 @@ export default defineComponent({
     this.initializeMap()
   },
   beforeUnmount() {
+    this.mobileViewport?.removeEventListener('change', this.updateMobileViewport)
     this.disposed = true
     this.cancelLocation()
     this.cancelLookup()
@@ -283,13 +308,29 @@ export default defineComponent({
     this.overlay?.close()
   },
   watch: {
-    query() {
+    query(value: string) {
+      this.lastSearchQuery = ''
       this.results = []
       this.searchError = ''
       if (this.searching) this.cancelLookup()
+      if (value.trim() !== this.selectedAddress.trim()) this.cancelLocation()
+      if (this.mobile && value.trim() !== this.selectedAddress.trim()) {
+        this.cancelLookup()
+        this.cancelLocation()
+        this.hasPoint = false
+        this.marker?.remove()
+        this.marker = null
+        this.locality = ''
+        this.addressError = ''
+      }
     },
   },
   methods: {
+    updateMobileViewport() {
+      this.mobile = this.mobileViewport?.matches ?? false
+      if (this.mobile && this.selectedAddress) this.query = this.selectedAddress
+      this.updateMapLayout()
+    },
     closeOnBackdrop(event: MouseEvent) {
       if (event.target === event.currentTarget) this.$emit('close')
     },
@@ -351,12 +392,13 @@ export default defineComponent({
           this.mapError = ''
           if (this.hasPoint) this.showMarker()
           if (this.hasPoint && !this.selectedAddress) this.resolveAddress()
+          if (!this.hasPoint && this.locationRequest === 0) this.locate(false)
         })
         this.map.on('error', () => {
           if (!this.mapReady && !this.disposed) this.failMapLoading()
         })
         this.mapLoadTimer = setTimeout(() => this.failMapLoading(), 15000)
-        this.observer = markRaw(new ResizeObserver(() => this.map?.resize()))
+        this.observer = markRaw(new ResizeObserver(() => this.updateMapLayout()))
         this.observer.observe(host)
       } catch {
         if (!this.disposed) this.failMapLoading()
@@ -366,6 +408,23 @@ export default defineComponent({
       clearTimeout(this.mapLoadTimer)
       this.loadingMap = false
       this.mapError = 'Не удалось загрузить карту. Проверьте подключение и попробуйте ещё раз.'
+    },
+    updateMapLayout() {
+      if (!this.map) return
+      this.map.resize()
+      const host = this.$refs.map as HTMLElement
+      const header = (this.$refs.dialog as HTMLElement).querySelector('header')!
+      const mobile = window.matchMedia('(max-width: 700px)').matches
+      const gap = parseFloat(getComputedStyle(host).getPropertyValue('--space-3')) || 0
+      const top = mobile
+        ? Math.min(
+            host.clientHeight / 2,
+            header.getBoundingClientRect().bottom - host.getBoundingClientRect().top + gap,
+          )
+        : 0
+      if (this.map.getPadding().top !== top)
+        this.map.setPadding({ top, bottom: 0, left: 0, right: 0 })
+      if (mobile && this.hasPoint) this.map.setCenter([this.longitude, this.latitude])
     },
     showMarker() {
       if (!this.mapbox || !this.map || !this.hasPoint) return
@@ -433,6 +492,7 @@ export default defineComponent({
           results.find((place) => place.address) ||
           results[0]
         this.selectedAddress = result?.address || ''
+        if (this.mobile) this.query = this.selectedAddress
         this.locality = result?.locality || ''
         this.addressError = this.selectedAddress
           ? ''
@@ -450,13 +510,24 @@ export default defineComponent({
         }
       }
     },
+    searchOnBlur() {
+      if (
+        !this.mobile ||
+        this.resolving ||
+        this.query.trim() === this.lastSearchQuery ||
+        (this.hasPoint && this.query.trim() === this.selectedAddress.trim())
+      )
+        return
+      this.searchPlaces()
+    },
     async searchPlaces() {
-      if (!this.mapReady || !this.query.trim()) return
+      if (!this.mapReady || !this.query.trim() || this.searching) return
       this.cancelLocation()
       this.cancelLookup()
       this.results = []
       this.searchError = ''
       this.searching = true
+      this.lastSearchQuery = this.query.trim()
       const controller = markRaw(new AbortController())
       this.lookupController = controller
       try {
@@ -487,6 +558,7 @@ export default defineComponent({
       this.longitude = result.longitude
       this.hasPoint = true
       this.selectedAddress = result.address
+      if (this.mobile) this.query = this.selectedAddress
       this.locality = result.locality
       this.addressError = result.address ? '' : 'Уточните улицу и номер дома.'
       this.results = []
@@ -515,8 +587,9 @@ export default defineComponent({
     cancelLocation() {
       this.locationRequest += 1
       this.locating = false
+      this.locationError = ''
     },
-    locate() {
+    locate(selectPoint = true) {
       this.locationError = ''
       if (!navigator.geolocation) {
         this.locationError = 'Геолокация недоступна. Найдите адрес или выберите дом на карте.'
@@ -528,13 +601,15 @@ export default defineComponent({
         (position) => {
           if (request !== this.locationRequest || !this.map) return
           this.locating = false
-          this.selectCoordinates({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          })
+          const { latitude, longitude } = position.coords
+          if (selectPoint) this.selectCoordinates({ latitude, longitude })
+          else {
+            this.latitude = latitude
+            this.longitude = longitude
+          }
           this.map.easeTo({
-            center: [this.longitude, this.latitude],
-            zoom: 16,
+            center: [longitude, latitude],
+            zoom: selectPoint ? 16 : 12,
             duration: this.reducedMotion ? 0 : 600,
           })
         },

@@ -1,0 +1,63 @@
+@use 'sass:meta';
+
+.placeMap {
+  min-width: 0;
+  margin-top: var(--space-6);
+}
+
+.viewport {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-4);
+  background: var(--background);
+}
+
+.map {
+  :global {
+    @include meta.load-css('mapbox-gl/dist/mapbox-gl.css');
+  }
+
+  position: absolute;
+  inset: 0;
+}
+
+.status {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--background);
+  color: var(--muted);
+  text-align: center;
+  font-size: var(--text-sm);
+}
+
+.controls {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-3);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+
+  .zoomButton {
+    border: 0;
+    border-radius: 0;
+    color: var(--text);
+    font-size: var(--text-xl);
+
+    & + .zoomButton {
+      border-top: 1px solid var(--border);
+    }
+  }
+}

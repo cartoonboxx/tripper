@@ -100,11 +100,11 @@ import {
   PhUsers,
 } from '@phosphor-icons/vue'
 import { Button, Avatar, Badge, EmptyState } from '@/components/ui'
-import { dateRange } from '@/composables/format'
-import { tripNavigation } from '@/data/navigation.data'
-import tripContext from '@/mixins/tripContext'
-import { markRawValue } from '@/utils/markRawValue'
-import TripForm from './TripForm.vue'
+import { dateRange } from '@/composables/format.ts'
+import { tripNavigation } from '@/data/navigation.data.ts'
+import tripContext from '@/mixins/tripContext.ts'
+import { markRawValue } from '@/utils/markRawValue.ts'
+import TripForm from '../TripForm/TripForm.vue'
 
 export default defineComponent({
   name: 'TripLayout',

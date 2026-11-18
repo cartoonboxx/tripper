@@ -31,7 +31,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0 var(--field-padding);
+  padding: 0 var(--space-1) 0 var(--field-padding);
   border-width: 1px;
   border-style: solid;
   border-radius: var(--radius-6);
@@ -66,5 +66,9 @@
       resize: none;
       overflow-y: hidden;
     }
+  }
+
+  &.withoutSuffix {
+    padding-right: var(--space-3);
   }
 }

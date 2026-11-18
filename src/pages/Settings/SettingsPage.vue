@@ -32,7 +32,6 @@
             v-model="form.email"
             label="Электронная почта"
             type="email"
-            required
             autocomplete="email" />
         </div>
         <div :class="style.settingsPreference">
@@ -303,7 +302,10 @@ export default defineComponent({
     save() {
       Object.assign(this.store.profile, { ...this.form, name: this.form.name.trim() })
       for (const member of this.store.participants) {
-        if (member.email === this.store.profile.email || member.role === 'organizer') {
+        if (
+          (this.store.profile.email && member.email === this.store.profile.email) ||
+          member.role === 'organizer'
+        ) {
           member.name = this.form.name
           member.email = this.form.email
         }

@@ -16,7 +16,7 @@
 <script lang="ts">
 import SectionHeader from '@/components/SectionHeader/SectionHeader.vue'
 import { defineComponent } from 'vue'
-import TripForm from '@/components/trip/TripForm.vue'
+import TripForm from '@/components/trip/TripForm/TripForm.vue'
 import { Button } from '@/components/ui'
 
 export default defineComponent({

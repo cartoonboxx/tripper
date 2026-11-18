@@ -20,6 +20,7 @@
         <div
           :class="[
             fieldStyle.uiInputWrap,
+            !$slots.suffix && fieldStyle.withoutSuffix,
             style.control,
             appearance.control,
             error && appearance.invalid,

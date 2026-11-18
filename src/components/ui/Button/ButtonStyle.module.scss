@@ -40,12 +40,13 @@
   }
 
   &Sm {
-    min-height: 40px;
+    --button-size: var(--space-10);
+
     padding: 0 var(--space-3);
     font-size: var(--text-sm);
   }
 
   &Lg {
-    min-height: 48px;
+    --button-size: var(--space-12);
   }
 }

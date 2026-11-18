@@ -45,7 +45,7 @@ import { defineComponent, markRaw } from 'vue'
 import { PhArchive, PhArrowRight, PhMagnifyingGlass } from '@phosphor-icons/vue'
 import { useTravelStore } from '@/stores/travel'
 import { Input, EmptyState, Button } from '@/components/ui'
-import TripCard from '@/components/trip/TripCard.vue'
+import TripCard from '@/components/trip/TripCard/TripCard.vue'
 
 export default defineComponent({
   name: 'ArchivePage',

@@ -149,7 +149,7 @@
           <Button
             type="submit"
             :disabled="imageLoading">
-            Сохранить место
+            Сохранить
           </Button>
         </div>
       </form>

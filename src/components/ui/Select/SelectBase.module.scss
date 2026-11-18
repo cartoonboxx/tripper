@@ -26,7 +26,7 @@
     display: block;
     width: 100%;
     height: var(--field-height);
-    padding: 0 var(--field-padding);
+    padding: 0 var(--space-1) 0 var(--field-padding);
     padding-inline-end: calc(var(--field-padding) + var(--space-4) + var(--space-2));
     appearance: none;
     border-width: 1px;

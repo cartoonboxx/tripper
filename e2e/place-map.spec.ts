@@ -39,13 +39,13 @@ test('expands the map dialog and restores its size without losing the selected a
   await expect(map.getByLabel('Улица и дом')).toHaveValue('Тверская улица, 7')
 
   await page.setViewportSize({ width: 390, height: 844 })
-  await map.getByRole('button', { name: 'На весь экран', exact: true }).click()
   await expect.poll(() => map.boundingBox()).toEqual({ x: 0, y: 0, width: 390, height: 844 })
-  await expect(map.getByRole('button', { name: 'Свернуть', exact: true })).toBeInViewport()
+  await expect(map.getByRole('button', { name: 'На весь экран', exact: true })).toBeHidden()
+  await expect(map.getByLabel('Поиск адреса')).toBeInViewport()
   await expect(map.getByRole('button', { name: 'Сохранить адрес', exact: true })).toBeInViewport()
 })
 
-test('opening the picker does not request a random address or geolocation', async ({ page }) => {
+test('opening the picker does not select a place or request an address', async ({ page }) => {
   const requests: string[] = []
   page.on('request', (request) => {
     if (request.url().includes('/search/geocode/')) requests.push(request.url())
@@ -68,7 +68,7 @@ test('searches, saves street and house, persists the selection, and cancels chan
   await expect(map.getByLabel('Улица и дом')).toHaveValue('Тверская улица, 7')
   await map.getByRole('button', { name: 'Сохранить адрес', exact: true }).click()
   await expect(page.getByLabel('Адрес', { exact: true })).toHaveValue('Тверская улица, 7')
-  await page.getByRole('button', { name: 'Сохранить место', exact: true }).click()
+  await page.getByRole('button', { name: 'Сохранить', exact: true }).click()
   await page.reload()
   await page.getByRole('button', { name: 'Место на карте', exact: true }).last().click()
   await page.getByRole('button', { name: 'Редактировать', exact: true }).click()
@@ -125,7 +125,10 @@ test('keeps map gestures from dismissing the dialog and the point from following
   await page.setViewportSize({ width: 390, height: 844 })
   await openPicker(page)
   const map = picker(page)
-  await map.locator('.mapboxgl-canvas').click({ position: { x: 100, y: 100 } })
+  const initialBounds = (await map.locator('.mapboxgl-canvas').boundingBox())!
+  await map.locator('.mapboxgl-canvas').click({
+    position: { x: initialBounds.width / 2, y: initialBounds.height * 0.55 },
+  })
   await expect(map.getByLabel('Улица и дом')).toHaveValue('Тверская улица, 7')
   const bounds = (await map.locator('.mapboxgl-canvas').boundingBox())!
   await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2)
@@ -237,7 +240,7 @@ test('saves the selected address without making another geocoding request', asyn
   await map.getByRole('button', { name: 'Сохранить адрес', exact: true }).click()
   await expect(page.getByLabel('Адрес', { exact: true })).toHaveValue('Тверская улица, 7')
   expect(parameters).toHaveLength(1)
-  await page.getByRole('button', { name: 'Сохранить место', exact: true }).click()
+  await page.getByRole('button', { name: 'Сохранить', exact: true }).click()
   await page.reload()
   await page.getByRole('button', { name: 'Место на карте', exact: true }).last().click()
   await expect(

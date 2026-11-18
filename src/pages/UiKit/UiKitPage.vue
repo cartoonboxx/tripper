@@ -570,10 +570,10 @@ import {
   Switch,
   Tab,
 } from '@/components/ui'
-import TripCard from '@/components/trip/TripCard.vue'
-import TripForm from '@/components/trip/TripForm.vue'
-import EventForm from '@/components/trip/EventForm.vue'
-import InviteForm from '@/components/trip/InviteForm.vue'
+import TripCard from '@/components/trip/TripCard/TripCard.vue'
+import TripForm from '@/components/trip/TripForm/TripForm.vue'
+import EventForm from '@/components/trip/EventForm/EventForm.vue'
+import InviteForm from '@/components/trip/InviteForm/InviteForm.vue'
 import { useTravelStore } from '@/stores/travel'
 import {
   catalog,

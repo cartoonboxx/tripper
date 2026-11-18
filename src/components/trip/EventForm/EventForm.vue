@@ -76,9 +76,9 @@
 import sharedStyle from '@/styles/shared.module.scss'
 import { defineComponent } from 'vue'
 import { Modal, Input, Select, Button } from '@/components/ui'
-import { useTravelStore } from '@/stores/travel'
+import { useTravelStore } from '@/stores/travel.ts'
 import PhotoUpload from '@/components/PhotoUpload/PhotoUpload.vue'
-import { componentProps } from './EventForm.props'
+import { componentProps } from './EventForm.props.ts'
 
 export default defineComponent({
   name: 'EventForm',

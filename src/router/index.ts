@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/components/layout/AppLayout.vue'
-import TripLayout from '@/components/trip/TripLayout.vue'
+import TripLayout from '@/components/trip/TripLayout/TripLayout.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   scrollBehavior: () => ({ top: 0 }),
@@ -149,6 +149,12 @@ const router = createRouter({
           name: 'ui-kit',
           component: () => import('@/pages/UiKit/UiKitPage.vue'),
           meta: { section: 'UI Kit', title: 'Библиотека компонентов' },
+        },
+        {
+          path: 'api-docs',
+          name: 'api-docs',
+          component: () => import('@/pages/ApiDocs/ApiDocsPage.vue'),
+          meta: { section: 'API docs', title: 'API и модель данных' },
         },
         {
           path: ':pathMatch(.*)*',

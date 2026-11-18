@@ -31,6 +31,7 @@
             <PhArrowRight :size="18" />
           </AppLink>
         </div>
+
         <AppLink
           to="/settings"
           :class="style.settingsLink">
@@ -138,6 +139,7 @@ import sharedStyle from '@/styles/shared.module.scss'
 import style from './AppLayout.module.scss'
 import { defineComponent } from 'vue'
 import {
+  PhCode,
   PhSquaresFour,
   PhBell,
   PhCaretDown,
@@ -159,6 +161,7 @@ import { markRawValue } from '@/utils/markRawValue'
 export default defineComponent({
   name: 'AppLayout',
   components: {
+    PhCode,
     FloatingPopup,
     PhSquaresFour,
     PhBell,

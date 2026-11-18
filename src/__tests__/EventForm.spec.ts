@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { shallowMount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
-import EventForm from '@/components/trip/EventForm.vue'
+import EventForm from '@/components/trip/EventForm/EventForm.vue'
 import { useTravelStore } from '@/stores/travel'
 import type { PlanEvent } from '@/types/trip.types'
 

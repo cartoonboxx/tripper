@@ -1,4 +1,4 @@
-import { PhGearSix } from '@phosphor-icons/vue'
+import { PhCode, PhGearSix } from '@phosphor-icons/vue'
 import {
   PhHouse,
   PhSuitcaseRolling,

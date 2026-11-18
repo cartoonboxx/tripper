@@ -42,6 +42,9 @@
         </div>
         <h3>Описание</h3>
         <p :class="sharedStyle.subtle">{{ event.description || 'Заметок пока нет.' }}</p>
+        <PlaceMap
+          v-if="place"
+          :place="place" />
       </div>
     </template>
     <EmptyState
@@ -68,7 +71,8 @@ import { defineComponent, markRaw } from 'vue'
 import { PhArrowLeft, PhCalendarDots, PhMapPin, PhPencilSimple } from '@phosphor-icons/vue'
 import { shortDate } from '@/composables/format'
 import { Button, Badge, EmptyState } from '@/components/ui'
-import EventForm from '@/components/trip/EventForm.vue'
+import EventForm from '@/components/trip/EventForm/EventForm.vue'
+import PlaceMap from '@/components/PlaceMap/PlaceMap.vue'
 import tripContext from '@/mixins/tripContext'
 
 export default defineComponent({
@@ -83,6 +87,7 @@ export default defineComponent({
     Badge,
     EmptyState,
     EventForm,
+    PlaceMap,
   },
   mixins: [tripContext],
   data() {
@@ -94,6 +99,9 @@ export default defineComponent({
     }
   },
   computed: {
+    place() {
+      return this.event ? this.store.placeForEvent(this.event) : undefined
+    },
     event() {
       return this.store.events.find(
         (e) => e.id === this.route.params.eventId && e.tripId === this.tripId,

@@ -75,11 +75,16 @@
     margin: 0 0 var(--space-4);
   }
 
-  .authIntro {
-    font-size: var(--text-sm);
-    color: var(--muted);
-    line-height: 1.8;
+  .authHeading {
+    display: block;
     margin-bottom: var(--space-8);
+
+    p {
+      font-size: var(--text-sm);
+      color: var(--muted);
+      line-height: 1.8;
+      margin: 0;
+    }
   }
 
   label:has(> input[type='checkbox']) {

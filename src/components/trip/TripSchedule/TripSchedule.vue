@@ -191,10 +191,16 @@
             {{ detail.place || 'Место не указано' }}
           </p>
         </div>
-        <h3>Детали и заметки</h3>
-        <p :class="sharedStyle.subtle">
-          {{ detail.description || 'Дополнительных заметок пока нет.' }}
-        </p>
+        <PlaceMap
+          v-if="detailPlace"
+          :place="detailPlace" />
+
+        <div :class="sharedStyle.detailsSection">
+          <h3>Детали и заметки</h3>
+          <p :class="sharedStyle.subtle">
+            {{ detail.description || 'Дополнительных заметок пока нет.' }}
+          </p>
+        </div>
       </template>
       <template
         v-if="detail && canEdit"
@@ -249,7 +255,8 @@ import {
 } from '@phosphor-icons/vue'
 import { tripDays, shortDate, localToday } from '@/composables/format'
 import { Button, Tab, EmptyState, Badge, Drawer, Modal } from '@/components/ui'
-import EventForm from '@/components/trip/EventForm.vue'
+import EventForm from '@/components/trip/EventForm/EventForm.vue'
+import PlaceMap from '@/components/PlaceMap/PlaceMap.vue'
 import TodayWeather from '@/components/trip/TodayWeather/TodayWeather.vue'
 import ChecklistsComponent from '@/pages/Checklists/ChecklistsPage.vue'
 import type { PlanEvent } from '@/types/trip.types'
@@ -276,6 +283,7 @@ export default defineComponent({
     Drawer,
     Modal,
     EventForm,
+    PlaceMap,
   },
   mixins: [tripContext],
   props: { today: { type: Boolean, default: false } },
@@ -308,6 +316,9 @@ export default defineComponent({
     }
   },
   computed: {
+    detailPlace() {
+      return this.detail ? this.store.placeForEvent(this.detail) : undefined
+    },
     displayedEvents(): PlanEvent[] {
       if (!this.draggedEventId) return this.events
       const byId = new Map(this.events.map((event) => [event.id, event]))

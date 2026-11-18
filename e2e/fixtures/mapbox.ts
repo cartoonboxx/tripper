@@ -86,7 +86,10 @@ export async function openPicker(page: Page) {
   await page.getByRole('button', { name: 'Добавить место', exact: true }).click()
   await page.getByLabel(/^Название/).fill('Место на карте')
   await addressMapButton(page).click()
-  await expect(picker(page).getByRole('button', { name: 'Приблизить', exact: true })).toBeEnabled({
+  await expect(picker(page).locator('.mapboxgl-canvas')).toBeVisible({
+    timeout: 15000,
+  })
+  await expect(picker(page).getByText('Загружаем карту…', { exact: true })).toHaveCount(0, {
     timeout: 15000,
   })
 }

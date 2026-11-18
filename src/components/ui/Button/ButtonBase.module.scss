@@ -1,9 +1,11 @@
 .uiButton {
+  --button-size: var(--space-11);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  min-height: 44px;
+  min-height: var(--button-size);
   padding: 0 var(--space-5);
   border-radius: var(--radius-6);
   border: 1px solid transparent;
@@ -13,22 +15,17 @@
   font-size: var(--text-sm);
   cursor: pointer;
   white-space: nowrap;
-  transition:
-    background 0.18s,
-    box-shadow 0.18s;
+  transition: 0.18s;
 
   &:disabled {
     opacity: 0.45;
     cursor: not-allowed;
   }
 
-  &Icon {
-    width: 44px;
+  &.uiButtonIcon {
+    width: var(--button-size);
+    height: var(--button-size);
     padding: 0;
     flex-shrink: 0;
-  }
-
-  @media (max-width: 600px) {
-    min-height: 44px;
   }
 }

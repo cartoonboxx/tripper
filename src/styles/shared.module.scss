@@ -74,7 +74,7 @@
 }
 
 .searchField {
-  width: 238px;
+  width: 100%;
 
   div:has(> input) {
     min-height: 38px;
@@ -185,6 +185,14 @@
     font-size: var(--text-xs);
     color: var(--muted);
   }
+
+  .labelMiddle {
+    @include flex(var(--space-2));
+    justify-content: center;
+
+    font-size: var(--text-sm);
+    color: var(--muted);
+  }
 }
 
 .formRow {
@@ -195,6 +203,10 @@
   @include below(600px) {
     grid-template-columns: 1fr;
   }
+}
+
+.detailsSection {
+  margin-top: var(--space-6);
 }
 
 .formActions {

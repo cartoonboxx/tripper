@@ -174,8 +174,8 @@ import {
   PhSuitcaseRolling,
 } from '@phosphor-icons/vue'
 import { Button, Input, Tab, EmptyState, Card } from '@/components/ui'
-import TripCard from '@/components/trip/TripCard.vue'
-import TripForm from '@/components/trip/TripForm.vue'
+import TripCard from '@/components/trip/TripCard/TripCard.vue'
+import TripForm from '@/components/trip/TripForm/TripForm.vue'
 import { useTravelStore } from '@/stores/travel'
 
 export default defineComponent({

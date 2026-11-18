@@ -77,9 +77,9 @@ import { defineComponent } from 'vue'
 import { PhCheck, PhPlus } from '@phosphor-icons/vue'
 import { Modal, Input, Button, Select } from '@/components/ui'
 import PhotoUpload from '@/components/PhotoUpload/PhotoUpload.vue'
-import { useTravelStore } from '@/stores/travel'
-import { componentProps } from './TripForm.props'
-import { markRawValue } from '@/utils/markRawValue'
+import { useTravelStore } from '@/stores/travel.ts'
+import { componentProps } from './TripForm.props.ts'
+import { markRawValue } from '@/utils/markRawValue.ts'
 
 export default defineComponent({
   name: 'TripForm',

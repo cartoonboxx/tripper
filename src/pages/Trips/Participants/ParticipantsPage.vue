@@ -101,7 +101,7 @@ import style from './ParticipantsPage.module.scss'
 import { defineComponent, markRaw } from 'vue'
 import { PhInfo, PhPlus, PhTrash, PhUsers } from '@phosphor-icons/vue'
 import { Button, Avatar, Badge, Card, EmptyState, Modal } from '@/components/ui'
-import InviteForm from '@/components/trip/InviteForm.vue'
+import InviteForm from '@/components/trip/InviteForm/InviteForm.vue'
 import type { Participant } from '@/types/trip.types'
 import tripContext from '@/mixins/tripContext'
 

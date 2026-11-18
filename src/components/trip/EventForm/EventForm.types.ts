@@ -1,4 +1,4 @@
-import type { PlanEvent } from '@/types/trip.types'
+import type { PlanEvent } from '@/types/trip.types.ts'
 export interface EventFormProps {
   open: boolean
   tripId: string

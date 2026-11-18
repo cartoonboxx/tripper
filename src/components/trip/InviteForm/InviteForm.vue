@@ -77,9 +77,9 @@ import { defineComponent } from 'vue'
 import { PhCopy, PhLink, PhLockKey, PhQrCode } from '@phosphor-icons/vue'
 import QRCode from 'qrcode'
 import { Modal, Tab, Input, Button } from '@/components/ui'
-import { useTravelStore } from '@/stores/travel'
-import { componentProps } from './InviteForm.props'
-import { markRawValue } from '@/utils/markRawValue'
+import { useTravelStore } from '@/stores/travel.ts'
+import { componentProps } from './InviteForm.props.ts'
+import { markRawValue } from '@/utils/markRawValue.ts'
 
 export default defineComponent({
   name: 'InviteForm',
